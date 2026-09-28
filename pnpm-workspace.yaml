@@ -1,3 +1,8 @@
 allowBuilds:
   esbuild: true
   unrs-resolver: true
+
+packageExtensions:
+  '@nuxt/schema@4.5.2':
+    dependencies:
+      vite: ^8.3.0

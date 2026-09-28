@@ -2,7 +2,7 @@
 
 ## Development
 
-Use Node.js 22 or newer with pnpm. Install dependencies and run the development server:
+Use Node.js 24 or newer with pnpm. Install dependencies and run the development server:
 
 ```sh
 pnpm install
@@ -20,6 +20,10 @@ pnpm format:check
 pnpm test
 pnpm build
 ```
+
+Build, generate, and typecheck regenerate Nuxt's type definitions. Vue Router is a direct dependency so Nuxt's Volar plugin can be resolved by the project. When validating in a container, use separate generated outputs or mount the repository at the same absolute path used by the host so generated TypeScript configuration resolves plugins consistently.
+
+Vite is a direct development dependency aligned with Nuxt's builder. The pnpm package extension declares Vite for `@nuxt/schema` so configuration types use the same version. Review the dependency and extension when upgrading Nuxt.
 
 Use `pnpm generate` to verify the static site output, manifest, and service worker. The generated language pages include home, cards, and settings for each site and game language combination. PWA behavior is available from HTTPS or localhost. Offline page selections are managed by the custom service worker in `service-worker/sw.ts`; keep its route and payload caching behavior aligned with Nuxt's generated `_payload.json` files.
 
