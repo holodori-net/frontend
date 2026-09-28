@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { NuxtLink } from '#components'
 import { buildLocalizedPath, resolveEntryLocales } from '#shared/language'
 
 defineI18nRoute(false)
@@ -25,14 +26,23 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="entry-page">
-    <section class="entry-card">
-      <p class="eyebrow">HOLODORI DATABASE</p>
-      <h1>{{ t('languageEntryTitle') }}</h1>
-      <p class="muted">{{ t('languageEntryDescription') }}</p>
-      <NuxtLink class="button button-primary" to="/ja/jpn/cards">
-        {{ t('continue') }}
-      </NuxtLink>
+  <main class="grid min-h-screen place-items-center p-6">
+    <section
+      class="w-full max-w-xl rounded-3xl border border-surface-200 bg-surface-0 p-8 shadow-xl dark:border-surface-700 dark:bg-surface-900 sm:p-11"
+    >
+      <p class="mb-3 text-xs font-bold tracking-[0.14em] text-primary">
+        HOLODORI DATABASE
+      </p>
+      <h1 class="mb-3 text-3xl font-bold">{{ t('languageEntryTitle') }}</h1>
+      <p class="mb-0 leading-relaxed text-muted-color">
+        {{ t('languageEntryDescription') }}
+      </p>
+      <Button
+        :as="NuxtLink"
+        class="mt-6"
+        to="/ja/jpn/cards"
+        :label="t('continue')"
+      />
     </section>
   </main>
 </template>

@@ -8,6 +8,15 @@ import {
 const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n()
+const { theme } = useMemberTheme()
+useHead({
+  htmlAttrs: {
+    'data-theme-id': computed(() => theme.value.id),
+    style: computed(
+      () => `--theme-motif: url("${theme.value.assets.motifMain}")`,
+    ),
+  },
+})
 const preferredSiteLocale = useCookie<string | null>('holodori-site-locale', {
   default: () => null,
   maxAge: 60 * 60 * 24 * 365,
@@ -20,6 +29,12 @@ const preferredGameLocale = useCookie<string | null>('holodori-game-locale', {
 })
 
 const conflict = ref<ReturnType<typeof getManualPreferenceConflict>>(null)
+const conflictVisible = computed({
+  get: () => conflict.value !== null,
+  set: (visible) => {
+    if (!visible) conflict.value = null
+  },
+})
 const checkedRoute = ref('')
 
 function inspectManualPreferences() {
@@ -70,28 +85,28 @@ async function keepLinkedLanguages() {
 </script>
 
 <template>
-  <VitePwaManifest />
-  <NuxtPage />
-  <PwaStatus />
-  <Teleport to="body">
-    <div v-if="conflict" class="dialog-backdrop">
-      <section
-        aria-labelledby="language-dialog-title"
-        aria-modal="true"
-        class="dialog-card"
-        role="dialog"
-      >
-        <h2 id="language-dialog-title">{{ t('languagePreferenceTitle') }}</h2>
-        <p>{{ t('languagePreferenceDescription') }}</p>
-        <div class="dialog-actions">
-          <button class="button button-primary" @click="useSavedPreferences">
-            {{ t('usePreference') }}
-          </button>
-          <button class="button button-secondary" @click="keepLinkedLanguages">
-            {{ t('keepLink') }}
-          </button>
-        </div>
-      </section>
+  <div class="min-h-screen">
+    <VitePwaManifest />
+    <NuxtPage />
+    <PwaStatus />
+  </div>
+  <Dialog
+    v-model:visible="conflictVisible"
+    modal
+    :closable="false"
+    :header="t('languagePreferenceTitle')"
+    class="w-[min(100%,28rem)]"
+  >
+    <p class="mb-6 leading-relaxed text-muted-color">
+      {{ t('languagePreferenceDescription') }}
+    </p>
+    <div class="flex flex-wrap justify-end gap-3">
+      <Button :label="t('usePreference')" @click="useSavedPreferences" />
+      <Button
+        :label="t('keepLink')"
+        severity="secondary"
+        @click="keepLinkedLanguages"
+      />
     </div>
-  </Teleport>
+  </Dialog>
 </template>

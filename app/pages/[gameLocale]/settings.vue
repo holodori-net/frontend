@@ -25,6 +25,7 @@ const selectedPages = ref<OfflinePage[]>([])
 const syncing = ref(false)
 const syncFailed = ref(false)
 const isOffline = ref(false)
+const offlineSettingsReady = ref(false)
 const savedSelection = ref<{
   siteLocale: string
   gameLocale: string
@@ -57,14 +58,14 @@ async function syncSelection() {
   }
 }
 
-function setPage(page: OfflinePage, enabled: boolean) {
-  const pages = new Set(selectedPages.value)
-  if (enabled) pages.add(page)
-  else pages.delete(page)
-  selectedPages.value = [...pages]
-  saveOfflinePages(siteLocale.value, validGameLocale.value, selectedPages.value)
-  void syncSelection()
-}
+watch(
+  selectedPages,
+  (pages) => {
+    saveOfflinePages(siteLocale.value, validGameLocale.value, pages)
+    if (offlineSettingsReady.value) void syncSelection()
+  },
+  { deep: true },
+)
 
 onMounted(async () => {
   selectedPages.value = getOfflinePages(siteLocale.value, validGameLocale.value)
@@ -77,6 +78,8 @@ onMounted(async () => {
     savedSelection.value = status.selection
   } catch (error) {
     console.warn('Holodori offline status unavailable', error)
+  } finally {
+    offlineSettingsReady.value = true
   }
 })
 </script>
@@ -84,44 +87,56 @@ onMounted(async () => {
 <template>
   <div class="site-shell">
     <SiteHeader />
-    <main class="page-content">
-      <div class="page-heading">
-        <p class="eyebrow">HOLODORI DATABASE</p>
-        <h1>{{ t('settings') }}</h1>
+    <main class="mx-auto w-[min(100%-3rem,67.5rem)] py-9 pb-24 sm:py-16">
+      <div class="mb-8">
+        <p class="mb-2 text-xs font-bold tracking-[0.14em] text-primary">
+          HOLODORI DATABASE
+        </p>
+        <h1 class="mb-0 text-3xl font-bold sm:text-4xl">
+          {{ t('settings') }}
+        </h1>
       </div>
 
-      <section class="settings-card" aria-labelledby="offline-title">
-        <h2 id="offline-title">{{ t('offlineTitle') }}</h2>
-        <p class="muted">{{ t('offlineDescription') }}</p>
-        <fieldset class="offline-options" :disabled="syncing">
-          <legend>{{ t('offlinePages') }}</legend>
-          <label>
-            <input
-              type="checkbox"
-              :checked="selectedPages.includes('home')"
-              @change="
-                setPage('home', ($event.target as HTMLInputElement).checked)
-              "
+      <section
+        class="rounded-3xl border border-surface-200 bg-surface-0 p-6 dark:border-surface-700 dark:bg-surface-900 sm:p-8"
+        aria-labelledby="offline-title"
+      >
+        <h2 id="offline-title" class="mb-2 text-xl font-semibold">
+          {{ t('offlineTitle') }}
+        </h2>
+        <p class="mb-0 leading-relaxed text-muted-color">
+          {{ t('offlineDescription') }}
+        </p>
+        <fieldset
+          class="mt-6 flex flex-wrap gap-x-6 gap-y-4 border-t border-surface-200 pt-5 dark:border-surface-700"
+          :disabled="syncing"
+        >
+          <legend class="px-3 text-sm font-semibold text-muted-color">
+            {{ t('offlinePages') }}
+          </legend>
+          <label class="inline-flex cursor-pointer items-center gap-2">
+            <Checkbox
+              v-model="selectedPages"
+              input-id="offline-home"
+              value="home"
             />
             {{ t('home') }}
           </label>
-          <label>
-            <input
-              type="checkbox"
-              :checked="selectedPages.includes('cards')"
-              @change="
-                setPage('cards', ($event.target as HTMLInputElement).checked)
-              "
+          <label class="inline-flex cursor-pointer items-center gap-2">
+            <Checkbox
+              v-model="selectedPages"
+              input-id="offline-cards"
+              value="cards"
             />
             {{ t('cards') }}
           </label>
         </fieldset>
-        <p v-if="syncing" class="offline-status" role="status">
+        <p v-if="syncing" class="mt-4 text-sm text-primary" role="status">
           {{ t('offlineSyncing') }}
         </p>
         <p
           v-else-if="syncFailed || isOffline"
-          class="offline-status offline-error"
+          class="offline-error mt-4 text-sm"
           role="status"
         >
           {{ t('offlineSyncFailed') }}
@@ -131,12 +146,12 @@ onMounted(async () => {
             savedSelection?.siteLocale === siteLocale &&
             savedSelection?.gameLocale === gameLocale
           "
-          class="offline-status"
+          class="mt-4 text-sm text-primary"
           role="status"
         >
           {{ t('offlineSyncComplete') }}
         </p>
-        <p v-else class="offline-status" role="status">
+        <p v-else class="mt-4 text-sm text-muted-color" role="status">
           {{ t('offlineSyncReady') }}
         </p>
       </section>
