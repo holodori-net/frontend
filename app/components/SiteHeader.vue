@@ -53,7 +53,7 @@ async function chooseGameLocale(value: GameLocale) {
       class="brand"
       :to="buildLocalizedPath(locale as SiteLocale, activeGameLocale, 'home')"
     >
-      <span class="brand-mark">H</span>
+      <img class="brand-icon" src="/icons/icon-192.png" alt="" />
       <span>{{ t('siteName') }}</span>
     </NuxtLink>
     <nav class="main-nav" :aria-label="t('home')">

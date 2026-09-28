@@ -16,6 +16,20 @@ const prerenderRoutes = [
 export default defineNuxtConfig({
   compatibilityDate: '2025-09-25',
   devtools: { enabled: true },
+  app: {
+    head: {
+      link: [
+        { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
+        {
+          rel: 'icon',
+          type: 'image/png',
+          href: '/favicon-32.png',
+          sizes: '32x32',
+        },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+      ],
+    },
+  },
   modules: ['@nuxtjs/i18n', '@nuxt/eslint', '@vite-pwa/nuxt'],
   css: ['~/assets/css/main.css'],
   typescript: {
@@ -69,9 +83,22 @@ export default defineNuxtConfig({
           sizes: '512x512',
           type: 'image/png',
         },
+        {
+          src: '/icons/icon-maskable-512.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'maskable',
+        },
       ],
     },
-    includeAssets: ['icons/icon-192.png', 'icons/icon-512.png'],
+    includeAssets: [
+      'favicon.ico',
+      'favicon-32.png',
+      'apple-touch-icon.png',
+      'icons/icon-192.png',
+      'icons/icon-512.png',
+      'icons/icon-maskable-512.png',
+    ],
     injectManifest: {
       globPatterns: ['**/*.{js,css,ico,png,svg,woff2}', '**/_i18n/**/*.json'],
       globIgnores: [
