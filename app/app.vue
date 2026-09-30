@@ -12,9 +12,6 @@ const { theme } = useMemberTheme()
 useHead({
   htmlAttrs: {
     'data-theme-id': computed(() => theme.value.id),
-    style: computed(
-      () => `--theme-motif: url("${theme.value.assets.motifMain}")`,
-    ),
   },
 })
 const preferredSiteLocale = useCookie<string | null>('holodori-site-locale', {

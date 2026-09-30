@@ -21,7 +21,7 @@ pnpm test
 pnpm build
 ```
 
-Build, generate, and typecheck regenerate Nuxt's type definitions. Vue Router is a direct dependency so Nuxt's Volar plugin can be resolved by the project. When validating in a container, use separate generated outputs or mount the repository at the same absolute path used by the host so generated TypeScript configuration resolves plugins consistently.
+Build, generate, and typecheck regenerate Nuxt's type definitions after generating styles. Vue Router is a direct dependency so Nuxt's Volar plugin can be resolved by the project. When validating in a container, use separate generated outputs or mount the repository at the same absolute path used by the host so generated TypeScript configuration resolves plugins consistently.
 
 Vite is a direct development dependency aligned with Nuxt's builder. The pnpm package extension declares Vite for `@nuxt/schema` so configuration types use the same version. Review the dependency and extension when upgrading Nuxt.
 
@@ -30,5 +30,19 @@ Use `pnpm generate` to verify the static site output, manifest, and service work
 Add language resolution and route behavior tests under `tests/` when changing language handling. Verify offline selection changes preserve the previous cache if any requested page or payload cannot be downloaded.
 
 ## Member themes
+
+The build generates shared CSS from `app/themes/primevue.ts` and the component list in `shared/primevue.ts`. Register used PrimeVue components in that list and include their nested component and directive styles in `primeVueStyleDependencies`. Verify this mapping when adding components or upgrading PrimeVue. The generated stylesheet is bundled by Nuxt and cached with application assets for offline use.
+
+The generator imports `@primevue/core` and `@primevue/metadata` as direct development dependencies. Keep their versions aligned with `primevue` and `@primevue/nuxt-module` when upgrading.
+
+`pnpm dev`, `pnpm build`, `pnpm generate`, and `pnpm typecheck` generate styles before starting Nuxt. To refresh styles after editing the preset, component list, member palette, or theme asset mapping during development, run:
+
+```sh
+pnpm styles:generate
+```
+
+The command writes `app/assets/css/generated.css`, which is ignored by Git. Missing component styles or member palettes stop generation with an error. PrimeVue uses the generated theme CSS; member theme changes update `data-theme-id` and appearance changes update the root `dark` class.
+
+Member palettes are defined in `app/themes/member-palettes.ts`, keyed by the stable theme ID. Each palette provides the primary scale, light and dark surface and semantic colors, page and motif colors, and motif size and gap. Keep palette data in this build input; the browser uses the generated CSS variables. Each registered theme needs a palette. The default theme supplies fallback CSS variables for an absent or unknown theme ID.
 
 Theme metadata is registered in `shared/theme.ts`. Keep the stable theme ID separate from member data and map visual roles such as `avatar` and `motifMain` to asset URLs there. Place member assets at stable public paths so theme CSS and views do not depend on source bundle filenames; keep a solid-color background fallback when an optional asset is unavailable. When member import is added, resolve imported assets into these role URLs and replace the local registry asset mapping without changing theme IDs. The Sakura Miko motif uses a CSS mask so light and dark modes can tint the same image independently.

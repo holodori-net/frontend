@@ -1,6 +1,7 @@
 .nuxt
 .output
 .data
+app/assets/css/generated.css
 node_modules
 coverage
 dist

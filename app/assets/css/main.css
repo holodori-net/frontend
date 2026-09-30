@@ -38,46 +38,53 @@ body,
 
 body {
   min-height: 100vh;
-  color: #4c3142;
-  background: #fff7fa;
-}
-
-.dark body {
-  color: #fff0f5;
-  background: #1f1722;
+  color: var(--member-page-color);
+  background: var(--member-page-background);
 }
 
 body::before {
   position: fixed;
   z-index: 0;
   inset: 0;
-  background-color: rgb(201 52 93 / 2%);
+  background-color: var(--member-motif-color);
   content: '';
   mask-image:
     var(--theme-motif, none),
-    repeating-linear-gradient(90deg, #000 0 20px, transparent 20px 40px),
-    repeating-linear-gradient(0deg, #000 0 20px, transparent 20px 40px);
+    repeating-linear-gradient(
+      90deg,
+      #000 0 var(--theme-motif-size),
+      transparent var(--theme-motif-size) var(--theme-motif-step)
+    ),
+    repeating-linear-gradient(
+      0deg,
+      #000 0 var(--theme-motif-size),
+      transparent var(--theme-motif-size) var(--theme-motif-step)
+    );
   mask-repeat: repeat;
   mask-size:
-    20px 20px,
-    40px 40px,
-    40px 40px;
+    var(--theme-motif-size) var(--theme-motif-size),
+    var(--theme-motif-step) var(--theme-motif-step),
+    var(--theme-motif-step) var(--theme-motif-step);
   mask-composite: intersect, intersect;
   pointer-events: none;
   -webkit-mask-image:
     var(--theme-motif, none),
-    repeating-linear-gradient(90deg, #000 0 20px, transparent 20px 40px),
-    repeating-linear-gradient(0deg, #000 0 20px, transparent 20px 40px);
+    repeating-linear-gradient(
+      90deg,
+      #000 0 var(--theme-motif-size),
+      transparent var(--theme-motif-size) var(--theme-motif-step)
+    ),
+    repeating-linear-gradient(
+      0deg,
+      #000 0 var(--theme-motif-size),
+      transparent var(--theme-motif-size) var(--theme-motif-step)
+    );
   -webkit-mask-repeat: repeat;
   -webkit-mask-size:
-    20px 20px,
-    40px 40px,
-    40px 40px;
+    var(--theme-motif-size) var(--theme-motif-size),
+    var(--theme-motif-step) var(--theme-motif-step),
+    var(--theme-motif-step) var(--theme-motif-step);
   -webkit-mask-composite: source-in, source-in;
-}
-
-.dark body::before {
-  background-color: rgb(255 143 169 / 3%);
 }
 
 #__nuxt > * {

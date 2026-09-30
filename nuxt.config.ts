@@ -1,6 +1,7 @@
 import { gameLocales } from './shared/language'
-import Aura from '@primeuix/themes/aura'
-import { definePreset } from '@primeuix/themes'
+import { primeVueComponents } from './shared/primevue'
+import { defaultThemeId } from './shared/theme'
+import { memberThemePalettes } from './app/themes/member-palettes'
 import tailwindcss from '@tailwindcss/vite'
 
 const siteLocales = ['ja', 'en', 'zh-TW'] as const
@@ -40,7 +41,7 @@ export default defineNuxtConfig({
     '@nuxtjs/color-mode',
     '@primevue/nuxt-module',
   ],
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/main.css', '~/assets/css/generated.css'],
   colorMode: {
     preference: 'system',
     fallback: 'light',
@@ -50,81 +51,12 @@ export default defineNuxtConfig({
     storageKey: 'holodori-color-mode',
   },
   primevue: {
-    options: {
-      theme: {
-        preset: definePreset(Aura, {
-          semantic: {
-            primary: {
-              50: '#FFF1F4',
-              100: '#FFE0E8',
-              200: '#FFC2D2',
-              300: '#FF9AB4',
-              400: '#F86D92',
-              500: '#E94E78',
-              600: '#C9345D',
-              700: '#A9274C',
-              800: '#8C2444',
-              900: '#75233D',
-              950: '#43101F',
-            },
-            colorScheme: {
-              light: {
-                primary: {
-                  color: '{primary.600}',
-                  contrastColor: '#ffffff',
-                  hoverColor: '{primary.700}',
-                  activeColor: '{primary.800}',
-                },
-                surface: {
-                  0: '#ffffff',
-                  50: '#FFF7FA',
-                  100: '#FCEEF3',
-                  200: '#F5E1E9',
-                  300: '#EAD0DB',
-                  400: '#CDAFBD',
-                  500: '#A78B9A',
-                  600: '#806675',
-                  700: '#624B5A',
-                  800: '#4C3142',
-                  900: '#382330',
-                  950: '#24151F',
-                },
-              },
-              dark: {
-                primary: {
-                  color: '#FF8FA9',
-                  contrastColor: '#32141F',
-                  hoverColor: '#FFA9BC',
-                  activeColor: '#FFC0CE',
-                },
-                surface: {
-                  0: '#ffffff',
-                  50: '#FCEFF4',
-                  100: '#F5E3EA',
-                  200: '#E9CCD8',
-                  300: '#D2AFC0',
-                  400: '#AF899D',
-                  500: '#8A687C',
-                  600: '#6B4E61',
-                  700: '#503A4B',
-                  800: '#392A37',
-                  900: '#2C202C',
-                  950: '#1F1722',
-                },
-              },
-            },
-          },
-        }),
-        options: {
-          prefix: 'p',
-          darkModeSelector: '.dark',
-          cssLayer: {
-            name: 'primevue',
-            order: 'theme, base, primevue, components, utilities',
-          },
-        },
-      },
+    loadStyles: false,
+    options: { theme: 'none' },
+    components: {
+      include: [...primeVueComponents],
     },
+    directives: { include: [] },
   },
   vite: { plugins: [tailwindcss()] },
   typescript: {
@@ -165,8 +97,9 @@ export default defineNuxtConfig({
       start_url: '/',
       scope: '/',
       display: 'standalone',
-      background_color: '#FFF7FA',
-      theme_color: '#C9345D',
+      background_color:
+        memberThemePalettes[defaultThemeId]!.light.page.background,
+      theme_color: memberThemePalettes[defaultThemeId]!.light.primary.color,
       icons: [
         {
           src: '/icons/icon-192.png',
