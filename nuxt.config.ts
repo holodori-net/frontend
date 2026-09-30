@@ -3,6 +3,12 @@ import { primeVueComponents } from './shared/primevue'
 import { defaultThemeId } from './shared/theme'
 import { memberThemePalettes } from './app/themes/member-palettes'
 import tailwindcss from '@tailwindcss/vite'
+import { fileURLToPath } from 'node:url'
+import { getPrerenderWorkerCount } from './scripts/prerender/worker-count'
+
+const prerenderWorkerCount = getPrerenderWorkerCount(
+  process.env.NUXT_PRERENDER_WORKERS,
+)
 
 const siteLocales = ['ja', 'en', 'zh-TW'] as const
 const contentPages = ['', '/cards', '/settings']
@@ -20,6 +26,17 @@ const prerenderRoutes = [
 export default defineNuxtConfig({
   compatibilityDate: '2025-09-25',
   devtools: { enabled: true },
+  hooks: {
+    'nitro:init': (nitro) => {
+      if (prerenderWorkerCount > 1) {
+        nitro.hooks.hook('prerender:config', (config) => {
+          config.entry = fileURLToPath(
+            new URL('./scripts/prerender/entry.ts', import.meta.url),
+          )
+        })
+      }
+    },
+  },
   app: {
     head: {
       link: [
