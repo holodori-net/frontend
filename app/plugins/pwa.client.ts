@@ -3,9 +3,18 @@ import {
   syncOfflinePages,
 } from '~/composables/useOfflinePages'
 import { isGameLocale, isSiteLocale } from '#shared/language'
+import { nextTick, watch } from 'vue'
 
 export default defineNuxtPlugin(() => {
   const router = useRouter()
+  const preferredSiteLocale = useCookie<string | null>('holodori-site-locale', {
+    default: () => null,
+    readonly: true,
+  })
+  const preferredGameLocale = useCookie<string | null>('holodori-game-locale', {
+    default: () => null,
+    readonly: true,
+  })
   let registration: ServiceWorkerRegistration | undefined
   let entryCheckActive = true
   let updateAccepted = false
@@ -14,36 +23,27 @@ export default defineNuxtPlugin(() => {
   let syncingSelectionKey = ''
 
   function currentSelection(path: string) {
-    const [, siteValue, gameValue] =
-      path.match(/^\/(ja|en|zh-TW)\/(jpn|eng|ind|kor|cht|chs)(?:\/|$)/) ?? []
+    const [, siteValue, gameValue] = path.split('/')
     if (!siteValue || !gameValue) return null
     if (!isSiteLocale(siteValue) || !isGameLocale(gameValue)) return null
     return { siteLocale: siteValue, gameLocale: gameValue }
   }
 
   async function synchronizeCurrentLocale(path: string) {
+    await registrationReady
+    if (!registration) return
     const selected = currentSelection(path)
     if (!selected) return
     const key = `${selected.siteLocale}:${selected.gameLocale}`
+    await nextTick()
+    refreshCookie('holodori-site-locale')
+    refreshCookie('holodori-game-locale')
     if (key === currentSelectionKey || key === syncingSelectionKey) return
-
-    const cookies = Object.fromEntries(
-      document.cookie
-        .split('; ')
-        .filter(Boolean)
-        .map((entry) => {
-          const separator = entry.indexOf('=')
-          return [
-            decodeURIComponent(entry.slice(0, separator)),
-            decodeURIComponent(entry.slice(separator + 1)),
-          ]
-        }),
-    )
-    const preferredSiteLocale = cookies['holodori-site-locale']
-    const preferredGameLocale = cookies['holodori-game-locale']
     if (
-      (preferredSiteLocale && preferredSiteLocale !== selected.siteLocale) ||
-      (preferredGameLocale && preferredGameLocale !== selected.gameLocale)
+      (preferredSiteLocale.value &&
+        preferredSiteLocale.value !== selected.siteLocale) ||
+      (preferredGameLocale.value &&
+        preferredGameLocale.value !== selected.gameLocale)
     ) {
       return
     }
@@ -134,8 +134,16 @@ export default defineNuxtPlugin(() => {
     }
   }
 
-  void checkForWaitingWorker().catch((error: unknown) => {
+  const registrationReady = checkForWaitingWorker().catch((error: unknown) => {
     console.warn('Holodori service worker registration failed', error)
+  })
+
+  watch([preferredSiteLocale, preferredGameLocale], () => {
+    void synchronizeCurrentLocale(router.currentRoute.value.path).catch(
+      (error: unknown) => {
+        console.warn('Holodori offline page sync failed', error)
+      },
+    )
   })
 
   router.afterEach((to) => {
@@ -146,6 +154,9 @@ export default defineNuxtPlugin(() => {
   void router
     .isReady()
     .then(() => synchronizeCurrentLocale(router.currentRoute.value.path))
+    .catch((error: unknown) => {
+      console.warn('Holodori offline page sync failed', error)
+    })
   window.addEventListener('online', () => {
     currentSelectionKey = ''
     void synchronizeCurrentLocale(router.currentRoute.value.path).catch(
