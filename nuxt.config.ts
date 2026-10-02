@@ -1,4 +1,8 @@
-import { gameLocales } from './shared/language'
+import {
+  gameLocales,
+  siteLocales,
+  siteLanguageMetadata,
+} from './shared/language'
 import { primeVueComponents } from './shared/primevue'
 import { defaultThemeId } from './shared/theme'
 import { memberThemePalettes } from './app/themes/member-palettes'
@@ -10,7 +14,6 @@ const prerenderWorkerCount = getPrerenderWorkerCount(
   process.env.NUXT_PRERENDER_WORKERS,
 )
 
-const siteLocales = ['ja', 'en', 'zh-TW'] as const
 const contentPages = ['', '/cards', '/settings']
 
 const prerenderRoutes = [
@@ -83,16 +86,11 @@ export default defineNuxtConfig({
   i18n: {
     strategy: 'prefix_and_default',
     defaultLocale: 'ja',
-    locales: [
-      { code: 'ja', language: 'ja-JP', file: 'ja.json', name: '日本語' },
-      { code: 'en', language: 'en', file: 'en.json', name: 'English' },
-      {
-        code: 'zh-TW',
-        language: 'zh-TW',
-        file: 'zh-TW.json',
-        name: '繁體中文',
-      },
-    ],
+    locales: siteLocales.map((code) => ({
+      code,
+      file: `${code}.json`,
+      ...siteLanguageMetadata[code],
+    })),
     langDir: 'locales',
     detectBrowserLanguage: false,
   },

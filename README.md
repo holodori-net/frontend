@@ -8,6 +8,8 @@ Pages use `/{site-language}/{game-language}`. For example, `/zh-TW/jpn/cards` di
 
 The root page `/` and `/cards` select languages from saved manual preferences first, then browser languages, then Japanese defaults. A complete language URL is shown as written. When it differs from a previously selected language, the site asks whether to use the saved preferences or keep the linked languages.
 
+Changing either language keeps the current page, query parameters, and fragment.
+
 ## Theme and appearance
 
 Open the display and language menu in the top-right corner to change site language, game content language, appearance, and member theme. Appearance is saved in this browser; **System** follows the device setting.

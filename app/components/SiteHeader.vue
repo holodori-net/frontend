@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import {
   buildLocalizedPath,
+  buildLocalizedRoute,
   isGameLocale,
+  siteLanguageOptions,
+  gameLanguageOptions,
   type GameLocale,
   type SiteLocale,
 } from '#shared/language'
@@ -32,24 +35,8 @@ const activeGameLocale = computed(() => {
   const value = route.params.gameLocale
   return typeof value === 'string' && isGameLocale(value) ? value : 'jpn'
 })
-const pageKind = computed(() => {
-  if (route.path.endsWith('/cards')) return 'cards'
-  if (route.path.endsWith('/settings')) return 'settings'
-  return 'home'
-})
-const siteLanguageOptions = [
-  { value: 'ja', label: '日本語' },
-  { value: 'en', label: 'English' },
-  { value: 'zh-TW', label: '繁體中文' },
-]
-const gameLanguageOptions = [
-  { value: 'jpn', label: '日本語' },
-  { value: 'eng', label: 'English' },
-  { value: 'ind', label: 'Bahasa Indonesia' },
-  { value: 'kor', label: '한국어' },
-  { value: 'cht', label: '繁體中文' },
-  { value: 'chs', label: '简体中文' },
-]
+const localizedRoute = (site: SiteLocale, game: GameLocale) =>
+  buildLocalizedRoute(site, game, route)
 const themeOptions = computed(() => Object.values(memberThemes))
 const appearanceOptions = computed(() => [
   { value: 'system', label: t('modeSystem'), icon: 'computer' },
@@ -72,18 +59,14 @@ function hideBrokenAvatar(event: Event) {
 async function chooseSiteLocale(value: SiteLocale) {
   if (value === locale.value) return
   preferredSiteLocale.value = value
-  await router.replace(
-    buildLocalizedPath(value, activeGameLocale.value, pageKind.value),
-  )
+  await router.replace(localizedRoute(value, activeGameLocale.value))
   closePreferences()
 }
 
 async function chooseGameLocale(value: GameLocale) {
   if (value === activeGameLocale.value) return
   preferredGameLocale.value = value
-  await router.replace(
-    buildLocalizedPath(locale.value as SiteLocale, value, pageKind.value),
-  )
+  await router.replace(localizedRoute(locale.value as SiteLocale, value))
   closePreferences()
 }
 </script>

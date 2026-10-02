@@ -1,8 +1,37 @@
+import type { RouteLocationNormalizedLoaded } from 'vue-router'
+
 export const siteLocales = ['ja', 'en', 'zh-TW'] as const
 export type SiteLocale = (typeof siteLocales)[number]
 
 export const gameLocales = ['jpn', 'eng', 'ind', 'kor', 'cht', 'chs'] as const
 export type GameLocale = (typeof gameLocales)[number]
+
+export const siteLanguageMetadata: Record<
+  SiteLocale,
+  { language: string; name: string }
+> = {
+  ja: { language: 'ja-JP', name: '日本語' },
+  en: { language: 'en', name: 'English' },
+  'zh-TW': { language: 'zh-TW', name: '繁體中文' },
+}
+
+export const gameLanguageNames: Record<GameLocale, string> = {
+  jpn: '日本語',
+  eng: 'English',
+  ind: 'Bahasa Indonesia',
+  kor: '한국어',
+  cht: '繁體中文',
+  chs: '简体中文',
+}
+
+export const siteLanguageOptions = siteLocales.map((value) => ({
+  value,
+  label: siteLanguageMetadata[value].name,
+}))
+export const gameLanguageOptions = gameLocales.map((value) => ({
+  value,
+  label: gameLanguageNames[value],
+}))
 
 export type PageKind = 'home' | 'cards' | 'settings'
 
@@ -113,4 +142,20 @@ export function getManualPreferenceConflict(
     siteLocale: savedSiteLocale ?? urlSiteLocale,
     gameLocale: savedGameLocale ?? urlGameLocale,
   } satisfies { siteLocale: SiteLocale; gameLocale: GameLocale }
+}
+
+export function buildLocalizedRoute(
+  siteLocale: SiteLocale,
+  gameLocale: GameLocale,
+  currentRoute: Pick<RouteLocationNormalizedLoaded, 'path' | 'query' | 'hash'>,
+) {
+  const segments = currentRoute.path.split('/').filter(Boolean)
+  if (segments[0] && isSiteLocale(segments[0])) segments.shift()
+  if (segments[0] && isGameLocale(segments[0])) segments.shift()
+  const subpath = segments.join('/')
+  return {
+    path: `/${siteLocale}/${gameLocale}${subpath ? `/${subpath}` : ''}`,
+    query: currentRoute.query,
+    hash: currentRoute.hash,
+  }
 }

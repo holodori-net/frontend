@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import {
   buildLocalizedPath,
+  buildLocalizedRoute,
   gameLocales,
   getManualPreferenceConflict,
   resolveBrowserGameLocale,
@@ -37,6 +39,47 @@ describe('language resolution', () => {
     expect(buildLocalizedPath('ja', 'jpn', 'settings')).toBe('/ja/jpn/settings')
   })
 
+  it('builds a locale route from a nested path', () => {
+    expect(
+      buildLocalizedRoute('en', 'cht', {
+        path: '/jpn/cards/123',
+        query: {},
+        hash: '',
+      }),
+    ).toEqual({ path: '/en/cht/cards/123', query: {}, hash: '' })
+  })
+
+  it.each(['/ja/jpn/cards/123/history', '/ja/jpn/cards/123'])(
+    'preserves router state for %s when changing locales',
+    async (path) => {
+      const router = createRouter({
+        history: createMemoryHistory(),
+        routes: [
+          { path: '/:pathMatch(.*)*', component: { template: '<div />' } },
+        ],
+      })
+      const initialUrl = `${path}?q=a?b&tag=one&tag=two&revision=a%252Fb#changes%20here`
+      await router.push(initialUrl)
+
+      await router.replace(
+        buildLocalizedRoute('en', 'cht', router.currentRoute.value),
+      )
+
+      expect(router.currentRoute.value.path).toBe(
+        path.replace('/ja/jpn', '/en/cht'),
+      )
+      expect(router.currentRoute.value.query).toEqual({
+        q: 'a?b',
+        tag: ['one', 'two'],
+        revision: 'a%2Fb',
+      })
+      expect(router.currentRoute.value.hash).toBe('#changes here')
+      expect(router.currentRoute.value.fullPath).toBe(
+        `${path.replace('/ja/jpn', '/en/cht')}?q=a?b&tag=one&tag=two&revision=a%252Fb#changes%20here`,
+      )
+    },
+  )
+
   it('prompts only when a manually chosen language conflicts with a link', () => {
     expect(getManualPreferenceConflict('en', 'jpn', 'zh-TW', null)).toEqual({
       siteLocale: 'zh-TW',
@@ -47,8 +90,6 @@ describe('language resolution', () => {
   })
 
   it('covers all configured language variants', () => {
-    expect(siteLocales).toHaveLength(3)
-    expect(gameLocales).toHaveLength(6)
     const localizedHomes = siteLocales.flatMap((siteLocale) =>
       gameLocales.map((gameLocale) =>
         buildLocalizedPath(siteLocale, gameLocale, 'home'),
@@ -59,7 +100,8 @@ describe('language resolution', () => {
         buildLocalizedPath(siteLocale, gameLocale, 'cards'),
       ),
     )
-    expect(new Set(localizedHomes)).toHaveProperty('size', 18)
-    expect(new Set(localizedCards)).toHaveProperty('size', 18)
+    const combinations = siteLocales.length * gameLocales.length
+    expect(new Set(localizedHomes)).toHaveProperty('size', combinations)
+    expect(new Set(localizedCards)).toHaveProperty('size', combinations)
   })
 })

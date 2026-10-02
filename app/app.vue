@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import {
-  buildLocalizedPath,
+  buildLocalizedRoute,
   getManualPreferenceConflict,
   isGameLocale,
+  type SiteLocale,
 } from '#shared/language'
 
 const route = useRoute()
@@ -11,6 +12,7 @@ const { locale, t } = useI18n()
 const { theme } = useMemberTheme()
 useHead({
   htmlAttrs: {
+    lang: computed(() => locale.value),
     'data-theme-id': computed(() => theme.value.id),
   },
 })
@@ -47,7 +49,7 @@ function inspectManualPreferences() {
 
   checkedRoute.value = route.fullPath
   conflict.value = getManualPreferenceConflict(
-    siteLocale as 'ja' | 'en' | 'zh-TW',
+    siteLocale as SiteLocale,
     gameLocale,
     preferredSiteLocale.value,
     preferredGameLocale.value,
@@ -60,14 +62,9 @@ watch(() => route.fullPath, inspectManualPreferences)
 async function useSavedPreferences() {
   if (!conflict.value) return
   const destination = conflict.value
-  const page = route.path.endsWith('/cards')
-    ? 'cards'
-    : route.path.endsWith('/settings')
-      ? 'settings'
-      : 'home'
   conflict.value = null
   await router.replace(
-    buildLocalizedPath(destination.siteLocale, destination.gameLocale, page),
+    buildLocalizedRoute(destination.siteLocale, destination.gameLocale, route),
   )
 }
 

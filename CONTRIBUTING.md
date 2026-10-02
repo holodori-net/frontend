@@ -35,6 +35,8 @@ NUXT_PRERENDER_WORKERS=2 pnpm generate
 
 The adapter uses Nitro's prerender entry. Recheck it when upgrading Nuxt or Nitro, or when adding a server plugin that needs shutdown hooks.
 
+Language identifiers, display names, browser aliases, and Nuxt locale metadata are configured in `shared/language.ts`.
+
 Add language resolution and route behavior tests under `tests/` when changing language handling. Verify offline selection changes preserve the previous cache if any requested page or payload cannot be downloaded.
 
 ## Member themes
