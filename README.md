@@ -18,6 +18,8 @@ Open the display and language menu in the top-right corner to change site langua
 
 The site can be installed from a supported browser when served over HTTPS (or localhost). Open **Settings** for a language combination to choose whether its home and cards pages should be available offline. The current language combination is kept offline; switching to another combination replaces its saved pages after the new selection downloads successfully. The settings page and app resources remain available to manage offline content. Unselected pages require a network connection.
 
+Settings displays download progress. If synchronization fails, the previous offline selection remains available.
+
 The site checks for updates when a page is opened. An update ready during that check activates and reloads the page once. Updates are not applied during in-app navigation.
 
 ## Run locally

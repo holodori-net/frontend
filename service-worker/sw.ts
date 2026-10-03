@@ -1,6 +1,12 @@
 /// <reference lib="webworker" />
 
-import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
+import {
+  cleanupOutdatedCaches,
+  getCacheKeyForURL,
+  precacheAndRoute,
+} from 'workbox-precaching'
+import { isGameLocale, isSiteLocale } from '../shared/language'
+import { fetchWithProgress, mapConcurrent } from './transfer'
 
 declare const self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: Array<{ revision?: string | null; url: string }>
@@ -9,11 +15,20 @@ declare const self: ServiceWorkerGlobalScope & {
 const CORE_CACHE = 'holodori-core-v1'
 const PAGE_CACHE_PREFIX = 'holodori-selected-pages-'
 const SELECTION_URL = new URL('/__offline-selection__', self.location.origin)
-const SITE_LOCALES = new Set(['ja', 'en', 'zh-TW'])
-const GAME_LOCALES = new Set(['jpn', 'eng', 'ind', 'kor', 'cht', 'chs'])
 const PAGE_NAMES = new Set(['home', 'cards'])
+const CONCURRENCY = 4
+const precacheEntries = self.__WB_MANIFEST.map((entry) =>
+  typeof entry === 'string' ? { url: entry } : entry,
+)
+const PRECACHED_URLS = new Set(
+  precacheEntries.map((entry) => new URL(entry.url, self.location.origin).href),
+)
+const PRECACHE_ASSET_URLS = [...PRECACHED_URLS].filter((url) =>
+  /^\/(?:_nuxt|_i18n)\//.test(new URL(url).pathname),
+)
+let selectionQueue: Promise<unknown> = Promise.resolve()
 
-precacheAndRoute(self.__WB_MANIFEST)
+precacheAndRoute(precacheEntries)
 cleanupOutdatedCaches()
 
 self.addEventListener('install', (event) => {
@@ -36,53 +51,82 @@ function payloadPath(page: string) {
   return `${page.replace(/\/$/, '')}/_payload.json`
 }
 
-function isValidSelection(data: Record<string, unknown>) {
+function validSelection(data: Record<string, unknown>) {
   return (
     typeof data.siteLocale === 'string' &&
-    SITE_LOCALES.has(data.siteLocale) &&
+    isSiteLocale(data.siteLocale) &&
     typeof data.gameLocale === 'string' &&
-    GAME_LOCALES.has(data.gameLocale) &&
+    isGameLocale(data.gameLocale) &&
     Array.isArray(data.pages) &&
-    data.pages.every(
-      (page): page is string =>
-        typeof page === 'string' && PAGE_NAMES.has(page),
-    )
+    data.pages.every((page) => typeof page === 'string' && PAGE_NAMES.has(page))
   )
 }
 
-async function syncSelection(data: Record<string, unknown>) {
-  if (!isValidSelection(data)) {
-    throw new Error('Invalid offline page selection')
-  }
+async function currentSelection() {
+  const core = await caches.open(CORE_CACHE)
+  const response = await core.match(SELECTION_URL)
+  return response
+    ? ((await response.json()) as {
+        cacheName: string
+        siteLocale: string
+        gameLocale: string
+        pages: string[]
+        assetUrls?: string[]
+      })
+    : null
+}
 
+async function syncSelection(
+  data: Record<string, unknown>,
+  port?: MessagePort,
+) {
+  if (!validSelection(data)) throw new Error('Invalid offline page selection')
   const siteLocale = data.siteLocale as string
   const gameLocale = data.gameLocale as string
-  const pages = data.pages as string[]
+  const pages = [...new Set(data.pages as string[])]
   const routes = [...new Set([...pages, 'settings'])].map((page) =>
     page === 'settings'
       ? `/${siteLocale}/${gameLocale}/settings/`
       : pagePath(siteLocale, gameLocale, page),
   )
-  const resources = routes.flatMap((route) => [route, payloadPath(route)])
-  const stagingName = `${PAGE_CACHE_PREFIX}${siteLocale}-${gameLocale}-${Date.now()}`
+  const resources = [
+    ...new Set(routes.flatMap((route) => [route, payloadPath(route)])),
+  ]
+  const stagingName = `${PAGE_CACHE_PREFIX}${siteLocale}-${gameLocale}-${crypto.randomUUID()}`
   const staging = await caches.open(stagingName)
+  const total = resources.length + PRECACHE_ASSET_URLS.length
+  let completed = 0
+  const report = (url: string) =>
+    port?.postMessage({ type: 'progress', completed, total, url })
   let committed = false
 
   try {
-    const downloaded = await Promise.all(
-      resources.map(async (path) => {
-        const request = new Request(new URL(path, self.location.origin), {
-          cache: 'reload',
-        })
-        const response = await fetch(request)
-        if (!response.ok) throw new Error(`Unable to download ${path}`)
-        return { request, response }
-      }),
-    )
+    await mapConcurrent(resources, CONCURRENCY, async (path) => {
+      const request = new Request(new URL(path, self.location.origin), {
+        cache: 'reload',
+      })
+      const response = await fetchWithProgress(request, () => report(path))
+      if (!response.ok || response.type === 'opaque')
+        throw new Error(`Unable to download ${path}`)
+      await staging.put(request, response)
+      completed += 1
+      report(path)
+    })
 
-    await Promise.all(
-      downloaded.map(({ request, response }) => staging.put(request, response)),
-    )
+    await mapConcurrent(PRECACHE_ASSET_URLS, CONCURRENCY, async (assetUrl) => {
+      const cacheKey = new URL(
+        getCacheKeyForURL(assetUrl) ?? assetUrl,
+        self.location.origin,
+      ).href
+      const response = await caches.match(cacheKey)
+      if (!response || !response.ok || response.type === 'opaque')
+        throw new Error(
+          `Required application asset is unavailable: ${assetUrl}`,
+        )
+      await staging.put(assetUrl, response)
+      completed += 1
+      report(assetUrl)
+    })
 
     const core = await caches.open(CORE_CACHE)
     await core.put(
@@ -93,16 +137,16 @@ async function syncSelection(data: Record<string, unknown>) {
           siteLocale,
           gameLocale,
           pages,
+          assetUrls: PRECACHE_ASSET_URLS,
         }),
       ),
     )
     committed = true
-
-    const previousNames = (await caches.keys()).filter(
+    const previous = (await caches.keys()).filter(
       (name) => name.startsWith(PAGE_CACHE_PREFIX) && name !== stagingName,
     )
-    await Promise.allSettled(previousNames.map((name) => caches.delete(name)))
-    return { success: true, siteLocale, gameLocale, pages }
+    await Promise.allSettled(previous.map((name) => caches.delete(name)))
+    return { type: 'result', success: true, siteLocale, gameLocale, pages }
   } catch (error) {
     if (!committed) await caches.delete(stagingName)
     throw error
@@ -113,32 +157,23 @@ self.addEventListener('message', (event: ExtendableMessageEvent) => {
   const data = event.data as Record<string, unknown> | undefined
   const port = event.ports[0]
   if (!data || typeof data.type !== 'string') return
-
   if (data.type === 'SKIP_WAITING') {
     void self.skipWaiting()
     return
   }
-
   event.waitUntil(
     (async () => {
       try {
         if (data.type === 'SYNC_OFFLINE_PAGES') {
-          const result = await syncSelection(data)
-          port?.postMessage(result)
+          const next = selectionQueue.then(() => syncSelection(data, port))
+          selectionQueue = next.catch(() => undefined)
+          port?.postMessage(await next)
         } else if (data.type === 'GET_OFFLINE_STATUS') {
-          const core = await caches.open(CORE_CACHE)
-          const selection = await core.match(SELECTION_URL)
-          const current = selection
-            ? ((await selection.json()) as {
-                cacheName: string
-                siteLocale: string
-                gameLocale: string
-                pages: string[]
-              })
-            : null
+          const current = await currentSelection()
           const cache = current ? await caches.open(current.cacheName) : null
           const requests = cache ? await cache.keys() : []
           port?.postMessage({
+            type: 'result',
             success: true,
             selection: current,
             urls: requests.map((request) => new URL(request.url).pathname),
@@ -146,6 +181,7 @@ self.addEventListener('message', (event: ExtendableMessageEvent) => {
         }
       } catch (error) {
         port?.postMessage({
+          type: 'result',
           success: false,
           error: error instanceof Error ? error.message : 'Offline sync failed',
         })
@@ -156,52 +192,53 @@ self.addEventListener('message', (event: ExtendableMessageEvent) => {
 
 self.addEventListener('fetch', (event) => {
   const request = event.request
+  const url = new URL(request.url)
+  const snapshotAsset =
+    url.origin === self.location.origin &&
+    /^\/(?:_nuxt|_i18n)\//.test(url.pathname) &&
+    !PRECACHED_URLS.has(url.href)
   if (
     request.method !== 'GET' ||
-    new URL(request.url).origin !== self.location.origin
-  ) {
+    url.origin !== self.location.origin ||
+    (request.mode !== 'navigate' &&
+      !url.pathname.endsWith('/_payload.json') &&
+      !snapshotAsset)
+  )
     return
-  }
-
-  const url = new URL(request.url)
-  const isPayload = url.pathname.endsWith('/_payload.json')
-  if (!isPayload && request.mode !== 'navigate') return
 
   event.respondWith(
     (async () => {
       try {
         return await fetch(request)
       } catch {
-        const coreCache = await caches.open(CORE_CACHE)
-        const selection = await coreCache.match(SELECTION_URL)
-        const current = selection
-          ? ((await selection.json()) as { cacheName: string })
-          : null
-        const pageCache = current ? await caches.open(current.cacheName) : null
-        const cacheUrl = new URL(request.url)
-        if (
-          request.mode === 'navigate' &&
-          cacheUrl.pathname.length > 1 &&
-          !cacheUrl.pathname.endsWith('/')
-        ) {
-          cacheUrl.pathname = `${cacheUrl.pathname.replace(/\/+$/, '')}/`
+        const core = await caches.open(CORE_CACHE)
+        const current = await currentSelection()
+        const cache = current ? await caches.open(current.cacheName) : null
+        if (snapshotAsset) {
+          const isPinned = current?.assetUrls?.some(
+            (assetUrl) => new URL(assetUrl).pathname === url.pathname,
+          )
+          if (!isPinned)
+            return new Response('Offline application asset unavailable', {
+              status: 503,
+            })
+          const asset = await cache?.match(url.href, { ignoreSearch: true })
+          if (asset) return asset
         }
-        const cached = pageCache
-          ? await pageCache.match(cacheUrl.href, { ignoreSearch: true })
+        const lookup = new URL(request.url)
+        if (request.mode === 'navigate' && !lookup.pathname.endsWith('/'))
+          lookup.pathname += '/'
+        const cached = cache
+          ? await cache.match(lookup.href, { ignoreSearch: true })
           : undefined
         if (cached) return cached
-
-        const coreResponse = await coreCache.match(request, {
-          ignoreSearch: true,
-        })
-        if (coreResponse) return coreResponse
-
+        const fallback = await core.match(request, { ignoreSearch: true })
+        if (fallback) return fallback
         if (url.pathname === '/') {
-          const rootPage = await coreCache.match('/')
+          const rootPage = await core.match('/')
           if (rootPage) return rootPage
         }
-
-        if (isPayload) {
+        if (url.pathname.endsWith('/_payload.json'))
           return new Response(
             JSON.stringify({ error: 'Offline payload is not available' }),
             {
@@ -209,9 +246,10 @@ self.addEventListener('fetch', (event) => {
               headers: { 'Content-Type': 'application/json; charset=utf-8' },
             },
           )
-        }
-
-        const siteLocale = url.pathname.split('/')[1]
+        const requestedLocale = url.pathname.split('/')[1] ?? 'ja'
+        const siteLocale = isSiteLocale(requestedLocale)
+          ? requestedLocale
+          : 'ja'
         const message =
           siteLocale === 'ja'
             ? 'このページはオフライン用に保存されていません。オンライン時に設定から保存してください。'
@@ -219,7 +257,7 @@ self.addEventListener('fetch', (event) => {
               ? '此頁面尚未儲存供離線使用。請在連線時從設定頁下載。'
               : 'This page is not saved for offline use. Save it from Settings while online.'
         return new Response(
-          `<!doctype html><html lang="${siteLocale || 'ja'}"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Holodori Database</title><body><main><h1>Holodori Database</h1><p>${message}</p><a href="/">Home</a></main></body></html>`,
+          `<!doctype html><html lang="${siteLocale}"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Holodori Database</title><body><main><h1>Holodori Database</h1><p>${message}</p><a href="/">Home</a></main></body></html>`,
           { headers: { 'Content-Type': 'text/html; charset=utf-8' } },
         )
       }

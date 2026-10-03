@@ -9,6 +9,7 @@ import {
 } from '~/composables/useOfflinePages'
 
 definePageMeta({
+  key: (pageRoute) => pageRoute.path,
   validate: (pageRoute) => isGameLocale(String(pageRoute.params.gameLocale)),
 })
 
@@ -23,6 +24,7 @@ const validGameLocale = computed<GameLocale>(() =>
 )
 const selectedPages = ref<OfflinePage[]>([])
 const syncing = ref(false)
+const transferProgress = ref<{ completed: number; total: number } | null>(null)
 const syncFailed = ref(false)
 const isOffline = ref(false)
 const offlineSettingsReady = ref(false)
@@ -31,6 +33,9 @@ const savedSelection = ref<{
   gameLocale: string
   pages: string[]
 } | null>(null)
+const updateOfflineStatus = () => {
+  isOffline.value = !navigator.onLine
+}
 
 async function syncSelection() {
   if (syncing.value) return
@@ -39,11 +44,21 @@ async function syncSelection() {
   isOffline.value = !navigator.onLine
 
   try {
-    const response = await syncOfflinePages({
-      siteLocale: siteLocale.value,
-      gameLocale: validGameLocale.value,
-      pages: selectedPages.value,
-    })
+    const response = await syncOfflinePages(
+      {
+        siteLocale: siteLocale.value,
+        gameLocale: validGameLocale.value,
+        pages: selectedPages.value,
+      },
+      {
+        onProgress: (progress) => {
+          transferProgress.value = {
+            completed: progress.completed,
+            total: progress.total,
+          }
+        },
+      },
+    )
     if (!response.success) throw new Error(response.error)
     savedSelection.value = {
       siteLocale: siteLocale.value,
@@ -55,6 +70,7 @@ async function syncSelection() {
     console.warn('Holodori offline page sync failed', error)
   } finally {
     syncing.value = false
+    transferProgress.value = null
   }
 }
 
@@ -68,8 +84,10 @@ watch(
 )
 
 onMounted(async () => {
+  window.addEventListener('online', updateOfflineStatus)
+  window.addEventListener('offline', updateOfflineStatus)
   selectedPages.value = getOfflinePages(siteLocale.value, validGameLocale.value)
-  isOffline.value = !navigator.onLine
+  updateOfflineStatus()
 
   try {
     const status = await sendOfflineWorkerMessage<{
@@ -81,6 +99,11 @@ onMounted(async () => {
   } finally {
     offlineSettingsReady.value = true
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('online', updateOfflineStatus)
+  window.removeEventListener('offline', updateOfflineStatus)
 })
 </script>
 
@@ -133,6 +156,9 @@ onMounted(async () => {
         </fieldset>
         <p v-if="syncing" class="mt-4 text-sm text-primary" role="status">
           {{ t('offlineSyncing') }}
+          <span v-if="transferProgress">
+            {{ transferProgress.completed }} / {{ transferProgress.total }}
+          </span>
         </p>
         <p
           v-else-if="syncFailed || isOffline"

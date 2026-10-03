@@ -21,11 +21,13 @@ pnpm test
 pnpm build
 ```
 
-Build, generate, and typecheck regenerate Nuxt's type definitions after generating styles. Vue Router is a direct dependency so Nuxt's Volar plugin can be resolved by the project. When validating in a container, use separate generated outputs or mount the repository at the same absolute path used by the host so generated TypeScript configuration resolves plugins consistently.
+Build, generate, and typecheck regenerate Nuxt's type definitions after generating styles. Typecheck covers Nuxt and service worker sources. Vue Router is a direct dependency so Nuxt's Volar plugin can be resolved by the project. When validating in a container, use separate generated outputs or mount the repository at the same absolute path used by the host so generated TypeScript configuration resolves plugins consistently.
 
 Vite is a direct development dependency aligned with Nuxt's builder. The pnpm package extension declares Vite for `@nuxt/schema` so configuration types use the same version. Review the dependency and extension when upgrading Nuxt.
 
 Use `pnpm generate` to verify the static site output, manifest, and service worker. The generated language pages include home, cards, and settings for each site and game language combination. PWA behavior is available from HTTPS or localhost. Offline page selections are managed by the custom service worker in `service-worker/sw.ts`; keep its route and payload caching behavior aligned with Nuxt's generated `_payload.json` files.
+
+Offline synchronization uses bounded concurrent downloads and aborts stalled transfers. Each selection retains its application scripts, styles, and locale resources. Progress messages keep the worker channel open until completion; test interrupted transfers and preservation of the previous selection when changing this protocol.
 
 Static generation fails when a route cannot be prerendered.
 

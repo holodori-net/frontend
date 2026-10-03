@@ -11,7 +11,7 @@
     "build": "node scripts/styles/cli.ts && nuxt prepare && nuxt build",
     "generate": "node scripts/styles/cli.ts && nuxt prepare && nuxt generate",
     "preview": "nuxt preview",
-    "typecheck": "node scripts/styles/cli.ts && nuxt prepare && nuxt typecheck",
+    "typecheck": "node scripts/styles/cli.ts && nuxt prepare && nuxt typecheck && tsc --project tsconfig.worker.json",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
