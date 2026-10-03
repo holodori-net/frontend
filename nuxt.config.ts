@@ -155,6 +155,7 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       routes: prerenderRoutes,
+      failOnError: true,
     },
   },
 })
