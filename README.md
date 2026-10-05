@@ -38,4 +38,6 @@ Generate the static site with:
 pnpm generate
 ```
 
-The output is written to `.output/public`. It includes the language entry pages and each configured language combination for the home, cards, and settings pages, along with the web manifest and service worker. Deploy the contents of that directory to a static host configured to serve generated paths and `404.html` fallback behavior. The service worker and install prompt require HTTPS in production.
+Set `NUXT_PUBLIC_SITE_URL` to the deployed HTTP(S) origin before generating; it defaults to `https://holodori.net`.
+
+The output is written to `.output/public`. It includes the language entry pages and each configured language combination for the home, cards, and settings pages, along with the sitemap, robots file, web manifest, and service worker. The sitemap lists the localized home and cards pages. Deploy the contents of that directory to a static host configured to serve generated paths and `404.html` fallback behavior. The service worker and install prompt require HTTPS in production.

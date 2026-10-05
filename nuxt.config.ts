@@ -8,6 +8,7 @@ import { defaultThemeId } from './shared/theme'
 import { memberThemePalettes } from './app/themes/member-palettes'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
+import { generateSiteSeo } from './scripts/site-seo'
 import { getPrerenderWorkerCount } from './scripts/prerender/worker-count'
 
 const prerenderWorkerCount = getPrerenderWorkerCount(
@@ -29,6 +30,11 @@ const prerenderRoutes = [
 export default defineNuxtConfig({
   compatibilityDate: '2025-09-25',
   devtools: { enabled: true },
+  runtimeConfig: {
+    public: {
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://holodori.net',
+    },
+  },
   hooks: {
     'nitro:init': (nitro) => {
       if (prerenderWorkerCount > 1) {
@@ -38,6 +44,12 @@ export default defineNuxtConfig({
           )
         })
       }
+    },
+    'nitro:config': async () => {
+      await generateSiteSeo(
+        fileURLToPath(new URL('.', import.meta.url)),
+        process.env.NUXT_PUBLIC_SITE_URL || 'https://holodori.net',
+      )
     },
   },
   app: {
