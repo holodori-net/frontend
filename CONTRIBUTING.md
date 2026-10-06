@@ -9,6 +9,8 @@ pnpm install
 pnpm dev
 ```
 
+Fetching the database requires `curl`. Run `pnpm data:fetch` to download it to `.data/master.sqlite`, which is ignored by Git. Running the command again downloads and overwrites the file. If `curl` fails, the command returns a nonzero status and removes any incomplete output.
+
 ## Checks
 
 Run the checks before submitting changes:
