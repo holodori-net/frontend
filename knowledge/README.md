@@ -4,9 +4,9 @@
 
 ## 文件索引
 
-- [卡片資料](data/cards.md)：Card 與 LangCard 的完整欄位、技能／語音／服裝關聯、素材枚舉與轉存狀態。
-- [角色資料](data/characters.md)：Character 與 LangCharacter 的完整欄位、角色名稱與詳細資料關聯、枚舉及轉存狀態。
-- [卡片成長資料](data/card-growth.md)：CardLevel、CardLevelLimit、CardPotential 的組別、養成階段、效果與轉存狀態。
+- [卡片資料](data/cards.md)：Card 與 LangCard 的完整欄位、技能／語音／服裝關聯、欄位用途、素材枚舉與轉存狀態。
+- [角色資料](data/characters.md)：Character 與 LangCharacter 的完整欄位、角色名稱與詳細資料關聯、SD 動畫、群組文字、顏色用途及轉存狀態。
+- [卡片成長資料](data/card-growth.md)：CardLevel、CardLevelLimit、CardPotential 的組別、養成階段、累積經驗門檻、效果與轉存狀態。
 
 ## 來源與適用快照
 
