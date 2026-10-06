@@ -11,6 +11,17 @@ pnpm dev
 
 Fetching the database requires `curl`. Run `pnpm data:fetch` to download it to `.data/master.sqlite`, which is ignored by Git. Running the command again downloads and overwrites the file. If `curl` fails, the command returns a nonzero status and removes any incomplete output.
 
+Convert the downloaded database into website data:
+
+```sh
+pnpm data:fetch
+pnpm data:transform
+```
+
+`data:transform` reads `.data/master.sqlite` in read-only mode and overwrites `public/data/characters.json`, `public/data/cards.json`, and `public/data/card-growth.json`. These generated files are ignored by Git. Characters and cards contain names in all configured game languages. Missing or null names cause the conversion to fail with the language and text ID. Growth data retains all source groups, keyed by their IDs. The command reports output paths and counts, and returns a nonzero status on failure. Fetching and transforming are standalone commands.
+
+See [knowledge/README.md](knowledge/README.md) for the data dictionary, relationships, and field conversion status. Update the relevant knowledge documents when changing data mappings.
+
 ## Checks
 
 Run the checks before submitting changes:
@@ -23,7 +34,7 @@ pnpm test
 pnpm build
 ```
 
-Build, generate, and typecheck regenerate Nuxt's type definitions after generating styles. Typecheck covers Nuxt and service worker sources. Vue Router is a direct dependency so Nuxt's Volar plugin can be resolved by the project. When validating in a container, use separate generated outputs or mount the repository at the same absolute path used by the host so generated TypeScript configuration resolves plugins consistently.
+Build, generate, and typecheck regenerate Nuxt's type definitions after generating styles. Typecheck covers Nuxt, service worker, and data transformation sources. Vue Router is a direct dependency so Nuxt's Volar plugin can be resolved by the project. When validating in a container, use separate generated outputs or mount the repository at the same absolute path used by the host so generated TypeScript configuration resolves plugins consistently.
 
 Vite is a direct development dependency aligned with Nuxt's builder. The pnpm package extension declares Vite for `@nuxt/schema` so configuration types use the same version. Review the dependency and extension when upgrading Nuxt.
 

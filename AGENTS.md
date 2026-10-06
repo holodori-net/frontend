@@ -35,6 +35,9 @@
 
 ## 驗證與維護
 
+- 本專案知識文件保存在 `knowledge/`，以 [knowledge/README.md](knowledge/README.md) 作為索引。處理相關主題前，先閱讀索引及對應文件。
+- 研究或實作改變資料定義、關聯、轉換行為或既有結論時，同步更新相關知識文件；新增、改名或移除文件時，同步更新索引。
+
 - 共用行為變更須涵蓋語言切換、直連、生成 HTML、sitemap，以及離線中斷與失敗保留舊內容。
 - 調整離線更新時，驗證頁面與其應用資源在版本切換後仍可使用。
 - 平行 prerender 使用 Nitro entry；升級 Nuxt／Nitro 或新增需關閉處理的 server plugin 時，重新驗證 adapter。
