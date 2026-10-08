@@ -18,9 +18,19 @@ pnpm data:fetch
 pnpm data:transform
 ```
 
-`data:transform` reads `.data/master.sqlite` in read-only mode and overwrites `public/data/characters.json`, `public/data/cards.json`, `public/data/card-growth.json`, and `public/data/character-groups.json`. These generated files are ignored by Git. Characters and cards contain names in all configured game languages. Character groups additionally contain names and descriptions in all configured game languages. Missing or null translations fail conversion with their source table, field, row ID, language, and text ID. Group membership arrays retain source order; null arrays become empty arrays. Character groups retain all source rows and sort by `order`, then `id`. Growth data retains all source groups, keyed by their IDs. All data is transformed before output files are written. The command reports output paths and counts, and returns a nonzero status on failure. Fetching and transforming are standalone commands.
+`data:transform` reads `.data/master.sqlite` in read-only mode and overwrites `public/data/characters.json`, `public/data/cards.json`, `public/data/card-growth.json`, and `public/data/character-groups.json`. These generated files are ignored by Git. Characters and cards contain names in all configured game languages. Character groups additionally contain names and descriptions in all configured game languages. Missing or null translations fail conversion with their source table, field, row ID, language, and text ID. Group membership arrays retain source order; null arrays become empty arrays. Character groups retain all source rows and sort by `order`, then `id`. Growth data retains all source groups, keyed by their IDs. All data is transformed before output files are written. The command reports each module's progress, output path, and counts. Conversion and write errors identify the failing module or output path and retain their underlying cause; the command returns a nonzero status on failure. Fetching and transforming are standalone commands.
 
 See [knowledge/README.md](knowledge/README.md) for the data dictionary, relationships, and field conversion status. Update the relevant knowledge documents when changing data mappings.
+
+### Data transform modules
+
+Each domain owns its SQL, source row types, and field mappings in `scripts/data/transforms/<domain>.ts`, output types in `shared/game-data/<domain>.ts`, and tests in `tests/data/<domain>.test.ts`. Tests create an independent in-memory database with the tables and fixtures needed by that domain.
+
+Modules implement `TransformModule` from `scripts/data/contract.ts`, declaring a JSON filename and returning data with a count summary. Register modules explicitly in `scripts/data/registry.ts`. The CLI owns database lifetime and exit status; `scripts/data/runner.ts` runs all conversions before writing formatted JSON and reporting each output.
+
+Shared helpers live in `scripts/data/common/`. Each domain prepares its own language query and passes the statement and source context to the localization helper. Cross-domain references use source IDs and output types.
+
+When assigning parallel work, keep each domain's transform, types, tests, and data dictionary under one owner. Coordinate changes to the shared contract, helpers, runner, registry, and knowledge index with the integration owner. Data typecheck includes all domain source and test files. Scripts use explicit `.ts` import paths and `import type` for types.
 
 ## Checks
 

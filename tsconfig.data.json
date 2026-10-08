@@ -5,8 +5,8 @@
   },
   "include": [
     "scripts/data/**/*.ts",
-    "shared/game-data.ts",
+    "shared/game-data/**/*.ts",
     "shared/language.ts",
-    "tests/data-transform.test.ts"
+    "tests/data/**/*.ts"
   ]
 }

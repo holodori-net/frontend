@@ -1,13 +1,8 @@
-import { mkdir, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { DatabaseSync } from 'node:sqlite'
-import {
-  transformCardGrowth,
-  transformCards,
-  transformCharacters,
-  transformCharacterGroups,
-} from './transform.ts'
+import { transformModules } from './registry.ts'
+import { runTransforms } from './runner.ts'
 
 const repositoryDirectory = fileURLToPath(new URL('../..', import.meta.url))
 const inputPath = resolve(repositoryDirectory, '.data/master.sqlite')
@@ -18,20 +13,7 @@ async function main() {
   try {
     console.info(`Reading ${inputPath}`)
     database = new DatabaseSync(inputPath, { readOnly: true })
-    const characters = transformCharacters(database)
-    const cards = transformCards(database)
-    const growth = transformCardGrowth(database)
-    const characterGroups = transformCharacterGroups(database)
-    await mkdir(outputDirectory, { recursive: true })
-    await Promise.all([
-      writeJson('characters.json', characters),
-      writeJson('cards.json', cards),
-      writeJson('card-growth.json', growth),
-      writeJson('character-groups.json', characterGroups),
-    ])
-    console.info(
-      `Wrote ${resolve(outputDirectory, 'characters.json')} (${characters.length} characters), ${resolve(outputDirectory, 'cards.json')} (${cards.length} cards), ${resolve(outputDirectory, 'card-growth.json')} (${Object.keys(growth.levels).length} level groups, ${Object.keys(growth.levelLimits).length} level limit groups, ${Object.keys(growth.potentials).length} potential groups), ${resolve(outputDirectory, 'character-groups.json')} (${characterGroups.length} character groups)`,
-    )
+    await runTransforms(database, transformModules, outputDirectory)
   } catch (error) {
     console.error(`Data transformation failed using ${inputPath}:`, error)
     process.exitCode = 1
@@ -41,8 +23,3 @@ async function main() {
 }
 
 await main()
-
-async function writeJson(name: string, data: unknown) {
-  const path = resolve(outputDirectory, name)
-  await writeFile(path, `${JSON.stringify(data, null, 2)}\n`)
-}
