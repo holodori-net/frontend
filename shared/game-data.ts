@@ -1,12 +1,26 @@
 import type { GameLocale } from './language'
 
-export type LocalizedNames = Record<GameLocale, string>
+export type LocalizedText = Record<GameLocale, string>
+export type LocalizedNames = LocalizedText
 
 export interface CharacterData {
   id: string
   name: LocalizedNames
   assetId: string | null
   isPlayable: boolean
+  regularGroupIds: string[]
+  order: number
+}
+
+export interface CharacterGroupData {
+  id: string
+  name: LocalizedText
+  description: LocalizedText
+  isRegular: boolean
+  characterIds: string[]
+  assetId: string
+  color1: string
+  color2: string
   order: number
 }
 

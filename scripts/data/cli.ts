@@ -6,6 +6,7 @@ import {
   transformCardGrowth,
   transformCards,
   transformCharacters,
+  transformCharacterGroups,
 } from './transform.ts'
 
 const repositoryDirectory = fileURLToPath(new URL('../..', import.meta.url))
@@ -20,14 +21,16 @@ async function main() {
     const characters = transformCharacters(database)
     const cards = transformCards(database)
     const growth = transformCardGrowth(database)
+    const characterGroups = transformCharacterGroups(database)
     await mkdir(outputDirectory, { recursive: true })
     await Promise.all([
       writeJson('characters.json', characters),
       writeJson('cards.json', cards),
       writeJson('card-growth.json', growth),
+      writeJson('character-groups.json', characterGroups),
     ])
     console.info(
-      `Wrote ${resolve(outputDirectory, 'characters.json')} (${characters.length} characters), ${resolve(outputDirectory, 'cards.json')} (${cards.length} cards), ${resolve(outputDirectory, 'card-growth.json')} (${Object.keys(growth.levels).length} level groups, ${Object.keys(growth.levelLimits).length} level limit groups, ${Object.keys(growth.potentials).length} potential groups)`,
+      `Wrote ${resolve(outputDirectory, 'characters.json')} (${characters.length} characters), ${resolve(outputDirectory, 'cards.json')} (${cards.length} cards), ${resolve(outputDirectory, 'card-growth.json')} (${Object.keys(growth.levels).length} level groups, ${Object.keys(growth.levelLimits).length} level limit groups, ${Object.keys(growth.potentials).length} potential groups), ${resolve(outputDirectory, 'character-groups.json')} (${characterGroups.length} character groups)`,
     )
   } catch (error) {
     console.error(`Data transformation failed using ${inputPath}:`, error)

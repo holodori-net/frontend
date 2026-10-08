@@ -18,7 +18,7 @@ pnpm data:fetch
 pnpm data:transform
 ```
 
-`data:transform` reads `.data/master.sqlite` in read-only mode and overwrites `public/data/characters.json`, `public/data/cards.json`, and `public/data/card-growth.json`. These generated files are ignored by Git. Characters and cards contain names in all configured game languages. Missing or null names cause the conversion to fail with the language and text ID. Growth data retains all source groups, keyed by their IDs. The command reports output paths and counts, and returns a nonzero status on failure. Fetching and transforming are standalone commands.
+`data:transform` reads `.data/master.sqlite` in read-only mode and overwrites `public/data/characters.json`, `public/data/cards.json`, `public/data/card-growth.json`, and `public/data/character-groups.json`. These generated files are ignored by Git. Characters and cards contain names in all configured game languages. Character groups additionally contain names and descriptions in all configured game languages. Missing or null translations fail conversion with their source table, field, row ID, language, and text ID. Group membership arrays retain source order; null arrays become empty arrays. Character groups retain all source rows and sort by `order`, then `id`. Growth data retains all source groups, keyed by their IDs. All data is transformed before output files are written. The command reports output paths and counts, and returns a nonzero status on failure. Fetching and transforming are standalone commands.
 
 See [knowledge/README.md](knowledge/README.md) for the data dictionary, relationships, and field conversion status. Update the relevant knowledge documents when changing data mappings.
 

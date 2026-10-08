@@ -3,15 +3,19 @@ import { gameLocales } from '../../shared/language.ts'
 import type {
   CardData,
   CardGrowthData,
+  CharacterGroupData,
   CharacterData,
-  LocalizedNames,
+  LocalizedText,
 } from '../../shared/game-data.ts'
 
-function localizedNames(
+function localizedText(
   database: DatabaseSync,
-  table: 'LangCharacter' | 'LangCard',
+  table: 'LangCharacter' | 'LangCard' | 'LangCharacterGrouping',
   id: string,
-): LocalizedNames {
+  sourceTable: string,
+  field: string,
+  rowId: string,
+): LocalizedText {
   const rows = database
     .prepare(`SELECT language, text FROM ${table} WHERE id = ?`)
     .all(id) as { language: string; text: string | null }[]
@@ -19,17 +23,35 @@ function localizedNames(
     gameLocales.map((locale) => {
       const translation = rows.find((row) => row.language === locale)
       if (!translation || translation.text === null) {
-        throw new Error(`Missing ${locale} translation in ${table} for ${id}`)
+        throw new Error(
+          `Missing ${locale} translation in ${table} for ${id} (${sourceTable}.${field} in row ${rowId})`,
+        )
       }
       return [locale, translation.text]
     }),
-  ) as LocalizedNames
+  ) as LocalizedText
+}
+
+function parseJsonArray(
+  value: string | null,
+  table: string,
+  field: string,
+  id: string,
+): string[] {
+  if (value === null) return []
+  try {
+    return JSON.parse(value) as string[]
+  } catch (cause) {
+    throw new Error(`Invalid JSON in ${table}.${field} for row ${id}`, {
+      cause,
+    })
+  }
 }
 
 export function transformCharacters(database: DatabaseSync): CharacterData[] {
   const rows = database
     .prepare(
-      `SELECT id, name_lang_id, asset_id, is_playable, "order"
+      `SELECT id, name_lang_id, asset_id, is_playable, regular_character_grouping_ids, "order"
        FROM Character ORDER BY "order", id`,
     )
     .all() as {
@@ -37,14 +59,81 @@ export function transformCharacters(database: DatabaseSync): CharacterData[] {
     name_lang_id: string
     asset_id: string | null
     is_playable: number
+    regular_character_grouping_ids: string | null
     order: number
   }[]
 
   return rows.map((row) => ({
     id: row.id,
-    name: localizedNames(database, 'LangCharacter', row.name_lang_id),
+    name: localizedText(
+      database,
+      'LangCharacter',
+      row.name_lang_id,
+      'Character',
+      'name_lang_id',
+      row.id,
+    ),
     assetId: row.asset_id,
     isPlayable: Boolean(row.is_playable),
+    regularGroupIds: parseJsonArray(
+      row.regular_character_grouping_ids,
+      'Character',
+      'regular_character_grouping_ids',
+      row.id,
+    ),
+    order: row.order,
+  }))
+}
+
+export function transformCharacterGroups(
+  database: DatabaseSync,
+): CharacterGroupData[] {
+  const rows = database
+    .prepare(
+      `SELECT id, name_lang_id, description_lang_id, is_regular, character_ids,
+              asset_id, color1, color2, "order"
+       FROM CharacterGrouping ORDER BY "order", id`,
+    )
+    .all() as {
+    id: string
+    name_lang_id: string
+    description_lang_id: string
+    is_regular: number | null
+    character_ids: string | null
+    asset_id: string
+    color1: string
+    color2: string
+    order: number
+  }[]
+
+  return rows.map((row) => ({
+    id: row.id,
+    name: localizedText(
+      database,
+      'LangCharacterGrouping',
+      row.name_lang_id,
+      'CharacterGrouping',
+      'name_lang_id',
+      row.id,
+    ),
+    description: localizedText(
+      database,
+      'LangCharacterGrouping',
+      row.description_lang_id,
+      'CharacterGrouping',
+      'description_lang_id',
+      row.id,
+    ),
+    isRegular: Boolean(row.is_regular),
+    characterIds: parseJsonArray(
+      row.character_ids,
+      'CharacterGrouping',
+      'character_ids',
+      row.id,
+    ),
+    assetId: row.asset_id,
+    color1: row.color1,
+    color2: row.color2,
     order: row.order,
   }))
 }
@@ -81,7 +170,14 @@ export function transformCards(database: DatabaseSync): CardData[] {
   return rows.map((row) => ({
     id: row.id,
     characterId: row.character_id,
-    name: localizedNames(database, 'LangCard', row.name_lang_id),
+    name: localizedText(
+      database,
+      'LangCard',
+      row.name_lang_id,
+      'Card',
+      'name_lang_id',
+      row.id,
+    ),
     rarity: row.rarity,
     attributeType: row.attribute_type,
     assetId: row.asset_id,

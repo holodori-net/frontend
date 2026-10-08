@@ -6,6 +6,7 @@
 
 - [卡片資料](data/cards.md)：Card 與 LangCard 的完整欄位、技能／語音／服裝關聯、欄位用途、素材枚舉與轉存狀態。
 - [角色資料](data/characters.md)：Character 與 LangCharacter 的完整欄位、角色名稱與詳細資料關聯、SD 動畫、群組文字、顏色用途及轉存狀態。
+- [角色群組資料](data/character-groups.md)：CharacterGrouping 與 LangCharacterGrouping 的完整欄位、角色成員關聯、多語文字及轉存狀態。
 - [卡片成長資料](data/card-growth.md)：CardLevel、CardLevelLimit、CardPotential 的組別、養成階段、累積經驗門檻、效果與轉存狀態。
 
 ## 來源與適用快照
@@ -15,7 +16,7 @@
 - 欄位與關聯的可重現來源：SQLite 的 `PRAGMA table_info`、`logical_fields` 與 `declared_foreign_keys`。
 - 轉存依據：[轉換模組](../scripts/data/transform.ts)、[共用型別](../shared/game-data.ts)。產物位於 `public/data/`。
 
-目前觀察日期為 2026-10-06，master_version 為 `5267906a638d20ddfc5c68dcb7775b0bda3484dfbb65006cd8e7dc59232112bc`。此快照包含 189 張卡片、62 位角色。來源更新後，重新驗證受影響的欄位、枚舉與結論。
+卡片與角色文件觀察日期為 2026-10-06，master_version 為 `5267906a638d20ddfc5c68dcb7775b0bda3484dfbb65006cd8e7dc59232112bc`，此快照包含 189 張卡片、62 位角色。角色群組文件觀察日期為 2026-10-11，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 16 個 CharacterGrouping 與 192 筆 LangCharacterGrouping。來源更新後，重新驗證受影響的欄位、枚舉與結論。
 
 ## 信心與轉存狀態
 
