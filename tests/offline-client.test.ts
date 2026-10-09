@@ -20,8 +20,8 @@ it('uses home and cards by default and saves language-specific selections', () =
   })
 
   expect(getOfflinePages('ja', 'jpn')).toEqual(['home', 'cards'])
-  saveOfflinePages('ja', 'jpn', ['home'])
-  expect(getOfflinePages('ja', 'jpn')).toEqual(['home'])
+  saveOfflinePages('ja', 'jpn', ['home', 'characters'])
+  expect(getOfflinePages('ja', 'jpn')).toEqual(['home', 'characters'])
   expect(getOfflinePages('en', 'eng')).toEqual(['home', 'cards'])
 })
 

@@ -112,6 +112,30 @@ describe('offline service worker selection', () => {
     expect(replies.at(-1)).toMatchObject({ type: 'result', success: true })
   })
 
+  it('stores the character page and payload at their localized paths', async () => {
+    const fetchPage = vi.fn(
+      async (request: Request) => new Response(request.url),
+    )
+    vi.stubGlobal('fetch', fetchPage)
+    const replies = await message({
+      type: 'SYNC_OFFLINE_PAGES',
+      siteLocale: 'zh-TW',
+      gameLocale: 'cht',
+      pages: ['characters'],
+    })
+    expect(replies.at(-1)).toMatchObject({
+      success: true,
+      pages: ['characters'],
+    })
+    const downloaded = fetchPage.mock.calls.map(
+      ([request]) => (request as Request).url,
+    )
+    expect(downloaded).toContain('https://example.test/zh-TW/cht/characters/')
+    expect(downloaded).toContain(
+      'https://example.test/zh-TW/cht/characters/_payload.json',
+    )
+  })
+
   it('keeps the previous selection when a staged page fails', async () => {
     const core = await caches.open('holodori-core-v1')
     const selectionUrl = 'https://example.test/__offline-selection__'
@@ -140,7 +164,7 @@ describe('offline service worker selection', () => {
       type: 'SYNC_OFFLINE_PAGES',
       siteLocale: 'ja',
       gameLocale: 'jpn',
-      pages: ['home'],
+      pages: ['characters'],
     })
     expect(replies.at(-1)).toMatchObject({ type: 'result', success: false })
     expect(await (await core.match(selectionUrl))?.json()).toMatchObject({

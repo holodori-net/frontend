@@ -33,9 +33,9 @@ export const gameLanguageOptions = gameLocales.map((value) => ({
   label: gameLanguageNames[value],
 }))
 
-export const sitePages = ['home', 'cards', 'settings'] as const
+export const sitePages = ['home', 'cards', 'characters', 'settings'] as const
 export type PageKind = (typeof sitePages)[number]
-export const offlinePageKinds = ['home', 'cards'] as const
+export const offlinePageKinds = ['home', 'cards', 'characters'] as const
 
 const browserLanguageAliases: Record<string, SiteLocale> = {
   ja: 'ja',

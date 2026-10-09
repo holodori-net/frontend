@@ -36,6 +36,9 @@ describe('language resolution', () => {
   it('builds language-prefixed page paths', () => {
     expect(buildLocalizedPath('zh-TW', 'jpn', 'home')).toBe('/zh-TW/jpn')
     expect(buildLocalizedPath('en', 'chs', 'cards')).toBe('/en/chs/cards')
+    expect(buildLocalizedPath('zh-TW', 'cht', 'characters')).toBe(
+      '/zh-TW/cht/characters',
+    )
     expect(buildLocalizedPath('ja', 'jpn', 'settings')).toBe('/ja/jpn/settings')
   })
 
@@ -49,36 +52,37 @@ describe('language resolution', () => {
     ).toEqual({ path: '/en/cht/cards/123', query: {}, hash: '' })
   })
 
-  it.each(['/ja/jpn/cards/123/history', '/ja/jpn/cards/123'])(
-    'preserves router state for %s when changing locales',
-    async (path) => {
-      const router = createRouter({
-        history: createMemoryHistory(),
-        routes: [
-          { path: '/:pathMatch(.*)*', component: { template: '<div />' } },
-        ],
-      })
-      const initialUrl = `${path}?q=a?b&tag=one&tag=two&revision=a%252Fb#changes%20here`
-      await router.push(initialUrl)
+  it.each([
+    '/ja/jpn/cards/123/history',
+    '/ja/jpn/cards/123',
+    '/ja/jpn/characters',
+  ])('preserves router state for %s when changing locales', async (path) => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/:pathMatch(.*)*', component: { template: '<div />' } },
+      ],
+    })
+    const initialUrl = `${path}?q=a?b&tag=one&tag=two&revision=a%252Fb#changes%20here`
+    await router.push(initialUrl)
 
-      await router.replace(
-        buildLocalizedRoute('en', 'cht', router.currentRoute.value),
-      )
+    await router.replace(
+      buildLocalizedRoute('en', 'cht', router.currentRoute.value),
+    )
 
-      expect(router.currentRoute.value.path).toBe(
-        path.replace('/ja/jpn', '/en/cht'),
-      )
-      expect(router.currentRoute.value.query).toEqual({
-        q: 'a?b',
-        tag: ['one', 'two'],
-        revision: 'a%2Fb',
-      })
-      expect(router.currentRoute.value.hash).toBe('#changes here')
-      expect(router.currentRoute.value.fullPath).toBe(
-        `${path.replace('/ja/jpn', '/en/cht')}?q=a?b&tag=one&tag=two&revision=a%252Fb#changes%20here`,
-      )
-    },
-  )
+    expect(router.currentRoute.value.path).toBe(
+      path.replace('/ja/jpn', '/en/cht'),
+    )
+    expect(router.currentRoute.value.query).toEqual({
+      q: 'a?b',
+      tag: ['one', 'two'],
+      revision: 'a%2Fb',
+    })
+    expect(router.currentRoute.value.hash).toBe('#changes here')
+    expect(router.currentRoute.value.fullPath).toBe(
+      `${path.replace('/ja/jpn', '/en/cht')}?q=a?b&tag=one&tag=two&revision=a%252Fb#changes%20here`,
+    )
+  })
 
   it('prompts only when a manually chosen language conflicts with a link', () => {
     expect(getManualPreferenceConflict('en', 'jpn', 'zh-TW', null)).toEqual({

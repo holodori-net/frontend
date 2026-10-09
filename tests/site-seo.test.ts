@@ -28,10 +28,11 @@ describe('site SEO files', () => {
     const sitemap = await readFile(join(root, 'public/sitemap.xml'), 'utf8')
     const robots = await readFile(join(root, 'public/robots.txt'), 'utf8')
     expect(sitemap.match(/<url>/g)).toHaveLength(
-      siteLocales.length * gameLocales.length * 2,
+      siteLocales.length * gameLocales.length * 3,
     )
     expect(sitemap).toContain('https://example.test/ja/jpn/')
     expect(sitemap).toContain('https://example.test/zh-TW/cht/cards/')
+    expect(sitemap).toContain('https://example.test/zh-TW/cht/characters/')
     expect(sitemap).not.toContain('/settings')
     expect(sitemap).not.toContain('/history')
     expect(sitemap).not.toContain('https://example.test/cards')
@@ -40,11 +41,12 @@ describe('site SEO files', () => {
     )
   })
 
-  it('derives home and cards paths from configured locales only', () => {
+  it('derives public page paths from configured locales only', () => {
     const routes = getSiteSeoRoutes()
-    expect(routes).toHaveLength(siteLocales.length * gameLocales.length * 2)
+    expect(routes).toHaveLength(siteLocales.length * gameLocales.length * 3)
     expect(routes).toContain('/en/eng/')
     expect(routes).toContain('/en/eng/cards/')
+    expect(routes).toContain('/en/eng/characters/')
     expect(routes).not.toContain('/')
     expect(routes).not.toContain('/cards')
     expect(routes.some((route) => route.includes('/settings'))).toBe(false)
