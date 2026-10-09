@@ -12,6 +12,7 @@ definePageMeta({
 })
 
 const gameLocale = computed(() => String(route.params.gameLocale) as GameLocale)
+const showUnplayableCharacters = ref(false)
 const {
   data: characters,
   error,
@@ -23,7 +24,12 @@ watch(error, (fetchError) => {
     console.warn('Holodori character data load failed', fetchError)
   }
 })
-const sections = computed(() => getCharacterSections(characters.value ?? []))
+const visibleCharacters = computed(() =>
+  (characters.value ?? []).filter(
+    (character) => showUnplayableCharacters.value || character.isPlayable,
+  ),
+)
+const sections = computed(() => getCharacterSections(visibleCharacters.value))
 const hasCharacters = computed(() =>
   sections.value.some((section) => section.characters.length > 0),
 )
@@ -35,10 +41,19 @@ const hasCharacters = computed(() =>
     <main
       class="mx-auto w-[min(calc(100%-2rem),65.625rem)] py-8 pb-20 sm:py-12"
     >
-      <div class="mb-8">
+      <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
         <h1 class="mb-0 text-2xl font-bold sm:text-3xl">
           {{ t('characters') }}
         </h1>
+        <div class="flex items-center gap-3">
+          <label for="show-unplayable-characters" class="text-sm">
+            {{ t('showUnplayableCharacters') }}
+          </label>
+          <ToggleSwitch
+            v-model="showUnplayableCharacters"
+            input-id="show-unplayable-characters"
+          />
+        </div>
       </div>
 
       <p

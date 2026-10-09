@@ -4,6 +4,7 @@
   "home": "ホーム",
   "cards": "カード",
   "characters": "キャラクター",
+  "showUnplayableCharacters": "プレイできないキャラクターも表示",
   "charactersLoading": "キャラクターを読み込み中…",
   "charactersLoadError": "キャラクターデータを読み込めませんでした。",
   "charactersEmpty": "キャラクターデータがありません。",

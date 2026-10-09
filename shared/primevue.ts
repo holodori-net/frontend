@@ -7,6 +7,7 @@ export const primeVueComponents = [
   'Popover',
   'Select',
   'Tag',
+  'ToggleSwitch',
 ] as const
 
 export const primeVueStyleDependencies: Partial<
