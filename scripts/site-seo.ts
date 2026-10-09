@@ -1,6 +1,11 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { gameLocales, siteLocales } from '../shared/language.ts'
+import {
+  buildLocalizedPath,
+  gameLocales,
+  sitePages,
+  siteLocales,
+} from '../shared/language.ts'
 
 export function escapeXml(value: string) {
   return value
@@ -13,10 +18,11 @@ export function escapeXml(value: string) {
 
 export function getSiteSeoRoutes() {
   return siteLocales.flatMap((siteLocale) =>
-    gameLocales.flatMap((gameLocale) => {
-      const home = `/${siteLocale}/${gameLocale}/`
-      return [home, `${home}cards/`]
-    }),
+    gameLocales.flatMap((gameLocale) =>
+      sitePages
+        .filter((page) => page !== 'settings')
+        .map((page) => `${buildLocalizedPath(siteLocale, gameLocale, page)}/`),
+    ),
   )
 }
 

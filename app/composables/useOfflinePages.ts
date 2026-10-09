@@ -1,6 +1,6 @@
-import type { GameLocale, SiteLocale } from '#shared/language'
+import type { GameLocale, SiteLocale, offlinePageKinds } from '#shared/language'
 
-export type OfflinePage = 'home' | 'cards'
+export type OfflinePage = (typeof offlinePageKinds)[number]
 
 export interface OfflineSelection {
   siteLocale: SiteLocale

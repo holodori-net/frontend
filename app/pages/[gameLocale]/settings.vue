@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { isGameLocale, isSiteLocale, type GameLocale } from '#shared/language'
+import {
+  isGameLocale,
+  isSiteLocale,
+  offlinePageKinds,
+  type GameLocale,
+} from '#shared/language'
 import {
   getOfflinePages,
   saveOfflinePages,
@@ -137,21 +142,17 @@ onUnmounted(() => {
           <legend class="px-3 text-sm font-semibold text-muted-color">
             {{ t('offlinePages') }}
           </legend>
-          <label class="inline-flex cursor-pointer items-center gap-2">
+          <label
+            v-for="page in offlinePageKinds"
+            :key="page"
+            class="inline-flex cursor-pointer items-center gap-2"
+          >
             <Checkbox
               v-model="selectedPages"
-              input-id="offline-home"
-              value="home"
+              :input-id="`offline-${page}`"
+              :value="page"
             />
-            {{ t('home') }}
-          </label>
-          <label class="inline-flex cursor-pointer items-center gap-2">
-            <Checkbox
-              v-model="selectedPages"
-              input-id="offline-cards"
-              value="cards"
-            />
-            {{ t('cards') }}
+            {{ t(page) }}
           </label>
         </fieldset>
         <p v-if="syncing" class="mt-4 text-sm text-primary" role="status">

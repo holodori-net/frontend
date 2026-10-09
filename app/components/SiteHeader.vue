@@ -5,6 +5,7 @@ import {
   isGameLocale,
   siteLanguageOptions,
   gameLanguageOptions,
+  sitePages,
   type GameLocale,
   type SiteLocale,
 } from '#shared/language'
@@ -91,23 +92,11 @@ async function chooseGameLocale(value: GameLocale) {
       :aria-label="t('home')"
     >
       <NuxtLink
+        v-for="page in sitePages"
+        :key="page"
         class="inline-flex h-full items-center [&.router-link-active]:text-primary [&.router-link-active]:shadow-[inset_0_-2px_var(--p-primary-color)]"
-        :to="buildLocalizedPath(locale as SiteLocale, activeGameLocale, 'home')"
-        >{{ t('home') }}</NuxtLink
-      >
-      <NuxtLink
-        class="inline-flex h-full items-center [&.router-link-active]:text-primary [&.router-link-active]:shadow-[inset_0_-2px_var(--p-primary-color)]"
-        :to="
-          buildLocalizedPath(locale as SiteLocale, activeGameLocale, 'cards')
-        "
-        >{{ t('cards') }}</NuxtLink
-      >
-      <NuxtLink
-        class="inline-flex h-full items-center [&.router-link-active]:text-primary [&.router-link-active]:shadow-[inset_0_-2px_var(--p-primary-color)]"
-        :to="
-          buildLocalizedPath(locale as SiteLocale, activeGameLocale, 'settings')
-        "
-        >{{ t('settings') }}</NuxtLink
+        :to="buildLocalizedPath(locale as SiteLocale, activeGameLocale, page)"
+        >{{ t(page) }}</NuxtLink
       >
     </nav>
     <Button

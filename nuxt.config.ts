@@ -2,6 +2,7 @@ import {
   gameLocales,
   siteLocales,
   siteLanguageMetadata,
+  sitePages,
 } from './shared/language'
 import { primeVueComponents } from './shared/primevue'
 import { defaultThemeId } from './shared/theme'
@@ -15,7 +16,9 @@ const prerenderWorkerCount = getPrerenderWorkerCount(
   process.env.NUXT_PRERENDER_WORKERS,
 )
 
-const contentPages = ['', '/cards', '/settings']
+const contentPages = sitePages.map((page) =>
+  page === 'home' ? '' : `/${page}`,
+)
 
 const prerenderRoutes = [
   '/',

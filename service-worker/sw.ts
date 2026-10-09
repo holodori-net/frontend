@@ -5,7 +5,11 @@ import {
   getCacheKeyForURL,
   precacheAndRoute,
 } from 'workbox-precaching'
-import { isGameLocale, isSiteLocale } from '../shared/language'
+import {
+  isGameLocale,
+  isSiteLocale,
+  offlinePageKinds,
+} from '../shared/language'
 import { fetchWithProgress, mapConcurrent } from './transfer'
 
 declare const self: ServiceWorkerGlobalScope & {
@@ -15,7 +19,7 @@ declare const self: ServiceWorkerGlobalScope & {
 const CORE_CACHE = 'holodori-core-v1'
 const PAGE_CACHE_PREFIX = 'holodori-selected-pages-'
 const SELECTION_URL = new URL('/__offline-selection__', self.location.origin)
-const PAGE_NAMES = new Set(['home', 'cards'])
+const PAGE_NAMES = new Set<string>(offlinePageKinds)
 const CONCURRENCY = 4
 const precacheEntries = self.__WB_MANIFEST.map((entry) =>
   typeof entry === 'string' ? { url: entry } : entry,
@@ -44,7 +48,7 @@ self.addEventListener('activate', (event) => {
 })
 
 function pagePath(siteLocale: string, gameLocale: string, page: string) {
-  return `/${siteLocale}/${gameLocale}${page === 'cards' ? '/cards' : ''}/`
+  return `/${siteLocale}/${gameLocale}${page === 'home' ? '' : `/${page}`}/`
 }
 
 function payloadPath(page: string) {
