@@ -84,6 +84,32 @@ describe('language resolution', () => {
     )
   })
 
+  it.each(['/', '/cards', '/characters', '/settings'])(
+    'localizes language entry %s while preserving query and hash',
+    async (path) => {
+      const router = createRouter({
+        history: createMemoryHistory(),
+        routes: [
+          { path: '/:pathMatch(.*)*', component: { template: '<div />' } },
+        ],
+      })
+      await router.push(`${path}?tab=offline&tag=a&tag=b#saved`)
+
+      await router.replace(
+        buildLocalizedRoute('en', 'cht', router.currentRoute.value),
+      )
+
+      expect(router.currentRoute.value.path).toBe(
+        `/en/cht${path === '/' ? '' : path}`,
+      )
+      expect(router.currentRoute.value.query).toEqual({
+        tab: 'offline',
+        tag: ['a', 'b'],
+      })
+      expect(router.currentRoute.value.hash).toBe('#saved')
+    },
+  )
+
   it('prompts only when a manually chosen language conflicts with a link', () => {
     expect(getManualPreferenceConflict('en', 'jpn', 'zh-TW', null)).toEqual({
       siteLocale: 'zh-TW',

@@ -11,6 +11,10 @@ import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
 import { generateSiteSeo } from './scripts/site-seo'
 import { getPrerenderWorkerCount } from './scripts/prerender/worker-count'
+import {
+  getLanguageEntryRoutes,
+  getStaticLanguageEntryPaths,
+} from './scripts/page-entries'
 
 const prerenderWorkerCount = getPrerenderWorkerCount(
   process.env.NUXT_PRERENDER_WORKERS,
@@ -21,9 +25,6 @@ const contentPages = sitePages.map((page) =>
 )
 
 const prerenderRoutes = [
-  '/',
-  '/cards',
-  '/characters',
   '/api/characters.json',
   ...siteLocales.flatMap((siteLocale) =>
     gameLocales.flatMap((gameLocale) =>
@@ -31,6 +32,7 @@ const prerenderRoutes = [
     ),
   ),
 ]
+let languageEntryPaths: string[] = []
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-09-25',
@@ -41,7 +43,23 @@ export default defineNuxtConfig({
     },
   },
   hooks: {
+    'pages:extend': (pages) => {
+      const entries = getLanguageEntryRoutes(
+        pages,
+        fileURLToPath(
+          new URL('./app/components/LanguageEntry.vue', import.meta.url),
+        ),
+      )
+      pages.push(...entries)
+      languageEntryPaths = entries.map((entry) => entry.path)
+    },
     'nitro:init': (nitro) => {
+      nitro.hooks.hook('prerender:routes', (routes) => {
+        for (const path of getStaticLanguageEntryPaths(languageEntryPaths)) {
+          routes.add(path)
+        }
+      })
+
       if (prerenderWorkerCount > 1) {
         nitro.hooks.hook('prerender:config', (config) => {
           config.entry = fileURLToPath(

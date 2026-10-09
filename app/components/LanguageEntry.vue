@@ -1,17 +1,22 @@
 <script setup lang="ts">
 import { NuxtLink } from '#components'
-import { buildLocalizedPath, resolveEntryLocales } from '#shared/language'
+import { buildLocalizedRoute, resolveEntryLocales } from '#shared/language'
 
-defineI18nRoute(false)
-
+const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const preferredSiteLocale = useCookie<string | null>('holodori-site-locale', {
   default: () => null,
+  maxAge: 60 * 60 * 24 * 365,
+  sameSite: 'lax',
 })
 const preferredGameLocale = useCookie<string | null>('holodori-game-locale', {
   default: () => null,
+  maxAge: 60 * 60 * 24 * 365,
+  sameSite: 'lax',
 })
+
+const continueRoute = computed(() => buildLocalizedRoute('ja', 'jpn', route))
 
 onMounted(async () => {
   const resolved = resolveEntryLocales(
@@ -20,7 +25,7 @@ onMounted(async () => {
     preferredGameLocale.value,
   )
   await router.replace(
-    buildLocalizedPath(resolved.siteLocale, resolved.gameLocale, 'characters'),
+    buildLocalizedRoute(resolved.siteLocale, resolved.gameLocale, route),
   )
 })
 </script>
@@ -40,7 +45,7 @@ onMounted(async () => {
       <Button
         :as="NuxtLink"
         class="mt-6"
-        to="/ja/jpn/characters"
+        :to="continueRoute"
         :label="t('continue')"
       />
     </section>
