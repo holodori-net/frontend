@@ -1,12 +1,12 @@
 import type { SourceFieldContext } from '../contract.ts'
 
-export function parseJsonArray(
+export function parseJsonArray<T = string>(
   value: string | null,
   context: SourceFieldContext,
-): string[] {
+): T[] {
   if (value === null) return []
   try {
-    return JSON.parse(value) as string[]
+    return JSON.parse(value) as T[]
   } catch (cause) {
     throw new Error(
       `Invalid JSON in ${context.table}.${context.field} for row ${context.rowId}`,
