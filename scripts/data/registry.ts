@@ -3,10 +3,12 @@ import { charactersTransform } from './transforms/characters.ts'
 import { cardsTransform } from './transforms/cards.ts'
 import { cardGrowthTransform } from './transforms/card-growth.ts'
 import { characterGroupsTransform } from './transforms/character-groups.ts'
+import { liveSkillEffectTargetsTransform } from './transforms/live-skill-effect-targets.ts'
 
 export const transformModules = [
   charactersTransform,
   cardsTransform,
   cardGrowthTransform,
   characterGroupsTransform,
+  liveSkillEffectTargetsTransform,
 ] satisfies TransformModule[]
