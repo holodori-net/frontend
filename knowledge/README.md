@@ -15,7 +15,7 @@
 - Schema：[holodori-net/android-protos](https://github.com/holodori-net/android-protos)，相關 entity.master 與 enums 定義。
 - 資料：[holodori-net/android-database](https://github.com/holodori-net/android-database) 的 [master.sqlite](https://github.com/holodori-net/android-database/releases/latest/download/master.sqlite)，本機位於 `.data/master.sqlite`。
 - 欄位與關聯的可重現來源：SQLite 的 `PRAGMA table_info`、`logical_fields` 與 `declared_foreign_keys`。
-- 轉換依據：[轉換模組](../server/data/converters/)、[資料型別](../shared/game-data/)。角色頁由 [reader](../server/data/character-list.ts) 選取列表欄位，交由 Nuxt 保存為頁面 payload。
+- 轉換依據：[Drizzle schema](../server/data/schema/)、[轉換模組](../server/data/converters/)、[資料型別](../shared/game-data/)。Schema 手動維護查詢所需欄位，透過 `snakeCase.table` 將 camelCase 屬性自動映射為 SQLite 的 snake_case 欄位名稱。Converter 接收 `GameDatabase`，角色頁由 [reader](../server/data/character-list.ts) 管理唯讀連線並選取列表欄位，交由 Nuxt 保存為頁面 payload。
 
 卡片文件觀察日期為 2026-10-06，master_version 為 `5267906a638d20ddfc5c68dcb7775b0bda3484dfbb65006cd8e7dc59232112bc`，此快照包含 189 張卡片。角色文件觀察日期為 2026-10-12，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 62 位角色與 2412 筆 LangCharacter。角色群組文件觀察日期為 2026-10-11，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 16 個 CharacterGrouping 與 192 筆 LangCharacterGrouping。來源更新後，重新驗證受影響的欄位、枚舉與結論。
 

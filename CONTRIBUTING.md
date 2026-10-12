@@ -19,11 +19,15 @@ See [knowledge/README.md](knowledge/README.md) for the data dictionary, relation
 
 ### Game data layer
 
-Each domain owns its SQL, source row types, and field mappings in `server/data/converters/<domain>.ts`, return types in `shared/game-data/<domain>.ts`, and tests in `tests/data/<domain>.test.ts`. Tests create an independent in-memory database with the tables and fixtures needed by that domain.
+The data layer uses `drizzle-orm` with the built-in `node:sqlite` driver and synchronous query methods. The RC version is pinned in `pnpm-lock.yaml`.
 
-Converters accept a `DatabaseSync` and return complete domain data. Page readers own database lifetime and explicitly select the fields needed by their pages. The character reader lives in `server/data/character-list.ts`. Data modules use ordinary functions with explicit imports; the page connects the reader to Nuxt through its server branch.
+Each domain owns its Drizzle queries and field mappings in `server/data/converters/<domain>.ts`, schema in `server/data/schema/<domain>.ts`, return types in `shared/game-data/<domain>.ts`, and tests in `tests/data/<domain>.test.ts`. Tests create an independent in-memory SQLite database and pass it through `createGameDatabase`.
 
-Shared helpers live in `server/data/common/`. Each domain prepares its own language query and passes the statement and source context to the localization helper. Cross-domain references use source IDs and return types.
+Maintain schema definitions by hand for the tables and columns used by queries. Verify SQLite types, nullability, and primary keys with `PRAGMA table_info` before extending a schema. Use `snakeCase.table` from `drizzle-orm/sqlite-core` with camelCase properties and unnamed column builders, such as `characterId: text()`, to map columns to snake_case automatically. Specify a column name only when it differs from that convention. Queries select their fields explicitly; JSON keys and source names in error messages retain the database spelling.
+
+`server/data/database.ts` provides `createGameDatabase(client: DatabaseSync)` and the inferred `GameDatabase` type. Converters accept a `GameDatabase` and return complete domain data. Page readers open read-only connections, wrap them with `createGameDatabase`, select the fields needed by their pages, and close the SQLite client in `finally`. The character reader lives in `server/data/character-list.ts`. Data modules use ordinary functions with explicit imports; the page connects the reader to Nuxt through its server branch.
+
+Shared helpers live in `server/data/common/`. Each domain reuses a parameterized Drizzle prepared query for language lookups and passes `{ language, text }` rows, the text ID, and source context to the localization helper. Missing or null translations report their language and source field. Cross-domain references use source IDs and return types.
 
 When assigning parallel work, keep each domain's transform, types, tests, and data dictionary under one owner. Coordinate changes to shared helpers, page readers, and the knowledge index with the integration owner. Data typecheck includes all domain source and test files. Data modules use explicit `.ts` import paths and `import type` for types. Runtime imports from the shared directory use Nuxt's `#shared` alias, which Vitest also resolves.
 

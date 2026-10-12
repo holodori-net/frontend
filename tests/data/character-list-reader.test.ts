@@ -3,6 +3,7 @@ import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { sql } from 'drizzle-orm'
 import type { CharacterData } from '#shared/game-data/characters'
 import type { LocalizedText } from '#shared/game-data/localized-text'
 import { readCharacterList } from '../../server/data/character-list.ts'
@@ -99,7 +100,7 @@ describe('character list reader', () => {
     const character = createCharacter()
     transformCharactersMock.mockImplementation((database) => {
       try {
-        database.exec('CREATE TABLE unexpected_write (id INTEGER)')
+        database.run(sql`CREATE TABLE unexpected_write (id INTEGER)`)
       } catch (error) {
         writeError = error
       }
@@ -118,6 +119,9 @@ describe('character list reader', () => {
       },
     ])
     expect(writeError).toBeInstanceOf(Error)
+    expect(writeError).toMatchObject({
+      cause: { message: 'attempt to write a readonly database' },
+    })
     expect(transformCharactersMock).toHaveBeenCalledOnce()
     expect(closeSpy).toHaveBeenCalledOnce()
     expect(consoleInfoSpy).toHaveBeenCalledWith('Loaded 1 characters')
@@ -150,7 +154,7 @@ describe('character list reader', () => {
     const databasePath = resolve(process.cwd(), '.data/master.sqlite')
     await writeFile(databasePath, 'not a sqlite database')
     transformCharactersMock.mockImplementation((database) => {
-      database.prepare('SELECT 1').all()
+      database.all(sql`SELECT name FROM sqlite_master`)
       return []
     })
 
@@ -160,7 +164,10 @@ describe('character list reader', () => {
     } catch (error) {
       expect(error).toMatchObject({
         message: `Unable to read character data from ${databasePath}`,
-        cause: expect.objectContaining({ message: 'file is not a database' }),
+        cause: expect.objectContaining({
+          query: 'SELECT name FROM sqlite_master',
+          cause: expect.objectContaining({ message: 'file is not a database' }),
+        }),
       })
     }
     expect(transformCharactersMock).toHaveBeenCalledOnce()

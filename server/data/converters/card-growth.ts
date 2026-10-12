@@ -1,68 +1,79 @@
-import type { DatabaseSync } from 'node:sqlite'
-import { parseJsonArray } from '../common/json-array.ts'
+import { asc } from 'drizzle-orm'
 import type { CardGrowthData } from '#shared/game-data/card-growth'
+import type { GameDatabase } from '../database.ts'
+import { parseJsonArray } from '../common/json-array.ts'
+import {
+  cardLevel,
+  cardLevelLimit,
+  cardPotential,
+  cardPotentialUpgradeItem,
+} from '../schema/card-growth.ts'
 
-export function transformCardGrowth(database: DatabaseSync): CardGrowthData {
+export function transformCardGrowth(database: GameDatabase): CardGrowthData {
   const levels = database
-    .prepare(
-      'SELECT group_id, level, parameter_base_value, exp, live_deck_power_permyriad_up FROM CardLevel ORDER BY group_id, level',
-    )
-    .all() as {
-    group_id: string
-    level: number
-    parameter_base_value: string | number
-    exp: string | number | null
-    live_deck_power_permyriad_up: string | number | null
-  }[]
+    .select({
+      groupId: cardLevel.groupId,
+      level: cardLevel.level,
+      parameterBaseValue: cardLevel.parameterBaseValue,
+      exp: cardLevel.exp,
+      liveDeckPowerPermyriadUp: cardLevel.liveDeckPowerPermyriadUp,
+    })
+    .from(cardLevel)
+    .orderBy(asc(cardLevel.groupId), asc(cardLevel.level))
+    .all()
   const levelLimits = database
-    .prepare(
-      'SELECT group_id, limit_break_count, level_limit, consumptions FROM CardLevelLimit ORDER BY group_id, limit_break_count',
-    )
-    .all() as {
-    group_id: string
-    limit_break_count: number
-    level_limit: number
-    consumptions: string | null
-  }[]
+    .select({
+      groupId: cardLevelLimit.groupId,
+      limitBreakCount: cardLevelLimit.limitBreakCount,
+      levelLimit: cardLevelLimit.levelLimit,
+      consumptions: cardLevelLimit.consumptions,
+    })
+    .from(cardLevelLimit)
+    .orderBy(asc(cardLevelLimit.groupId), asc(cardLevelLimit.limitBreakCount))
+    .all()
   const potentials = database
-    .prepare(
-      'SELECT group_id, upgrade_count, effect_type, value FROM CardPotential ORDER BY group_id, upgrade_count, effect_type',
+    .select({
+      groupId: cardPotential.groupId,
+      upgradeCount: cardPotential.upgradeCount,
+      effectType: cardPotential.effectType,
+      value: cardPotential.value,
+    })
+    .from(cardPotential)
+    .orderBy(
+      asc(cardPotential.groupId),
+      asc(cardPotential.upgradeCount),
+      asc(cardPotential.effectType),
     )
-    .all() as {
-    group_id: string
-    upgrade_count: number
-    effect_type: number
-    value: string | number
-  }[]
+    .all()
   const potentialUpgradeItems = database
-    .prepare(
-      'SELECT rarity, item_id FROM CardPotentialUpgradeItem ORDER BY rarity',
-    )
-    .all() as {
-    rarity: number | string
-    item_id: string
-  }[]
+    .select({
+      rarity: cardPotentialUpgradeItem.rarity,
+      itemId: cardPotentialUpgradeItem.itemId,
+    })
+    .from(cardPotentialUpgradeItem)
+    .orderBy(asc(cardPotentialUpgradeItem.rarity))
+    .all()
 
   return {
     levels: groupRows(levels, (row) => ({
       level: row.level,
-      parameterBaseValue: Number(row.parameter_base_value),
+      parameterBaseValue: Number(row.parameterBaseValue),
       exp: row.exp === null ? null : Number(row.exp),
       liveDeckPowerPermyriadUp:
-        row.live_deck_power_permyriad_up === null
+        row.liveDeckPowerPermyriadUp === null
           ? null
-          : Number(row.live_deck_power_permyriad_up),
+          : Number(row.liveDeckPowerPermyriadUp),
     })),
     levelLimits: groupRows(levelLimits, (row) => ({
-      limitBreakCount: row.limit_break_count,
-      levelLimit: row.level_limit,
+      limitBreakCount: row.limitBreakCount,
+      levelLimit: row.levelLimit,
       consumptions:
         row.consumptions === null
           ? null
           : parseJsonArray<ConsumptionSource>(row.consumptions, {
               table: 'CardLevelLimit',
               field: 'consumptions',
-              rowId: `group_id=${row.group_id}, limit_break_count=${row.limit_break_count}`,
+              rowId: `group_id=${row.groupId}, limit_break_count=${row.limitBreakCount}`,
             }).map((consumption) => ({
               resourceType: consumption.resource_type.number,
               resourceId: consumption.resource_id,
@@ -70,14 +81,14 @@ export function transformCardGrowth(database: DatabaseSync): CardGrowthData {
             })),
     })),
     potentials: groupRows(potentials, (row) => ({
-      upgradeCount: row.upgrade_count,
-      effectType: row.effect_type,
+      upgradeCount: row.upgradeCount,
+      effectType: row.effectType,
       value: Number(row.value),
     })),
     potentialUpgradeItems: Object.fromEntries(
       potentialUpgradeItems.map((row) => [
         String(row.rarity),
-        { itemId: row.item_id },
+        { itemId: row.itemId },
       ]),
     ),
   }
@@ -89,13 +100,13 @@ interface ConsumptionSource {
   quantity: string | number
 }
 
-function groupRows<T extends { group_id: string }, Result>(
+function groupRows<T extends { groupId: string }, Result>(
   rows: T[],
   map: (row: T) => Result,
 ): Record<string, Result[]> {
   const groups: Record<string, Result[]> = {}
   for (const row of rows) {
-    ;(groups[row.group_id] ??= []).push(map(row))
+    ;(groups[row.groupId] ??= []).push(map(row))
   }
   return groups
 }

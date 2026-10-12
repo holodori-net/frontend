@@ -1,0 +1,48 @@
+import { primaryKey, snakeCase, text, integer } from 'drizzle-orm/sqlite-core'
+
+export const character = snakeCase.table('Character', {
+  id: text().notNull().primaryKey(),
+  nameLangId: text().notNull(),
+  shortNameLangId: text().notNull(),
+  characterProductionId: text(),
+  defaultCostumeId: text().notNull(),
+  defaultSdCostumeId: text().notNull(),
+  birthMonth: integer().notNull(),
+  birthDay: integer().notNull(),
+  debutYear: integer().notNull(),
+  debutMonth: integer().notNull(),
+  debutDay: integer().notNull(),
+  fanNameLangId: text(),
+  descriptionLangId: text(),
+  commentLangId: text(),
+  youtubeUrl: text(),
+  xUrl: text(),
+  personalityType: integer(),
+  sdPersonalityType: integer(),
+  isPlayable: integer(),
+  assetId: text().notNull(),
+  characterLevelGroupId: text(),
+  skillTreeNodePositionGroupId: text(),
+  isTutorial: integer(),
+  dominantHandType: integer().notNull(),
+  skillTreePointId: text(),
+  bgmAssetId: text(),
+  regularCharacterGroupingNameLangId: text(),
+  color1: text(),
+  color2: text(),
+  color3: text(),
+  color4: text(),
+  color5: text(),
+  order: integer().notNull(),
+  regularCharacterGroupingIds: text(),
+})
+
+export const langCharacter = snakeCase.table(
+  'LangCharacter',
+  {
+    language: text().notNull(),
+    id: text().notNull(),
+    text: text(),
+  },
+  (table) => [primaryKey({ columns: [table.language, table.id] })],
+)

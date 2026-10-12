@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gameLocales } from '../../shared/language.ts'
+import { createGameDatabase } from '../../server/data/database.ts'
 import { transformCharacterGroups } from '../../server/data/converters/character-groups.ts'
 
 let database: DatabaseSync
@@ -40,7 +41,7 @@ afterEach(() => database.close())
 
 describe('character group transform', () => {
   it('maps all localized fields and preserves source member order', () => {
-    const groups = transformCharacterGroups(database)
+    const groups = transformCharacterGroups(createGameDatabase(database))
     expect(groups.map(({ id }) => id)).toEqual(['g-a', 'g-b', 'g-0'])
     expect(groups[0]).toEqual({
       id: 'g-a',
@@ -87,7 +88,7 @@ describe('character group transform', () => {
         'UPDATE LangCharacterGrouping SET text = ? WHERE id = ? AND language = ?',
       )
       .run(value, textId, 'ind')
-    const group = transformCharacterGroups(database)[0]!
+    const group = transformCharacterGroups(createGameDatabase(database))[0]!
     expect(group[field].ind).toBe(value)
   })
 
@@ -100,18 +101,18 @@ describe('character group transform', () => {
         'DELETE FROM LangCharacterGrouping WHERE id = ? AND language = ?',
       )
       .run(textId, 'ind')
-    expect(() => transformCharacterGroups(database)).toThrow(
-      `CharacterGrouping.${field} in row g-a`,
-    )
+    expect(() =>
+      transformCharacterGroups(createGameDatabase(database)),
+    ).toThrow(`CharacterGrouping.${field} in row g-a`)
 
     database
       .prepare(
         'INSERT INTO LangCharacterGrouping (language, id, text) VALUES (?, ?, NULL)',
       )
       .run('ind', textId)
-    expect(() => transformCharacterGroups(database)).toThrow(
-      'Missing ind translation in LangCharacterGrouping',
-    )
+    expect(() =>
+      transformCharacterGroups(createGameDatabase(database)),
+    ).toThrow('Missing ind translation in LangCharacterGrouping')
   })
 
   it('reports malformed member JSON with source context and parser cause', () => {
@@ -120,7 +121,7 @@ describe('character group transform', () => {
     )
     let error: Error | undefined
     try {
-      transformCharacterGroups(database)
+      transformCharacterGroups(createGameDatabase(database))
     } catch (caught) {
       error = caught as Error
     }

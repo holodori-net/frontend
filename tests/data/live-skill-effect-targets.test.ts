@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gameLocales } from '../../shared/language.ts'
+import { createGameDatabase } from '../../server/data/database.ts'
 import { transformLiveSkillEffectTargets } from '../../server/data/converters/live-skill-effect-targets.ts'
 
 let database: DatabaseSync
@@ -36,7 +37,9 @@ afterEach(() => database.close())
 
 describe('live skill effect target transform', () => {
   it('sorts by id and maps numeric, nullable, and localized fields', () => {
-    const targets = transformLiveSkillEffectTargets(database)
+    const targets = transformLiveSkillEffectTargets(
+      createGameDatabase(database),
+    )
     expect(targets.map(({ id }) => id)).toEqual(['target-a', 'target-b'])
     expect(targets[0]).toEqual({
       id: 'target-a',
@@ -69,8 +72,9 @@ describe('live skill effect target transform', () => {
       )
       .run('Deal [attribute] damage -', 'description-a', 'eng')
 
-    const description =
-      transformLiveSkillEffectTargets(database)[0]!.description
+    const description = transformLiveSkillEffectTargets(
+      createGameDatabase(database),
+    )[0]!.description
     expect(description.ind).toBe('')
     expect(description.eng).toBe('Deal [attribute] damage -')
   })
@@ -92,12 +96,12 @@ describe('live skill effect target transform', () => {
           .run('description-a', 'ind')
       }
 
-      expect(() => transformLiveSkillEffectTargets(database)).toThrow(
-        'LiveSkillEffectTarget.description_lang_id in row target-a',
-      )
-      expect(() => transformLiveSkillEffectTargets(database)).toThrow(
-        'Missing ind translation in LangGeneratedLiveSkillEffectTarget',
-      )
+      expect(() =>
+        transformLiveSkillEffectTargets(createGameDatabase(database)),
+      ).toThrow('LiveSkillEffectTarget.description_lang_id in row target-a')
+      expect(() =>
+        transformLiveSkillEffectTargets(createGameDatabase(database)),
+      ).toThrow('Missing ind translation in LangGeneratedLiveSkillEffectTarget')
     },
   )
 })

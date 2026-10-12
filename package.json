@@ -25,6 +25,7 @@
     "@nuxtjs/i18n": "^10.1.0",
     "@primeuix/themes": "^2.0.3",
     "@primevue/nuxt-module": "^4.5.5",
+    "drizzle-orm": "1.0.0-rc.4",
     "nuxt": "^4.1.2",
     "primevue": "^4.5.5",
     "tailwindcss": "^4.3.3",

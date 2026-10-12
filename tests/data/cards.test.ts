@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gameLocales } from '../../shared/language.ts'
+import { createGameDatabase } from '../../server/data/database.ts'
 import { transformCards } from '../../server/data/converters/cards.ts'
 
 describe('card data transform', () => {
@@ -33,7 +34,7 @@ describe('card data transform', () => {
   afterEach(() => database.close())
 
   it('sorts equal-order cards by id and preserves localized fields', () => {
-    const cards = transformCards(database)
+    const cards = transformCards(createGameDatabase(database))
     expect(cards.map(({ id }) => id)).toEqual(['card-a', 'card-b'])
     expect(cards[0]).toMatchObject({
       characterId: 'c1',
@@ -63,14 +64,16 @@ describe('card data transform', () => {
     database.exec(
       "DELETE FROM LangCard WHERE id = 'name-a' AND language = 'ind'",
     )
-    expect(() => transformCards(database)).toThrow(
+    expect(() => transformCards(createGameDatabase(database))).toThrow(
       'Card.name_lang_id in row card-a',
     )
     database.exec("INSERT INTO LangCard VALUES ('ind', 'name-a', NULL)")
-    expect(() => transformCards(database)).toThrow('Missing ind translation')
+    expect(() => transformCards(createGameDatabase(database))).toThrow(
+      'Missing ind translation',
+    )
     database.exec(
       "UPDATE LangCard SET text = '' WHERE id = 'name-a' AND language = 'ind'",
     )
-    expect(transformCards(database)[0]!.name.ind).toBe('')
+    expect(transformCards(createGameDatabase(database))[0]!.name.ind).toBe('')
   })
 })

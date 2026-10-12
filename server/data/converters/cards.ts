@@ -1,63 +1,62 @@
-import type { DatabaseSync } from 'node:sqlite'
-import { localizedText } from '../common/localized-text.ts'
+import { asc, eq, sql } from 'drizzle-orm'
 import type { CardData } from '#shared/game-data/cards'
+import { localizedText } from '../common/localized-text.ts'
+import type { GameDatabase } from '../database.ts'
+import { card, langCard } from '../schema/cards.ts'
 
-export function transformCards(database: DatabaseSync): CardData[] {
+export function transformCards(database: GameDatabase): CardData[] {
   const rows = database
-    .prepare(
-      `SELECT id, character_id, name_lang_id, rarity, attribute_type, asset_id,
-              asset_type, vertical_anchor_type, horizontal_anchor_type, "order",
-              card_level_group_id, card_level_limit_group_id,
-              card_potential_group_id, performance_permil_multiply,
-              technique_permil_multiply, sense_permil_multiply
-       FROM Card ORDER BY "order", id`,
-    )
-    .all() as {
-    id: string
-    character_id: string
-    name_lang_id: string
-    rarity: number
-    attribute_type: number
-    asset_id: string | null
-    asset_type: number
-    vertical_anchor_type: number
-    horizontal_anchor_type: number
-    order: number
-    card_level_group_id: string
-    card_level_limit_group_id: string
-    card_potential_group_id: string
-    performance_permil_multiply: number
-    technique_permil_multiply: number
-    sense_permil_multiply: number
-  }[]
-  const nameStatement = database.prepare(
-    'SELECT language, text FROM LangCard WHERE id = ?',
-  )
+    .select({
+      id: card.id,
+      characterId: card.characterId,
+      nameLangId: card.nameLangId,
+      rarity: card.rarity,
+      attributeType: card.attributeType,
+      assetId: card.assetId,
+      assetType: card.assetType,
+      verticalAnchorType: card.verticalAnchorType,
+      horizontalAnchorType: card.horizontalAnchorType,
+      order: card.order,
+      cardLevelGroupId: card.cardLevelGroupId,
+      cardLevelLimitGroupId: card.cardLevelLimitGroupId,
+      cardPotentialGroupId: card.cardPotentialGroupId,
+      performancePermilMultiply: card.performancePermilMultiply,
+      techniquePermilMultiply: card.techniquePermilMultiply,
+      sensePermilMultiply: card.sensePermilMultiply,
+    })
+    .from(card)
+    .orderBy(asc(card.order), asc(card.id))
+    .all()
+  const nameQuery = database
+    .select({ language: langCard.language, text: langCard.text })
+    .from(langCard)
+    .where(eq(langCard.id, sql.placeholder('id')))
+    .prepare()
 
   return rows.map((row) => ({
     id: row.id,
-    characterId: row.character_id,
-    name: localizedText(nameStatement, row.name_lang_id, {
+    characterId: row.characterId,
+    name: localizedText(nameQuery.all({ id: row.nameLangId }), row.nameLangId, {
       languageTable: 'LangCard',
       table: 'Card',
       field: 'name_lang_id',
       rowId: row.id,
     }),
     rarity: row.rarity,
-    attributeType: row.attribute_type,
-    assetId: row.asset_id,
-    assetType: row.asset_type,
-    verticalAnchorType: row.vertical_anchor_type,
-    horizontalAnchorType: row.horizontal_anchor_type,
+    attributeType: row.attributeType,
+    assetId: row.assetId,
+    assetType: row.assetType,
+    verticalAnchorType: row.verticalAnchorType,
+    horizontalAnchorType: row.horizontalAnchorType,
     order: row.order,
     growth: {
-      levelGroupId: row.card_level_group_id,
-      levelLimitGroupId: row.card_level_limit_group_id,
-      potentialGroupId: row.card_potential_group_id,
+      levelGroupId: row.cardLevelGroupId,
+      levelLimitGroupId: row.cardLevelLimitGroupId,
+      potentialGroupId: row.cardPotentialGroupId,
       weightsPermil: {
-        performance: row.performance_permil_multiply,
-        technique: row.technique_permil_multiply,
-        sense: row.sense_permil_multiply,
+        performance: row.performancePermilMultiply,
+        technique: row.techniquePermilMultiply,
+        sense: row.sensePermilMultiply,
       },
     },
   }))

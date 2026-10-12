@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gameLocales } from '../../shared/language.ts'
+import { createGameDatabase } from '../../server/data/database.ts'
 import { transformCharacters } from '../../server/data/converters/characters.ts'
 
 describe('character transform', () => {
@@ -81,7 +82,7 @@ describe('character transform', () => {
   afterEach(() => database.close())
 
   it('exports all included fields, six-language text, and sorted rows', () => {
-    const characters = transformCharacters(database)
+    const characters = transformCharacters(createGameDatabase(database))
     expect(characters.map(({ id }) => id)).toEqual(['c1', 'c2'])
     expect(characters[0]).toEqual({
       id: 'c1',
@@ -137,7 +138,7 @@ describe('character transform', () => {
   })
 
   it('preserves nulls, false flags, zero dates, and empty group arrays', () => {
-    const character = transformCharacters(database)[1]!
+    const character = transformCharacters(createGameDatabase(database))[1]!
     expect(character).toMatchObject({
       productionId: null,
       birthday: { month: 0, day: 0 },
@@ -169,21 +170,59 @@ describe('character transform', () => {
     database.exec(
       "UPDATE Character SET is_playable = NULL, is_tutorial = NULL WHERE id = 'c2'",
     )
-    expect(transformCharacters(database)[1]!.isPlayable).toBe(false)
-    expect(transformCharacters(database)[1]!.isTutorial).toBeNull()
+    expect(
+      transformCharacters(createGameDatabase(database))[1]!.isPlayable,
+    ).toBe(false)
+    expect(
+      transformCharacters(createGameDatabase(database))[1]!.isTutorial,
+    ).toBeNull()
+  })
+
+  it('binds localized text IDs as values, including an empty optional ID', () => {
+    const requiredId = "name' OR 1=1 --"
+    const optionalId = ''
+    database
+      .prepare(
+        'UPDATE Character SET name_lang_id = ?, fan_name_lang_id = ? WHERE id = ?',
+      )
+      .run(requiredId, optionalId, 'c1')
+
+    const insertTranslation = database.prepare(
+      'INSERT INTO LangCharacter (language, id, text) VALUES (?, ?, ?)',
+    )
+    for (const locale of gameLocales) {
+      insertTranslation.run(
+        locale,
+        requiredId,
+        locale === 'ind' ? '' : `${locale} bound name`,
+      )
+      insertTranslation.run(
+        locale,
+        optionalId,
+        locale === 'eng' ? '' : `${locale} empty-ID fan name`,
+      )
+    }
+
+    const character = transformCharacters(createGameDatabase(database))[0]!
+    expect(character.name.eng).toBe('eng bound name')
+    expect(character.name.ind).toBe('')
+    expect(character.fanName?.eng).toBe('')
+    expect(character.fanName?.ind).toBe('ind empty-ID fan name')
   })
 
   it('preserves explicit empty group ids and reports malformed JSON cause', () => {
     database.exec(
       "UPDATE Character SET regular_character_grouping_ids = '[]' WHERE id = 'c1'",
     )
-    expect(transformCharacters(database)[0]!.regularGroupIds).toEqual([])
+    expect(
+      transformCharacters(createGameDatabase(database))[0]!.regularGroupIds,
+    ).toEqual([])
 
     database.exec(
       "UPDATE Character SET regular_character_grouping_ids = '{' WHERE id = 'c1'",
     )
     try {
-      transformCharacters(database)
+      transformCharacters(createGameDatabase(database))
       throw new Error('Expected malformed JSON to fail')
     } catch (error) {
       expect(error).toMatchObject({
@@ -210,14 +249,14 @@ describe('character transform', () => {
       database
         .prepare('DELETE FROM LangCharacter WHERE id = ? AND language = ?')
         .run(id, 'ind')
-      expect(() => transformCharacters(database)).toThrow(
+      expect(() => transformCharacters(createGameDatabase(database))).toThrow(
         `Character.${field} in row c1`,
       )
 
       database
         .prepare('INSERT INTO LangCharacter VALUES (?, ?, NULL)')
         .run('ind', id)
-      expect(() => transformCharacters(database)).toThrow(
+      expect(() => transformCharacters(createGameDatabase(database))).toThrow(
         `Missing ind translation in LangCharacter for ${id} (Character.${field} in row c1)`,
       )
     },

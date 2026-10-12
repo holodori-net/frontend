@@ -1,5 +1,6 @@
 import { DatabaseSync } from 'node:sqlite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { createGameDatabase } from '../../server/data/database.ts'
 import { transformCardGrowth } from '../../server/data/converters/card-growth.ts'
 
 describe('card growth data transform', () => {
@@ -29,7 +30,7 @@ describe('card growth data transform', () => {
   afterEach(() => database.close())
 
   it('keeps unused groups, parses numeric text, and sorts by group and stage', () => {
-    expect(transformCardGrowth(database)).toEqual({
+    expect(transformCardGrowth(createGameDatabase(database))).toEqual({
       levels: {
         shared: [
           {
@@ -92,7 +93,9 @@ describe('card growth data transform', () => {
 
   it('returns an empty potential upgrade item dictionary when the source has no rows', () => {
     database.exec('DELETE FROM CardPotentialUpgradeItem')
-    expect(transformCardGrowth(database).potentialUpgradeItems).toEqual({})
+    expect(
+      transformCardGrowth(createGameDatabase(database)).potentialUpgradeItems,
+    ).toEqual({})
   })
 
   it('includes the source row identity and parse cause for malformed consumptions JSON', () => {
@@ -102,7 +105,7 @@ describe('card growth data transform', () => {
 
     let error: unknown
     try {
-      transformCardGrowth(database)
+      transformCardGrowth(createGameDatabase(database))
     } catch (caught) {
       error = caught
     }
