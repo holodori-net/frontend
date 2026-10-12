@@ -1,7 +1,6 @@
 import type { DatabaseSync } from 'node:sqlite'
-import type { LiveSkillEffectTargetData } from '../../../shared/game-data/live-skill-effect-targets.ts'
+import type { LiveSkillEffectTargetData } from '#shared/game-data/live-skill-effect-targets'
 import { localizedText } from '../common/localized-text.ts'
-import type { TransformModule } from '../contract.ts'
 
 export function transformLiveSkillEffectTargets(
   database: DatabaseSync,
@@ -39,14 +38,4 @@ export function transformLiveSkillEffectTargets(
       rowId: row.id,
     }),
   }))
-}
-
-export const liveSkillEffectTargetsTransform: TransformModule<
-  LiveSkillEffectTargetData[]
-> = {
-  fileName: 'live-skill-effect-targets.json',
-  run(database) {
-    const data = transformLiveSkillEffectTargets(database)
-    return { data, summary: `${data.length} live skill effect targets` }
-  },
 }

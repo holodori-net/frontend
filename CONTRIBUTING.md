@@ -2,39 +2,30 @@
 
 ## Development
 
-Use Node.js 24 or newer with pnpm. Install dependencies and run the development server:
+Use Node.js 24 or newer with pnpm and `curl`. Run commands from the repository root. Generate and preview the static site:
 
 ```sh
 pnpm install
-pnpm dev
+pnpm data:fetch
+pnpm generate
+pnpm preview
 ```
 
 Fetching the database requires `curl`. Run `pnpm data:fetch` to download it to `.data/master.sqlite`, which is ignored by Git. Running the command again downloads and overwrites the file. If `curl` fails, the command returns a nonzero status and removes any incomplete output.
 
-Convert the downloaded database into website data:
-
-```sh
-pnpm data:fetch
-pnpm data:transform
-```
-
-`data:transform` reads `.data/master.sqlite` in read-only mode and overwrites `public/data/characters.json`, `public/data/cards.json`, `public/data/card-growth.json`, `public/data/character-groups.json`, and `public/data/live-skill-effect-targets.json`. These generated files are ignored by Git. Characters contain names, short names, fan names, descriptions, comments, and regular group labels in all configured game languages. Optional character text IDs map to null when absent; when a text ID is present, missing or null translations fail conversion with their source table, field, row ID, language, and text ID. Cards contain names, and character groups contain names and descriptions, in all configured game languages. Characters also include birthday and debut date parts, profile links, numeric enums, costume and asset IDs, source colors, and growth references. Nullable character fields retain null; `isPlayable` maps null to false and `isTutorial` preserves null. Date parts, including zero values, retain their source values. Group membership arrays retain source order; null arrays become empty arrays. Character groups retain all source rows and sort by `order`, then `id`. Growth data retains all source groups, keyed by their IDs. All data is transformed before output files are written. The command reports each module's progress, output path, and counts. Conversion and write errors identify the failing module or output path and retain their underlying cause; the command returns a nonzero status on failure. Fetching and transforming are standalone commands.
-
-Growth levels include cumulative experience thresholds and live deck power values. Level limits include resource consumptions with numeric resource types and quantities. Nullable growth fields retain null; consumption arrays retain their source order. Invalid consumption JSON reports the source field, group ID, and limit break count. Potential effects retain their source values. Potential upgrade items are keyed by card rarity and reference `Item.id` through `itemId`.
-
-Live skill effect targets retain all source rows, sorted by `id`, with numeric target types, target counts, character and character group IDs, and numeric card attribute types. Nullable fields retain null. Descriptions come from `LangGeneratedLiveSkillEffectTarget` in all configured game languages and retain source text and markup. Missing or null translations fail conversion with the source table, field, row ID, language, and text ID.
+The character page reads SQLite during prerendering and stores its list data in Nuxt's page payload. The reader opens `.data/master.sqlite` in read-only mode, converts characters, selects the list fields, and closes the database. It reports the source path and character count; read and conversion failures retain their underlying cause and stop generation.
 
 See [knowledge/README.md](knowledge/README.md) for the data dictionary, relationships, and field conversion status. Update the relevant knowledge documents when changing data mappings.
 
-### Data transform modules
+### Game data layer
 
-Each domain owns its SQL, source row types, and field mappings in `scripts/data/transforms/<domain>.ts`, output types in `shared/game-data/<domain>.ts`, and tests in `tests/data/<domain>.test.ts`. Tests create an independent in-memory database with the tables and fixtures needed by that domain.
+Each domain owns its SQL, source row types, and field mappings in `server/data/converters/<domain>.ts`, return types in `shared/game-data/<domain>.ts`, and tests in `tests/data/<domain>.test.ts`. Tests create an independent in-memory database with the tables and fixtures needed by that domain.
 
-Modules implement `TransformModule` from `scripts/data/contract.ts`, declaring a JSON filename and returning data with a count summary. Register modules explicitly in `scripts/data/registry.ts`. The CLI owns database lifetime and exit status; `scripts/data/runner.ts` runs all conversions before writing formatted JSON and reporting each output.
+Converters accept a `DatabaseSync` and return complete domain data. Page readers own database lifetime and explicitly select the fields needed by their pages. The character reader lives in `server/data/character-list.ts`. Data modules use ordinary functions with explicit imports; the page connects the reader to Nuxt through its server branch.
 
-Shared helpers live in `scripts/data/common/`. Each domain prepares its own language query and passes the statement and source context to the localization helper. Cross-domain references use source IDs and output types.
+Shared helpers live in `server/data/common/`. Each domain prepares its own language query and passes the statement and source context to the localization helper. Cross-domain references use source IDs and return types.
 
-When assigning parallel work, keep each domain's transform, types, tests, and data dictionary under one owner. Coordinate changes to the shared contract, helpers, runner, registry, and knowledge index with the integration owner. Data typecheck includes all domain source and test files. Scripts use explicit `.ts` import paths and `import type` for types.
+When assigning parallel work, keep each domain's transform, types, tests, and data dictionary under one owner. Coordinate changes to shared helpers, page readers, and the knowledge index with the integration owner. Data typecheck includes all domain source and test files. Data modules use explicit `.ts` import paths and `import type` for types. Runtime imports from the shared directory use Nuxt's `#shared` alias, which Vitest also resolves.
 
 ## Checks
 
@@ -45,7 +36,7 @@ pnpm typecheck
 pnpm lint
 pnpm format:check
 pnpm test
-pnpm build
+pnpm generate
 ```
 
 Build, generate, and typecheck regenerate Nuxt's type definitions after generating styles. Typecheck covers Nuxt, service worker, and data transformation sources. Vue Router is a direct dependency so Nuxt's Volar plugin can be resolved by the project. When validating in a container, use separate generated outputs or mount the repository at the same absolute path used by the host so generated TypeScript configuration resolves plugins consistently.
@@ -54,7 +45,7 @@ Vite is a direct development dependency aligned with Nuxt's builder. The pnpm pa
 
 Use `pnpm generate` to verify the static site output, manifest, and service worker. The generated language pages include home, cards, characters, and settings for each site and game language combination. PWA behavior is available from HTTPS or localhost. Offline page selections are managed by the custom service worker in `service-worker/sw.ts`; keep its route and payload caching behavior aligned with Nuxt's generated `_payload.json` files.
 
-The character list reads `/api/characters.json`, backed by generated `public/data/characters.json` through Nitro server assets. Run `pnpm data:transform` before generating the site. The data endpoint is prerendered with the pages; missing character data fails generation. Page payloads retain names for offline use; external CDN icons use placeholders when unavailable.
+The character page uses `useAsyncData('character-list', ...)` and dynamically imports its reader in the server branch. Its payload contains `id`, `name`, `productionId`, `assetId`, `isPlayable`, `order`, and `color1` for all characters, including names in every configured game language. Hydration and static navigation reuse the generated payload. Missing page data is an error; external CDN icons use placeholders when unavailable. Verify the generated pages with a static server, including navigation from another page and offline use.
 
 Offline synchronization uses bounded concurrent downloads and aborts stalled transfers. Each selection retains its application scripts, styles, and locale resources. Progress messages keep the worker channel open until completion; test interrupted transfers and preservation of the previous selection when changing this protocol.
 

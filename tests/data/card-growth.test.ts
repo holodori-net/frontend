@@ -1,9 +1,6 @@
 import { DatabaseSync } from 'node:sqlite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import {
-  cardGrowthTransform,
-  transformCardGrowth,
-} from '../../scripts/data/transforms/card-growth.ts'
+import { transformCardGrowth } from '../../server/data/converters/card-growth.ts'
 
 describe('card growth data transform', () => {
   let database: DatabaseSync
@@ -96,10 +93,6 @@ describe('card growth data transform', () => {
   it('returns an empty potential upgrade item dictionary when the source has no rows', () => {
     database.exec('DELETE FROM CardPotentialUpgradeItem')
     expect(transformCardGrowth(database).potentialUpgradeItems).toEqual({})
-
-    expect(cardGrowthTransform.run(database).summary).toContain(
-      '0 potential upgrade item rows',
-    )
   })
 
   it('includes the source row identity and parse cause for malformed consumptions JSON', () => {

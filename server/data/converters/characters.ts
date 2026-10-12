@@ -1,9 +1,8 @@
 import type { DatabaseSync } from 'node:sqlite'
-import type { CharacterData } from '../../../shared/game-data/characters.ts'
-import type { LocalizedText } from '../../../shared/game-data/localized-text.ts'
+import type { CharacterData } from '#shared/game-data/characters'
+import type { LocalizedText } from '#shared/game-data/localized-text'
 import { parseJsonArray } from '../common/json-array.ts'
 import { localizedText } from '../common/localized-text.ts'
-import type { TransformModule } from '../contract.ts'
 
 type CharacterRow = {
   id: string
@@ -130,12 +129,4 @@ export function transformCharacters(database: DatabaseSync): CharacterData[] {
       skillTreePointId: row.skill_tree_point_id,
     },
   }))
-}
-
-export const charactersTransform: TransformModule<CharacterData[]> = {
-  fileName: 'characters.json',
-  run(database) {
-    const data = transformCharacters(database)
-    return { data, summary: `${data.length} characters` }
-  },
 }

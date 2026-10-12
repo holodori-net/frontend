@@ -35,3 +35,8 @@ export interface CharacterData {
     skillTreePointId: string | null
   }
 }
+
+export type CharacterListItemData = Pick<
+  CharacterData,
+  'id' | 'name' | 'productionId' | 'assetId' | 'isPlayable' | 'order' | 'color1'
+>

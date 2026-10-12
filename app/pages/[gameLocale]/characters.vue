@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { isGameLocale, type GameLocale } from '#shared/language'
-import type { CharacterData } from '#shared/game-data/characters'
+import type { CharacterListItemData } from '#shared/game-data/characters'
 import { getCharacterSections } from '#shared/game-data/character-list'
 
 const route = useRoute()
@@ -13,19 +13,32 @@ definePageMeta({
 
 const gameLocale = computed(() => String(route.params.gameLocale) as GameLocale)
 const showUnplayableCharacters = ref(false)
-const {
-  data: characters,
-  error,
-  pending,
-  refresh,
-} = await useFetch<CharacterData[]>('/api/characters.json')
-watch(error, (fetchError) => {
-  if (fetchError) {
-    console.warn('Holodori character data load failed', fetchError)
-  }
-})
+const { data: characters, error } = await useAsyncData<CharacterListItemData[]>(
+  'character-list',
+  async () => {
+    if (import.meta.server) {
+      const { readCharacterList } =
+        await import('~~/server/data/character-list')
+      return readCharacterList()
+    }
+
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Character data is unavailable',
+      fatal: true,
+    })
+  },
+)
+if (error.value) throw error.value
+if (characters.value === null || characters.value === undefined) {
+  throw createError({
+    statusCode: 500,
+    statusMessage: 'Character data is unavailable',
+    fatal: true,
+  })
+}
 const visibleCharacters = computed(() =>
-  (characters.value ?? []).filter(
+  characters.value!.filter(
     (character) => showUnplayableCharacters.value || character.isPlayable,
   ),
 )
@@ -57,23 +70,7 @@ const hasCharacters = computed(() =>
       </div>
 
       <p
-        v-if="pending"
-        class="py-16 text-center text-sm text-muted-color"
-        role="status"
-      >
-        {{ t('charactersLoading') }}
-      </p>
-      <div
-        v-else-if="error"
-        class="grid justify-items-center gap-4 py-16 text-center"
-      >
-        <p class="m-0 text-sm text-muted-color" role="alert">
-          {{ t('charactersLoadError') }}
-        </p>
-        <Button :label="t('retry')" severity="secondary" @click="refresh()" />
-      </div>
-      <p
-        v-else-if="!hasCharacters"
+        v-if="!hasCharacters"
         class="py-16 text-center text-sm text-muted-color"
       >
         {{ t('charactersEmpty') }}

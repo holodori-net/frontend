@@ -1,7 +1,7 @@
 import type { StatementSync } from 'node:sqlite'
-import { gameLocales } from '../../../shared/language.ts'
-import type { LocalizedText } from '../../../shared/game-data/localized-text.ts'
-import type { SourceFieldContext } from '../contract.ts'
+import { gameLocales } from '#shared/language'
+import type { LocalizedText } from '#shared/game-data/localized-text'
+import type { SourceFieldContext } from './source-context.ts'
 
 interface LocalizedTextContext extends SourceFieldContext {
   languageTable: string

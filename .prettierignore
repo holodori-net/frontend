@@ -2,6 +2,5 @@ node_modules
 .nuxt
 .output
 .data
-public/data/*
 app/assets/css/generated.css
 pnpm-lock.yaml

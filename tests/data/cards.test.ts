@@ -1,7 +1,7 @@
 import { DatabaseSync } from 'node:sqlite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gameLocales } from '../../shared/language.ts'
-import { transformCards } from '../../scripts/data/transforms/cards.ts'
+import { transformCards } from '../../server/data/converters/cards.ts'
 
 describe('card data transform', () => {
   let database: DatabaseSync

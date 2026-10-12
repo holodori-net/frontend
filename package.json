@@ -7,7 +7,6 @@
   },
   "scripts": {
     "data:fetch": "curl --fail --location --create-dirs --progress-bar --remove-on-error --output .data/master.sqlite https://github.com/holodori-net/android-database/releases/latest/download/master.sqlite",
-    "data:transform": "node scripts/data/cli.ts",
     "styles:generate": "node scripts/styles/cli.ts",
     "dev": "node scripts/styles/cli.ts && nuxt dev",
     "build": "node scripts/styles/cli.ts && nuxt prepare && nuxt build",

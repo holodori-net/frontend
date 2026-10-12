@@ -1,8 +1,7 @@
 import type { DatabaseSync } from 'node:sqlite'
-import type { CharacterGroupData } from '../../../shared/game-data/character-groups.ts'
+import type { CharacterGroupData } from '#shared/game-data/character-groups'
 import { localizedText } from '../common/localized-text.ts'
 import { parseJsonArray } from '../common/json-array.ts'
-import type { TransformModule } from '../contract.ts'
 
 export function transformCharacterGroups(
   database: DatabaseSync,
@@ -53,12 +52,4 @@ export function transformCharacterGroups(
     color2: row.color2,
     order: row.order,
   }))
-}
-
-export const characterGroupsTransform: TransformModule<CharacterGroupData[]> = {
-  fileName: 'character-groups.json',
-  run(database) {
-    const data = transformCharacterGroups(database)
-    return { data, summary: `${data.length} character groups` }
-  },
 }

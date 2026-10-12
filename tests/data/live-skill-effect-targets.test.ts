@@ -1,10 +1,7 @@
 import { DatabaseSync } from 'node:sqlite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gameLocales } from '../../shared/language.ts'
-import {
-  liveSkillEffectTargetsTransform,
-  transformLiveSkillEffectTargets,
-} from '../../scripts/data/transforms/live-skill-effect-targets.ts'
+import { transformLiveSkillEffectTargets } from '../../server/data/converters/live-skill-effect-targets.ts'
 
 let database: DatabaseSync
 
@@ -103,13 +100,4 @@ describe('live skill effect target transform', () => {
       )
     },
   )
-
-  it('exposes the generated data module metadata', () => {
-    expect(liveSkillEffectTargetsTransform.fileName).toBe(
-      'live-skill-effect-targets.json',
-    )
-    expect(liveSkillEffectTargetsTransform.run(database)).toMatchObject({
-      summary: '2 live skill effect targets',
-    })
-  })
 })

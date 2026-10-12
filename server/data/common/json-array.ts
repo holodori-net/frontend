@@ -1,4 +1,4 @@
-import type { SourceFieldContext } from '../contract.ts'
+import type { SourceFieldContext } from './source-context.ts'
 
 export function parseJsonArray<T = string>(
   value: string | null,

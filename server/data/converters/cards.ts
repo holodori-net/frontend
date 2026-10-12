@@ -1,7 +1,6 @@
 import type { DatabaseSync } from 'node:sqlite'
-import type { TransformModule } from '../contract.ts'
 import { localizedText } from '../common/localized-text.ts'
-import type { CardData } from '../../../shared/game-data/cards.ts'
+import type { CardData } from '#shared/game-data/cards'
 
 export function transformCards(database: DatabaseSync): CardData[] {
   const rows = database
@@ -62,12 +61,4 @@ export function transformCards(database: DatabaseSync): CardData[] {
       },
     },
   }))
-}
-
-export const cardsTransform: TransformModule<CardData[]> = {
-  fileName: 'cards.json',
-  run(database) {
-    const data = transformCards(database)
-    return { data, summary: `${data.length} cards` }
-  },
 }

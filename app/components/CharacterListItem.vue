@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { GameLocale } from '#shared/language'
-import type { CharacterData } from '#shared/game-data/characters'
+import type { CharacterListItemData } from '#shared/game-data/characters'
 import { getCharacterIconUrl } from '#shared/game-data/character-list'
 
 const props = defineProps<{
-  character: CharacterData
+  character: CharacterListItemData
   gameLocale: GameLocale
 }>()
 

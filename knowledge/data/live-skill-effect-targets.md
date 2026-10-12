@@ -1,8 +1,8 @@
-# Live 技能效果目標資料字典與轉存對照
+# Live 技能效果目標資料字典與轉換對照
 
-輸出為 `public/data/live-skill-effect-targets.json`，保留全部目標資料並依 `id` 排序。角色與群組關聯見 [characters.md](characters.md) 及 [character-groups.md](character-groups.md)。來源與適用快照見[知識索引](../README.md)。
+`transformLiveSkillEffectTargets(database)` 回傳 `LiveSkillEffectTargetData[]`，保留全部目標資料並依 `id` 排序。角色與群組關聯見 [characters.md](characters.md) 及 [character-groups.md](character-groups.md)。來源與適用快照見[知識索引](../README.md)。
 
-欄位名稱、SQLite 型別、主鍵、schema 宣告的關聯與轉存對應均為 **CONFIRMED**。宣告的關聯不等同 SQLite 外鍵約束。`✓` 表示直接輸出或經查表產生輸出。
+欄位名稱、SQLite 型別、主鍵、schema 宣告的關聯與轉換對應均為 **CONFIRMED**。宣告的關聯不等同 SQLite 外鍵約束。`✓` 表示已直接轉換或經查表產生回傳值。
 
 ## LiveSkillEffectTarget
 
@@ -10,7 +10,7 @@
 
 **CONFIRMED**：主鍵為 `id`。目前快照的目標類型為 SELF、ALL、CHARACTER_GROUPING 與 ATTRIBUTE；`character_id` 皆為 null。
 
-| 轉存 | 來源欄位                | 型別                   | 意義            | 關聯                                    | 輸出對應                 | 備註                    |
+| 轉換 | 來源欄位                | 型別                   | 意義            | 關聯                                    | 回傳對應                 | 備註                    |
 | ---- | ----------------------- | ---------------------- | --------------- | --------------------------------------- | ------------------------ | ----------------------- |
 | ✓    | `id`                    | TEXT                   | 目標 ID         | —                                       | `[].id`                  | 保留來源 ID             |
 | ✓    | `type`                  | INTEGER（enum）        | 目標類型        | `enums.LiveSkillEffectTargetType`       | `[].type`                | 保留數值；見枚舉        |
@@ -26,9 +26,9 @@
 
 **CONFIRMED**：主鍵為 `language, id`。每種設定語言皆須有非 null 翻譯；缺列或 null 使轉換失敗並回報來源表、欄位、目標 ID、語言與文字 ID。空字串與文字標記原樣保留。
 
-| 轉存 | 來源欄位   | 型別        | 意義             | 關聯                                        | 輸出對應                    | 備註                 |
+| 轉換 | 來源欄位   | 型別        | 意義             | 關聯                                        | 回傳對應                    | 備註                 |
 | ---- | ---------- | ----------- | ---------------- | ------------------------------------------- | --------------------------- | -------------------- |
-| ✓    | `language` | TEXT        | 遊戲語言代碼     | —                                           | `[].description` 的語言 key | 僅輸出設定的六種語言 |
+| ✓    | `language` | TEXT        | 遊戲語言代碼     | —                                           | `[].description` 的語言 key | 僅回傳設定的六種語言 |
 | ✓    | `id`       | TEXT        | 目標描述文字 ID  | `LiveSkillEffectTarget.description_lang_id` | `[].description` 的查表鍵   | —                    |
 | ✓    | `text`     | TEXT / null | 該語言的目標描述 | —                                           | `[].description[language]`  | 保留來源文字與標記   |
 

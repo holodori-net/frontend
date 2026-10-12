@@ -23,6 +23,7 @@
 - 保留主題 ID `15-sakura-miko` 的已儲存偏好相容性。匯入其他來源時，以明確對照連結既有 memberId 與來源角色 ID。
 - 目前素材用途為 `avatar` 與 `motifMain`；新增用途集中定義，選用素材缺失時提供 fallback。
 - 角色列表的 production 分區與 `icon` 素材用途集中在 `shared/game-data/character-list.ts`；圖示缺失時保留角色名稱與占位。
+- 遊戲資料層位於 `server/data/`，共用資料型別位於 `shared/game-data/`。角色頁於 prerender 時直接唯讀讀取 `.data/master.sqlite`；converter 回傳完整資料，reader 選取列表欄位交由 Nuxt 保存為頁面 payload。生成失敗時須保留來源錯誤。
 - 主題背景須維持亮暗模式可讀、低對比且不遮擋內容。樣式生成流程與 PrimeVue 元件相依設定見 CONTRIBUTING。
 
 ## PWA 與離線

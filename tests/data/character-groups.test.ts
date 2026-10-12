@@ -1,7 +1,7 @@
 import { DatabaseSync } from 'node:sqlite'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { gameLocales } from '../../shared/language.ts'
-import { transformCharacterGroups } from '../../scripts/data/transforms/character-groups.ts'
+import { transformCharacterGroups } from '../../server/data/converters/character-groups.ts'
 
 let database: DatabaseSync
 

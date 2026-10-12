@@ -25,7 +25,6 @@ const contentPages = sitePages.map((page) =>
 )
 
 const prerenderRoutes = [
-  '/api/characters.json',
   ...siteLocales.flatMap((siteLocale) =>
     gameLocales.flatMap((gameLocale) =>
       contentPages.map((page) => `/${siteLocale}/${gameLocale}${page}`),
@@ -188,12 +187,6 @@ export default defineNuxtConfig({
     },
   },
   nitro: {
-    serverAssets: [
-      {
-        baseName: 'game-data',
-        dir: fileURLToPath(new URL('./public/data', import.meta.url)),
-      },
-    ],
     prerender: {
       routes: prerenderRoutes,
       failOnError: true,

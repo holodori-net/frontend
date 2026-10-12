@@ -1,7 +1,6 @@
 import type { DatabaseSync } from 'node:sqlite'
-import type { TransformModule } from '../contract.ts'
 import { parseJsonArray } from '../common/json-array.ts'
-import type { CardGrowthData } from '../../../shared/game-data/card-growth.ts'
+import type { CardGrowthData } from '#shared/game-data/card-growth'
 
 export function transformCardGrowth(database: DatabaseSync): CardGrowthData {
   const levels = database
@@ -99,15 +98,4 @@ function groupRows<T extends { group_id: string }, Result>(
     ;(groups[row.group_id] ??= []).push(map(row))
   }
   return groups
-}
-
-export const cardGrowthTransform: TransformModule<CardGrowthData> = {
-  fileName: 'card-growth.json',
-  run(database) {
-    const data = transformCardGrowth(database)
-    return {
-      data,
-      summary: `${Object.keys(data.levels).length} level groups, ${Object.keys(data.levelLimits).length} level limit groups, ${Object.keys(data.potentials).length} potential groups, ${Object.keys(data.potentialUpgradeItems).length} potential upgrade item rows`,
-    }
-  },
 }

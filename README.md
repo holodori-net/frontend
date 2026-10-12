@@ -28,18 +28,18 @@ The site checks for updates when a page is opened. An update ready during that c
 
 ## Run locally
 
-Install dependencies and prepare game data, then start the development server. Fetching the database requires `curl`:
+Use Node.js 24 or newer with pnpm and `curl`. From the repository root, download the game database, generate the static site, and preview it:
 
 ```sh
 pnpm install
 pnpm data:fetch
-pnpm data:transform
-pnpm dev
+pnpm generate
+pnpm preview
 ```
 
 ## Build and deploy
 
-Generate the static site after preparing game data:
+Generate the static site from the downloaded `.data/master.sqlite`:
 
 ```sh
 pnpm generate

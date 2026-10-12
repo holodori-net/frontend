@@ -1,7 +1,6 @@
 .nuxt
 .output
 .data
-public/data/*
 app/assets/css/generated.css
 public/sitemap.xml
 public/robots.txt
