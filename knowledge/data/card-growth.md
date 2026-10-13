@@ -57,7 +57,24 @@ CardPotentialEffectType 的 schema 定義如下（**CONFIRMED**）：
 | 4   | ALL_PARAMETER_UP_PERMIL_UP：全三圍千分比效果           |
 | 5   | SKILL_TREE_CONNECT_EFFECT_LEVEL_UP：技能樹連結效果等級 |
 
-綻放資料保存原始階段與效果值。三圍計算與效果套用由後續計算程式處理。
+綻放資料保存原始階段與效果值。卡片列表由 `server/data/card-list-stats.ts` 計算滿養成三圍。
+
+## 列表的滿養成三圍
+
+**CONFIRMED**：最高等級取卡片 `levelLimitGroupId` 對應的 `CardLevelLimit.level_limit` 最大值，再以該等級讀取 `levelGroupId` 對應的 `CardLevel.parameter_base_value`。目前三星／四星／五星的特訓上限為 60／70／80 級；成長表另包含更高等級的列。
+
+滿綻放加成累加該 `potentialGroupId` 全部 `effect_type=4` 的 `value`。目前三星在第 2／5 階段分別提供 50‰／100‰，總計 150‰；四星與五星各為 100‰。
+
+單項計算順序為 `base / 1000 × weight × (1 + bonus / 1000)`。`base`、`weight`、整數累加後的 `bonus` 轉為 float32，每次除法、乘法與加法也以 `Math.fround` 保留 float32 精度，最後各自向上取整，三項整數相加為合計。特化圍取來源 `weightsPermil` 的最大項；並列時保留全部最高項。
+
+| 卡片 ID                     | 等級 | base  | 權重（表現力／技巧／品味） | 綻放 | 三圍              | 合計  |
+| --------------------------- | ---- | ----- | -------------------------- | ---- | ----------------- | ----- |
+| `card-00015-3-nrml-0003-00` | 60   | 15412 | 400／306／294              | 150‰ | 7090／5424／5211  | 17725 |
+| `card-00015-5-uniq-0003-00` | 80   | 23512 | 297／263／440              | 100‰ | 7682／6803／11380 | 25865 |
+
+計算範圍為卡片自身的等級、特訓與綻放。帳號技能樹、隊伍與收藏效果在其他計算層處理。
+
+來源：`.data/master.sqlite` 的 `Card`、`CardLevel`、`CardLevelLimit`、`CardPotential`；客戶端 `../extraction/work/decompile/05-annotate-decompiled-code/annotated-csharp/Vision.Common.Core/Vision/Common/Data/CardStatus.cs` 的建構式及 `GetPotentialUpgradeBonusPermil`。`../extraction/work/decompile/05-annotate-decompiled-code/methods.json` 記錄該建構式 RVA `0xE7B8C98`（file offset `0xE7B4C98`）。精度與向上取整可由對應 ARM64 `libil2cpp.so` 的單精度算術與 `FRINTP` 指令重現；反編譯 C# 含未還原指令，數值計算以原生指令順序為準。跨系統研究見 [組隊與分數模擬](../../../knowledge/team-simulator.md)。
 
 ## CardPotentialUpgradeItem
 
