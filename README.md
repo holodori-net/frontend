@@ -10,6 +10,16 @@ The pages `/`, `/cards`, `/characters`, and `/settings` select languages from sa
 
 Changing either language keeps the current page, query parameters, and fragment.
 
+## Cards
+
+Open **Cards** to browse full card art, names, rarity, attribute, and stats. Card and character names follow the game content language; labels follow the site language. Rarity uses a vertical stack of animated stars matching the star count. Attributes and specializations use game icons with translated names in tooltips. Specialization icons indicate the card's highest source weight. Stats compare each card at maximum level, special training, and blooming, using only the card's own stats.
+
+The gallery wraps to fit the window. Attribute and rarity appear over the full card art, specialization appears beside the card name, and the labeled stats are displayed below the names with total on the right.
+
+Search matches card and character names in every game language. Combine character, rarity, attribute, and specialization filters; multiple selections within a filter match any selected value. Character filter options follow character order. Rarity, attribute, and specialization choices show their icons alongside names. Sort by source order, rarity, character order, Performance, Technique, Sense, or total in either direction; stat choices also show their icons. All matching cards are displayed together. **Reset** restores the default filters and descending source order.
+
+Search, filters, and sorting are saved in the URL and restored when reloading, changing languages, or using browser history. Card art and icons load from `assets.holodori.net`. Unavailable card art shows a placeholder while retaining card details; unavailable attribute and stat icons show their names. Stars appear as static images while their animation loads or reduced motion is enabled. Animations play while visible; if star images are unavailable, rarity text appears.
+
 ## Characters
 
 Open **Characters** to browse members grouped by production. Only playable characters are shown by default; turn on **Show unplayable characters** to include the others. Names follow the selected game content language. Character icons load from `assets.holodori.net`; unavailable icons show a placeholder while retaining the character's name.
@@ -20,7 +30,7 @@ Open the display and language menu in the top-right corner to change site langua
 
 ## Install and use offline
 
-The site can be installed from a supported browser when served over HTTPS (or localhost). Open **Settings** for a language combination to choose whether its home, cards, and characters pages should be available offline. The current language combination is kept offline; switching to another combination replaces its saved pages after the new selection downloads successfully. The settings page and app resources remain available to manage offline content. Unselected pages and character icons require a network connection.
+The site can be installed from a supported browser when served over HTTPS (or localhost). Open **Settings** for a language combination to choose whether its home, cards, and characters pages should be available offline. The current language combination is kept offline; switching to another combination replaces its saved pages after the new selection downloads successfully. The settings page and app resources remain available to manage offline content. Saved card lists support searching, filtering, and sorting offline. Unselected pages, card art, star animations, attribute and stat icons, and character icons require a network connection.
 
 Settings displays download progress. If synchronization fails, the previous offline selection remains available.
 

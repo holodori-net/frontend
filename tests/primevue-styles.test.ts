@@ -37,6 +37,7 @@ describe('PrimeVue shared styles', () => {
       'badge-variables',
       'badge-style',
       'iconfield-style',
+      'chip-style',
     ]
 
     expect(styleIds).toEqual(expect.arrayContaining(dependencyStyles))

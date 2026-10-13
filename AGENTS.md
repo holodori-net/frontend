@@ -4,7 +4,7 @@
 
 - Holodori Database 使用 Nuxt 4、Vue 3、TypeScript、PrimeVue、Tailwind CSS、Nuxt i18n 與自訂 PWA Service Worker。
 - Node.js 24+ 與 pnpm 為開發環境；開發及驗證指令見 [CONTRIBUTING.md](CONTRIBUTING.md)，網站操作及部署見 [README.md](README.md)。
-- 網站使用檔案路由與靜態生成，部署內容為 `.output/public`。目前提供首頁、cards 空狀態頁、角色列表及設定頁。
+- 網站使用檔案路由與靜態生成，部署內容為 `.output/public`。目前提供首頁、卡片列表、角色列表及設定頁。
 - 語言、主題、頁面清單及素材用途由對應設定管理；數量從設定推導。
 
 ## 語言、網址與 SEO
@@ -23,13 +23,17 @@
 - 保留主題 ID `15-sakura-miko` 的已儲存偏好相容性。匯入其他來源時，以明確對照連結既有 memberId 與來源角色 ID。
 - 目前素材用途為 `avatar` 與 `motifMain`；新增用途集中定義，選用素材缺失時提供 fallback。
 - 角色列表的 production 分區與 `icon` 素材用途集中在 `shared/game-data/character-list.ts`；圖示缺失時保留角色名稱與占位。
-- 遊戲資料層位於 `server/data/`，共用資料型別位於 `shared/game-data/`。角色頁於 prerender 時直接唯讀讀取 `.data/master.sqlite`；converter 回傳完整資料，reader 選取列表欄位交由 Nuxt 保存為頁面 payload。生成失敗時須保留來源錯誤。
+- 遊戲資料層位於 `server/data/`，共用資料型別位於 `shared/game-data/`。卡片與角色頁於 prerender 時直接唯讀讀取 `.data/master.sqlite`；converter 回傳完整資料，reader 選取列表欄位交由 Nuxt 保存為頁面 payload。生成失敗時須保留來源錯誤。
+- 卡片列表採滿等、滿特訓、滿綻放的自身三圍，以 float32 逐項計算並向上取整；特化依來源權重最高項判定。搜尋、複選篩選與排序保存於 query，靜態 HTML 先顯示預設列表，hydration 後套用網址條件。
+- 卡片屬性與三圍圖示的 APK 素材網址集中於 `shared/game-data/card-icons.ts`；卡片與選單共用 `CardListIcon`，白色三圍圖示以深色底呈現，圖示載入失敗時保留文字名稱。
+- 卡片與稀有度選項共用 `CardListRarity`，先顯示遠端靜態星星，再以共用 sprite 圖集與時鐘播放動畫；離開畫面或頁面隱藏時暫停，圖集載入失敗或減少動態效果時保留靜態星星，圖片也無法載入時顯示文字。
+- 卡片網格以 350px 最小欄寬自動換行，較窄螢幕縮至容器寬度。屬性與垂直星星列位於卡圖左側，特化圖示與卡名行高對齊；底部依序以文字顯示表現力、技巧、品味及合計，須保持亮暗主題可讀及 fallback 不溢出。
 - 主題背景須維持亮暗模式可讀、低對比且不遮擋內容。樣式生成流程與 PrimeVue 元件相依設定見 CONTRIBUTING。
 
 ## PWA 與離線
 
 - 進站檢查時套用已就緒的更新，最多自動 reload 一次；站內導覽途中不強制更新。
-- 離線選擇可保存目前語言組合的首頁、cards 與 characters 頁面；設定頁及必要的 scripts、styles、語言資源一併保存。角色圖示由 CDN 載入，離線時提供占位。
+- 離線選擇可保存目前語言組合的首頁、cards 與 characters 頁面；設定頁及必要的 scripts、styles、語言資源一併保存。卡圖與角色圖示由 CDN 載入，離線時提供占位；卡片資料可離線搜尋、篩選與排序。
 - 完整下載成功後才替換已儲存的選擇；失敗時保留原本可用的頁面與資源。
 - Service Worker 共用語言驗證，依序處理同步請求；下載使用有限併發及停滯逾時。
 - 通訊協定須區分進度與完成訊息；持續收到進度時更新等待期限，傳送 Vue 狀態前先建立可複製的資料。

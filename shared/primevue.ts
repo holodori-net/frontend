@@ -4,6 +4,7 @@ export const primeVueComponents = [
   'Dialog',
   'InputText',
   'Message',
+  'MultiSelect',
   'Popover',
   'Select',
   'Tag',
@@ -19,6 +20,10 @@ export const primeVueStyleDependencies: Partial<
   Button: { components: ['Badge'], directives: ['ripple'] },
   Dialog: { directives: ['ripple'] },
   Message: { directives: ['ripple'] },
+  MultiSelect: {
+    components: ['Chip', 'IconField', 'VirtualScroller'],
+    directives: ['ripple'],
+  },
   Popover: { directives: ['ripple'] },
   Select: {
     components: ['IconField', 'VirtualScroller'],

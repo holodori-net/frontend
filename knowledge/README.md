@@ -4,10 +4,10 @@
 
 ## 文件索引
 
-- [卡片資料](data/cards.md)：Card 與 LangCard 的完整欄位、技能／語音／服裝關聯、欄位用途、素材枚舉與轉換狀態。
+- [卡片資料](data/cards.md)：Card 與 LangCard 的完整欄位、技能／語音／服裝關聯、正式屬性與三圍文字及圖示、星級 sprite 圖集與星形圖示、完整卡圖、列表投影及轉換狀態。
 - [角色資料](data/characters.md)：Character 與 LangCharacter 的完整欄位、多語角色資料、生日與出道日期、養成關聯、SD 動畫、群組文字、顏色用途及轉換狀態。
 - [角色群組資料](data/character-groups.md)：CharacterGrouping 與 LangCharacterGrouping 的完整欄位、角色成員關聯、多語文字及轉換狀態。
-- [卡片成長資料](data/card-growth.md)：CardLevel、CardLevelLimit、CardPotential 的組別、養成階段、累積經驗門檻、特訓消耗、效果，以及 CardPotentialUpgradeItem 的綻放道具對應與轉換狀態。
+- [卡片成長資料](data/card-growth.md)：CardLevel、CardLevelLimit、CardPotential 的組別、養成階段、累積經驗門檻、特訓消耗、綻放累加、滿養成三圍公式與特化判定，以及 CardPotentialUpgradeItem 的綻放道具對應與轉換狀態。
 - [Live 技能效果目標資料](data/live-skill-effect-targets.md)：LiveSkillEffectTarget 的目標類型、人數、角色／群組／屬性關聯、六語描述與轉換對照。
 
 ## 來源與適用快照
@@ -15,9 +15,9 @@
 - Schema：[holodori-net/android-protos](https://github.com/holodori-net/android-protos)，相關 entity.master 與 enums 定義。
 - 資料：[holodori-net/android-database](https://github.com/holodori-net/android-database) 的 [master.sqlite](https://github.com/holodori-net/android-database/releases/latest/download/master.sqlite)，本機位於 `.data/master.sqlite`。
 - 欄位與關聯的可重現來源：SQLite 的 `PRAGMA table_info`、`logical_fields` 與 `declared_foreign_keys`。
-- 轉換依據：[Drizzle schema](../server/data/schema/)、[轉換模組](../server/data/converters/)、[資料型別](../shared/game-data/)。Schema 手動維護查詢所需欄位，透過 `snakeCase.table` 將 camelCase 屬性自動映射為 SQLite 的 snake_case 欄位名稱。Converter 接收 `GameDatabase`，角色頁由 [reader](../server/data/character-list.ts) 管理唯讀連線並選取列表欄位，交由 Nuxt 保存為頁面 payload。
+- 轉換依據：[Drizzle schema](../server/data/schema/)、[轉換模組](../server/data/converters/)、[資料型別](../shared/game-data/)。Schema 手動維護查詢所需欄位，透過 `snakeCase.table` 將 camelCase 屬性自動映射為 SQLite 的 snake_case 欄位名稱。Converter 接收 `GameDatabase`，[卡片 reader](../server/data/card-list.ts) 與 [角色 reader](../server/data/character-list.ts) 管理唯讀連線並選取列表欄位，交由 Nuxt 保存為頁面 payload。
 
-卡片文件觀察日期為 2026-10-06，master_version 為 `5267906a638d20ddfc5c68dcb7775b0bda3484dfbb65006cd8e7dc59232112bc`，此快照包含 189 張卡片。角色文件觀察日期為 2026-10-12，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 62 位角色與 2412 筆 LangCharacter。角色群組文件觀察日期為 2026-10-11，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 16 個 CharacterGrouping 與 192 筆 LangCharacterGrouping。來源更新後，重新驗證受影響的欄位、枚舉與結論。
+卡片文件觀察日期為 2026-10-14，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 192 張卡片與 1152 筆 LangCard。角色文件觀察日期為 2026-10-12，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 62 位角色與 2412 筆 LangCharacter。角色群組文件觀察日期為 2026-10-11，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 16 個 CharacterGrouping 與 192 筆 LangCharacterGrouping。來源更新後，重新驗證受影響的欄位、枚舉與結論。
 
 卡片成長文件觀察日期為 2026-10-12，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 1890 筆 CardLevel、45 筆 CardLevelLimit、15 筆 CardPotential 與 1 筆 CardPotentialUpgradeItem。
 
