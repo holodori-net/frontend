@@ -18,7 +18,7 @@ The gallery wraps to fit the window. Attribute and rarity appear over the full c
 
 Search matches card and character names in every game language. Combine character, rarity, attribute, and specialization filters; multiple selections within a filter match any selected value. Character filter options follow character order. Rarity, attribute, and specialization choices show their icons alongside names. Sort by source order, rarity, character order, Performance, Technique, Sense, or total in either direction; stat choices also show their icons. All matching cards are displayed together. **Reset** restores the default filters and descending source order.
 
-Search, filters, and sorting are saved in the URL and restored when reloading, changing languages, or using browser history. Card art and icons load from `assets.holodori.net`. Unavailable card art shows a placeholder while retaining card details; unavailable attribute and stat icons show their names. Stars appear as static images while their animation loads or reduced motion is enabled. Animations play while visible; if star images are unavailable, rarity text appears.
+Search, filters, and sorting are saved in the URL and restored when reloading, changing languages, or using browser history. Card art and icons load from `assets.holodori.net`. Loading card art shows a skeleton placeholder; reduced motion disables its shimmer. Unavailable card art shows a text placeholder while retaining card details; unavailable attribute and stat icons show their names. Stars appear as static images while their animation loads or reduced motion is enabled. Animations play while visible; if star images are unavailable, rarity text appears.
 
 ## Characters
 

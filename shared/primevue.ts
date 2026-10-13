@@ -7,6 +7,7 @@ export const primeVueComponents = [
   'MultiSelect',
   'Popover',
   'Select',
+  'Skeleton',
   'Tag',
   'ToggleSwitch',
 ] as const

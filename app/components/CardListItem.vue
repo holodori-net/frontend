@@ -18,6 +18,7 @@ const props = defineProps<{
 
 const { t, locale } = useI18n()
 const imageFailed = ref(false)
+const imageLoaded = ref(false)
 const imageElement = ref<HTMLImageElement | null>(null)
 const imageUrl = computed(() => getCardImageUrl(props.card.assetId))
 const numberFormatter = computed(() => new Intl.NumberFormat(locale.value))
@@ -35,14 +36,22 @@ const characterName = computed(
     props.card.characterName.eng,
 )
 
-watch([() => props.card.id, imageUrl], () => {
+function settleCompletedImage() {
+  const image = imageElement.value
+  if (!image?.complete) return
+  if (image.naturalWidth > 0) imageLoaded.value = true
+  else imageFailed.value = true
+}
+
+watch([() => props.card.id, imageUrl], async () => {
   imageFailed.value = false
+  imageLoaded.value = false
+  await nextTick()
+  settleCompletedImage()
 })
 
 onMounted(() => {
-  if (imageElement.value?.complete && imageElement.value.naturalWidth === 0) {
-    imageFailed.value = true
-  }
+  settleCompletedImage()
 })
 </script>
 
@@ -54,15 +63,24 @@ onMounted(() => {
       <div
         class="relative aspect-video w-full overflow-hidden bg-surface-100 dark:bg-surface-800"
       >
+        <Skeleton
+          v-if="hasImage && !imageLoaded"
+          class="card-image-skeleton absolute inset-0"
+          width="100%"
+          height="100%"
+          border-radius="0"
+        />
         <img
           v-if="hasImage"
           ref="imageElement"
+          :key="imageUrl!"
           :src="imageUrl!"
           alt=""
-          class="size-full object-contain"
+          class="relative size-full object-contain"
           draggable="false"
           loading="lazy"
           decoding="async"
+          @load="imageLoaded = true"
           @error="imageFailed = true"
         />
         <span
@@ -155,3 +173,11 @@ onMounted(() => {
     </article>
   </li>
 </template>
+
+<style scoped>
+@media (prefers-reduced-motion: reduce) {
+  .card-image-skeleton::after {
+    animation: none;
+  }
+}
+</style>
