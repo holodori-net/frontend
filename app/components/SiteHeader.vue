@@ -75,10 +75,10 @@ async function chooseGameLocale(value: GameLocale) {
 
 <template>
   <header
-    class="theme-site-header flex min-h-[4.75rem] flex-wrap items-center gap-x-10 gap-y-3 border-b px-5 py-3 sm:px-8 lg:px-[max(2rem,calc((100vw-1160px)/2))]"
+    class="theme-site-header sticky top-0 z-20 flex flex-wrap items-center gap-x-4 gap-y-0 border-b px-5 sm:h-[4.75rem] sm:flex-nowrap sm:px-8 md:gap-x-10 lg:px-[max(2rem,calc((100vw-1160px)/2))]"
   >
     <NuxtLink
-      class="inline-flex shrink-0 items-center gap-2.5 font-bold whitespace-nowrap text-primary"
+      class="inline-flex h-16 shrink-0 items-center gap-2.5 font-bold whitespace-nowrap text-primary sm:h-full"
       :to="buildLocalizedPath(locale as SiteLocale, activeGameLocale, 'home')"
     >
       <img
@@ -89,7 +89,7 @@ async function chooseGameLocale(value: GameLocale) {
       <span>{{ t('siteName') }}</span>
     </NuxtLink>
     <nav
-      class="order-3 flex h-9 w-full flex-1 items-center gap-6 text-sm text-muted-color sm:order-none sm:h-[4.75rem] sm:w-auto"
+      class="order-3 flex h-9 basis-full flex-none items-center gap-4 text-sm text-muted-color sm:order-none sm:h-full sm:basis-auto sm:flex-1 md:gap-6"
       :aria-label="t('home')"
     >
       <NuxtLink
@@ -101,7 +101,7 @@ async function chooseGameLocale(value: GameLocale) {
       >
     </nav>
     <Button
-      class="ml-auto !size-11 !p-0"
+      class="ml-auto !size-11 !p-0 shrink-0"
       text
       rounded
       :aria-label="t('displaySettings')"
