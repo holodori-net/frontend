@@ -20,10 +20,13 @@ const gameLocale = computed(() => String(route.params.gameLocale) as GameLocale)
     <SiteHeader />
     <main class="mx-auto w-[min(100%-3rem,67.5rem)] py-9 pb-24 sm:py-16">
       <section
-        class="relative isolate overflow-hidden rounded-[1.75rem] border border-primary/20 bg-gradient-to-br from-primary/15 via-surface-0 to-surface-100 px-7 py-12 dark:via-surface-900 dark:to-surface-800 sm:px-[4.375rem] sm:py-[4.75rem]"
+        class="theme-home-hero relative isolate overflow-hidden rounded-[1.75rem] border border-primary/20 px-7 py-12 sm:px-[4.375rem] sm:py-[4.75rem]"
       >
         <div
-          class="pointer-events-none absolute -right-12 -top-14 -z-10 size-64 rounded-full bg-primary/10 blur-3xl"
+          class="theme-home-orb pointer-events-none absolute -right-12 -top-14 -z-10 size-64 rounded-full blur-3xl"
+        />
+        <div
+          class="theme-home-orb-secondary pointer-events-none absolute -bottom-28 -left-20 -z-10 size-72 rounded-full blur-3xl"
         />
         <p class="mb-4 text-xs font-bold tracking-[0.14em] text-primary">
           HOLODORI DATABASE

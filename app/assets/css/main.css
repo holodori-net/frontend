@@ -42,49 +42,37 @@ body {
   background: var(--member-page-background);
 }
 
-body::before {
+body::before,
+body::after {
   position: fixed;
   z-index: 0;
   inset: 0;
-  background-color: var(--member-motif-color);
   content: '';
-  mask-image:
-    var(--theme-motif, none),
-    repeating-linear-gradient(
-      90deg,
-      #000 0 var(--theme-motif-size),
-      transparent var(--theme-motif-size) var(--theme-motif-step)
-    ),
-    repeating-linear-gradient(
-      0deg,
-      #000 0 var(--theme-motif-size),
-      transparent var(--theme-motif-size) var(--theme-motif-step)
-    );
-  mask-repeat: repeat;
-  mask-size:
-    var(--theme-motif-size) var(--theme-motif-size),
-    var(--theme-motif-step) var(--theme-motif-step),
-    var(--theme-motif-step) var(--theme-motif-step);
-  mask-composite: intersect, intersect;
   pointer-events: none;
-  -webkit-mask-image:
-    var(--theme-motif, none),
-    repeating-linear-gradient(
-      90deg,
-      #000 0 var(--theme-motif-size),
-      transparent var(--theme-motif-size) var(--theme-motif-step)
+}
+
+body::before {
+  background-image:
+    radial-gradient(
+      ellipse at 8% 8%,
+      color-mix(in srgb, var(--member-background-accent-1), transparent 32%),
+      transparent 58%
     ),
-    repeating-linear-gradient(
-      0deg,
-      #000 0 var(--theme-motif-size),
-      transparent var(--theme-motif-size) var(--theme-motif-step)
+    radial-gradient(
+      ellipse at 92% 86%,
+      color-mix(in srgb, var(--member-background-accent-2), transparent 32%),
+      transparent 56%
     );
+}
+
+body::after {
+  background-color: var(--member-motif-color);
+  mask-image: var(--theme-motif, none);
+  mask-repeat: repeat;
+  mask-size: var(--theme-motif-size) var(--theme-motif-size);
+  -webkit-mask-image: var(--theme-motif, none);
   -webkit-mask-repeat: repeat;
-  -webkit-mask-size:
-    var(--theme-motif-size) var(--theme-motif-size),
-    var(--theme-motif-step) var(--theme-motif-step),
-    var(--theme-motif-step) var(--theme-motif-step);
-  -webkit-mask-composite: source-in, source-in;
+  -webkit-mask-size: var(--theme-motif-size) var(--theme-motif-size);
 }
 
 #__nuxt > * {
@@ -129,6 +117,40 @@ p {
   box-shadow: 0 8px 28px rgb(42 22 33 / 12%);
   font-size: 14px;
   line-height: 1.5;
+}
+
+.theme-site-header {
+  background-color: var(--member-header-background);
+  border-bottom-color: color-mix(
+    in srgb,
+    var(--member-primary-color) 22%,
+    var(--member-header-background)
+  );
+}
+
+.theme-home-hero {
+  background-image: linear-gradient(
+    135deg,
+    var(--member-background-accent-1),
+    var(--p-content-background),
+    var(--member-background-accent-2)
+  );
+}
+
+.theme-home-orb {
+  background: radial-gradient(
+    circle,
+    var(--member-background-accent-1),
+    transparent 70%
+  );
+}
+
+.theme-home-orb-secondary {
+  background: radial-gradient(
+    circle,
+    var(--member-background-accent-2),
+    transparent 70%
+  );
 }
 
 .offline-error {

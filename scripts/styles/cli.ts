@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import theme from '../../app/themes/primevue.ts'
+import { readMemberThemes } from '../../server/data/member-themes.ts'
 import { renderMemberThemeCss } from './member-themes.ts'
 import { generatePrimeVueStyles } from './primevue.ts'
 
@@ -12,7 +13,7 @@ const layerOrder = 'theme, base, primevue, components, utilities'
 
 async function main(): Promise<void> {
   const { css: primeVueCss, styleIds } = await generatePrimeVueStyles(theme)
-  const memberCss = renderMemberThemeCss().trim()
+  const memberCss = renderMemberThemeCss(readMemberThemes()).trim()
   const output = [`@layer ${layerOrder};`, memberCss, primeVueCss]
     .filter(Boolean)
     .join('\n\n')

@@ -1,27 +1,45 @@
-export const defaultThemeId = '15-sakura-miko'
+import type { LocalizedNames } from './game-data/localized-text.ts'
+
+export const defaultThemeId = 'chr-00015'
+export const memberThemesDataKey = 'member-themes'
 
 export interface MemberTheme {
   id: string
-  memberId: number
-  name: string
+  name: LocalizedNames
+  order: number
+  color1: string
+  color2: string
+  color3: string
+  color4: string
   assets: {
-    avatar?: string
-    motifMain: string
+    avatar: string | null
+    motifMain: string | null
   }
 }
 
-export const memberThemes: Record<string, MemberTheme> = {
-  [defaultThemeId]: {
-    id: defaultThemeId,
-    memberId: 15,
-    name: 'さくらみこ',
-    assets: {
-      avatar: '/icons/icon-192.png',
-      motifMain: '/themes/15-sakura-miko-motif-main.png',
-    },
-  },
+const memberAssetRoles = {
+  avatar: 'img_chr_icon_normal',
+  motifMain: 'img_chr_motif_icon_default_main',
+} as const
+
+export function getMemberThemeAssets(
+  assetId: string | null,
+): MemberTheme['assets'] {
+  const url = (role: keyof typeof memberAssetRoles) => {
+    if (!assetId) return null
+    const name = `${memberAssetRoles[role]}_${assetId}`
+    return `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.png`
+  }
+  return { avatar: url('avatar'), motifMain: url('motifMain') }
 }
 
-export function resolveMemberTheme(themeId: string | null | undefined) {
-  return memberThemes[themeId ?? ''] ?? memberThemes[defaultThemeId]!
+export function resolveMemberTheme(
+  themes: readonly MemberTheme[],
+  themeId: string | null | undefined,
+): MemberTheme {
+  const theme =
+    themes.find(({ id }) => id === themeId) ??
+    themes.find(({ id }) => id === defaultThemeId)
+  if (!theme) throw new Error(`Missing default member theme: ${defaultThemeId}`)
+  return theme
 }

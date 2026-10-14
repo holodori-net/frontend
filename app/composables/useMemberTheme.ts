@@ -1,19 +1,27 @@
-import { defaultThemeId, memberThemes, resolveMemberTheme } from '#shared/theme'
+import {
+  defaultThemeId,
+  memberThemesDataKey,
+  resolveMemberTheme,
+  type MemberTheme,
+} from '#shared/theme'
 
 export function useMemberTheme() {
-  const selectedThemeId = useCookie<string>('holodori-theme-id', {
-    default: () => defaultThemeId,
-    maxAge: 60 * 60 * 24 * 365,
-    sameSite: 'lax',
-  })
-  const theme = computed(() => resolveMemberTheme(selectedThemeId.value))
-  watch(
-    selectedThemeId,
-    (value) => {
-      if (!memberThemes[value]) selectedThemeId.value = defaultThemeId
-    },
-    { immediate: true },
+  const { data: themes } = useNuxtData<MemberTheme[]>(memberThemesDataKey)
+  const themeId = useState<string>(
+    'selected-member-theme-id',
+    () => defaultThemeId,
   )
+  const theme = computed(() =>
+    resolveMemberTheme(themes.value ?? [], themeId.value),
+  )
+  const selectedThemeId = computed({
+    get: () => themeId.value,
+    set: setTheme,
+  })
 
-  return { selectedThemeId, theme }
+  function setTheme(id: string) {
+    themeId.value = resolveMemberTheme(themes.value ?? [], id).id
+  }
+
+  return { themes, theme, selectedThemeId, setTheme }
 }

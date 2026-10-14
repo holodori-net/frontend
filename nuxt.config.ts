@@ -5,8 +5,9 @@ import {
   sitePages,
 } from './shared/language'
 import { primeVueComponents } from './shared/primevue'
-import { defaultThemeId } from './shared/theme'
-import { memberThemePalettes } from './app/themes/member-palettes'
+import { defaultThemeId, resolveMemberTheme } from './shared/theme'
+import { createMemberThemePalette } from './app/themes/member-palettes'
+import { readMemberThemes } from './server/data/member-themes'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
 import { generateSiteSeo } from './scripts/site-seo'
@@ -18,6 +19,9 @@ import {
 
 const prerenderWorkerCount = getPrerenderWorkerCount(
   process.env.NUXT_PRERENDER_WORKERS,
+)
+const defaultThemePalette = createMemberThemePalette(
+  resolveMemberTheme(readMemberThemes(), defaultThemeId),
 )
 
 const contentPages = sitePages.map((page) =>
@@ -146,9 +150,8 @@ export default defineNuxtConfig({
       start_url: '/',
       scope: '/',
       display: 'standalone',
-      background_color:
-        memberThemePalettes[defaultThemeId]!.light.page.background,
-      theme_color: memberThemePalettes[defaultThemeId]!.light.primary.color,
+      background_color: defaultThemePalette.light.page.background,
+      theme_color: defaultThemePalette.light.primary.color,
       icons: [
         {
           src: '/icons/icon-192.png',

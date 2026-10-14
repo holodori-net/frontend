@@ -9,11 +9,9 @@ import {
 const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n()
-const { theme } = useMemberTheme()
 useHead({
   htmlAttrs: {
     lang: computed(() => locale.value),
-    'data-theme-id': computed(() => theme.value.id),
   },
 })
 const preferredSiteLocale = useCookie<string | null>('holodori-site-locale', {

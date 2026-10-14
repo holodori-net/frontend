@@ -1,17 +1,12 @@
 import {
-  memberThemePalettes,
+  createMemberThemePalette,
   primaryShades,
   surfaceShades,
   type MemberThemeColors,
-  type MemberThemePalette,
 } from '../../app/themes/member-palettes.ts'
-import {
-  defaultThemeId,
-  memberThemes,
-  type MemberTheme,
-} from '../../shared/theme.ts'
+import { defaultThemeId, type MemberTheme } from '../../shared/theme.ts'
 
-function modeVariables(colors: MemberThemeColors) {
+function modeVariables(colors: MemberThemeColors): string {
   return [
     ...surfaceShades.map(
       (shade) => `--member-surface-${shade}:${colors.surface[shade]};`,
@@ -22,55 +17,51 @@ function modeVariables(colors: MemberThemeColors) {
     `--member-primary-active-color:${colors.primary.activeColor};`,
     `--member-page-background:${colors.page.background};`,
     `--member-page-color:${colors.page.color};`,
+    `--member-header-background:${colors.headerBackground};`,
     `--member-motif-color:${colors.motifColor};`,
+    `--member-background-accent-1:${colors.backgroundAccent1};`,
+    `--member-background-accent-2:${colors.backgroundAccent2};`,
   ].join('')
 }
 
+function themeCss(theme: MemberTheme, fallback: boolean): string {
+  const palette = createMemberThemePalette(theme)
+  const selector = `:root[data-theme-id="${theme.id}"]`
+  const darkSelector = `:root.dark[data-theme-id="${theme.id}"]`
+  const lightSelector = fallback ? `:root,${selector}` : selector
+  const darkModeSelector = fallback
+    ? `:root.dark,${darkSelector}`
+    : darkSelector
+  const motif = theme.assets.motifMain
+    ? `url(${JSON.stringify(theme.assets.motifMain)})`
+    : 'none'
+  const common = [
+    ...primaryShades.map(
+      (shade) => `--member-primary-${shade}:${palette.primary[shade]};`,
+    ),
+    `--theme-motif:${motif};`,
+    `--theme-motif-size:${palette.motif.size}px;`,
+  ].join('')
+
+  return `${lightSelector}{${common}${modeVariables(palette.light)}}\n${darkModeSelector}{${modeVariables(palette.dark)}}`
+}
+
 export function renderMemberThemeCss(
-  themes: Record<string, MemberTheme> = memberThemes,
-  palettes: Record<string, MemberThemePalette> = memberThemePalettes,
+  themes: readonly MemberTheme[],
   fallbackId = defaultThemeId,
 ): string {
-  if (!themes[fallbackId] || !palettes[fallbackId]) {
+  const fallbackTheme = themes.find((theme) => theme.id === fallbackId)
+  if (!fallbackTheme) {
     throw new Error(`Missing default member theme: ${fallbackId}`)
   }
 
-  return Object.values(themes)
-    .map((theme) => {
-      const palette = palettes[theme.id]
-      if (!palette)
-        throw new Error(`Missing palette for member theme: ${theme.id}`)
-      if (!/^[a-z0-9-]+$/.test(theme.id)) {
-        throw new Error(`Invalid member theme ID: ${theme.id}`)
-      }
-      const { size, gap } = palette.motif
-      if (
-        !Number.isFinite(size) ||
-        size <= 0 ||
-        !Number.isFinite(gap) ||
-        gap < 0
-      ) {
-        throw new Error(
-          `Invalid motif dimensions for member theme: ${theme.id}`,
-        )
-      }
-      const selector = `:root[data-theme-id="${theme.id}"]`
-      const darkSelector = `:root.dark[data-theme-id="${theme.id}"]`
-      const light = theme.id === fallbackId ? `:root,${selector}` : selector
-      const dark =
-        theme.id === fallbackId ? `:root.dark,${darkSelector}` : darkSelector
-      const motif = theme.assets.motifMain
-        ? `url(${JSON.stringify(theme.assets.motifMain)})`
-        : 'none'
-      const common = [
-        ...primaryShades.map(
-          (shade) => `--member-primary-${shade}:${palette.primary[shade]};`,
-        ),
-        `--theme-motif:${motif};`,
-        `--theme-motif-size:${size}px;`,
-        `--theme-motif-step:${size + gap}px;`,
-      ].join('')
-      return `${light}{${common}${modeVariables(palette.light)}}\n${dark}{${modeVariables(palette.dark)}}`
-    })
+  for (const theme of themes) {
+    if (!/^[a-z0-9-]+$/.test(theme.id)) {
+      throw new Error(`Invalid member theme ID: ${theme.id}`)
+    }
+  }
+
+  return themes
+    .map((theme) => themeCss(theme, theme.id === fallbackId))
     .join('\n')
 }

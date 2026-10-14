@@ -19,8 +19,26 @@ export default {
         primaryShades.map((shade) => [shade, `var(--member-primary-${shade})`]),
       ),
       colorScheme: {
-        light: { primary, surface },
-        dark: { primary, surface },
+        light: {
+          primary,
+          surface,
+          text: {
+            color: '{surface.800}',
+            hoverColor: '{surface.900}',
+            mutedColor: '{surface.700}',
+            hoverMutedColor: '{surface.800}',
+          },
+        },
+        dark: {
+          primary,
+          surface,
+          text: {
+            color: '{surface.0}',
+            hoverColor: '{surface.50}',
+            mutedColor: '{surface.200}',
+            hoverMutedColor: '{surface.100}',
+          },
+        },
       },
     },
   }),

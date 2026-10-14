@@ -9,13 +9,16 @@ import {
   type GameLocale,
   type SiteLocale,
 } from '#shared/language'
-import { memberThemes } from '#shared/theme'
 
 const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n()
 const colorMode = useColorMode()
-const { selectedThemeId, theme } = useMemberTheme()
+const { selectedThemeId, theme, themes } = useMemberTheme()
+const activeGameLocale = computed(() => {
+  const value = route.params.gameLocale
+  return typeof value === 'string' && isGameLocale(value) ? value : 'jpn'
+})
 const preferencesPopover = ref<{
   toggle: (event: Event) => void
   hide: () => void
@@ -32,13 +35,15 @@ const preferredGameLocale = useCookie<string | null>('holodori-game-locale', {
   sameSite: 'lax',
 })
 
-const activeGameLocale = computed(() => {
-  const value = route.params.gameLocale
-  return typeof value === 'string' && isGameLocale(value) ? value : 'jpn'
-})
 const localizedRoute = (site: SiteLocale, game: GameLocale) =>
   buildLocalizedRoute(site, game, route)
-const themeOptions = computed(() => Object.values(memberThemes))
+const themeOptions = computed(() =>
+  (themes.value ?? []).map((memberTheme) => ({
+    ...memberTheme,
+    label: memberTheme.name[activeGameLocale.value],
+    searchNames: Object.values(memberTheme.name).join(' '),
+  })),
+)
 const appearanceOptions = computed(() => [
   { value: 'system', label: t('modeSystem'), icon: 'computer' },
   { value: 'light', label: t('modeLight'), icon: 'sun' },
@@ -51,10 +56,6 @@ function togglePreferences(event: Event) {
 
 function closePreferences() {
   preferencesPopover.value?.hide()
-}
-
-function hideBrokenAvatar(event: Event) {
-  ;(event.currentTarget as HTMLImageElement).hidden = true
 }
 
 async function chooseSiteLocale(value: SiteLocale) {
@@ -74,10 +75,10 @@ async function chooseGameLocale(value: GameLocale) {
 
 <template>
   <header
-    class="flex min-h-[4.75rem] flex-wrap items-center gap-x-10 gap-y-3 border-b border-surface-200 bg-surface-0/95 px-5 py-3 backdrop-blur dark:border-surface-700 dark:bg-surface-900/95 sm:px-8 lg:px-[max(2rem,calc((100vw-1160px)/2))]"
+    class="theme-site-header flex min-h-[4.75rem] flex-wrap items-center gap-x-10 gap-y-3 border-b px-5 py-3 sm:px-8 lg:px-[max(2rem,calc((100vw-1160px)/2))]"
   >
     <NuxtLink
-      class="inline-flex shrink-0 items-center gap-2.5 font-bold whitespace-nowrap"
+      class="inline-flex shrink-0 items-center gap-2.5 font-bold whitespace-nowrap text-primary"
       :to="buildLocalizedPath(locale as SiteLocale, activeGameLocale, 'home')"
     >
       <img
@@ -101,7 +102,6 @@ async function chooseGameLocale(value: GameLocale) {
     </nav>
     <Button
       class="ml-auto !size-11 !p-0"
-      severity="secondary"
       text
       rounded
       :aria-label="t('displaySettings')"
@@ -249,9 +249,9 @@ async function chooseGameLocale(value: GameLocale) {
           <Select
             v-model="selectedThemeId"
             :options="themeOptions"
-            option-label="name"
+            option-label="label"
             option-value="id"
-            :filter-fields="['name', 'id']"
+            :filter-fields="['searchNames', 'id']"
             :filter-placeholder="t('searchMembers')"
             :aria-label="t('themeTitle')"
             :virtual-scroller-options="
@@ -269,42 +269,42 @@ async function chooseGameLocale(value: GameLocale) {
                 v-if="slotProps.value"
                 class="flex min-w-0 items-center gap-3"
               >
-                <span
-                  class="grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/10 text-primary"
-                  aria-hidden="true"
-                >
-                  <span class="col-start-1 row-start-1">✿</span>
-                  <img
-                    v-if="theme.assets.avatar"
-                    :key="theme.assets.avatar"
-                    :src="theme.assets.avatar"
-                    alt=""
-                    class="col-start-1 row-start-1 size-full rounded-full object-cover"
-                    @error="hideBrokenAvatar"
+                <MemberThemeAvatar
+                  :src="theme.assets.avatar"
+                  :color="theme.color1"
+                />
+                <span class="truncate">{{ theme.name[activeGameLocale] }}</span>
+                <span class="ml-auto flex shrink-0 gap-1" aria-hidden="true">
+                  <span
+                    class="size-3 rounded-full border border-surface-400/50"
+                    :style="{ backgroundColor: theme.color2 }"
+                  />
+                  <span
+                    class="size-3 rounded-full border border-surface-400/50"
+                    :style="{ backgroundColor: theme.color3 }"
                   />
                 </span>
-                <span class="truncate">{{ theme.name }}</span>
               </span>
               <span v-else>{{ t('selectMemberTheme') }}</span>
             </template>
             <template #option="slotProps">
               <span class="flex min-w-0 items-center gap-3">
-                <span
-                  class="grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/10 text-primary"
-                  aria-hidden="true"
-                >
-                  <span class="col-start-1 row-start-1">✿</span>
-                  <img
-                    v-if="slotProps.option.assets.avatar"
-                    :key="slotProps.option.assets.avatar"
-                    :src="slotProps.option.assets.avatar"
-                    alt=""
-                    class="col-start-1 row-start-1 size-full rounded-full object-cover"
-                    @error="hideBrokenAvatar"
+                <MemberThemeAvatar
+                  :src="slotProps.option.assets.avatar"
+                  :color="slotProps.option.color1"
+                />
+                <span class="flex shrink-0 gap-1" aria-hidden="true">
+                  <span
+                    class="size-3 rounded-full border border-surface-400/50"
+                    :style="{ backgroundColor: slotProps.option.color2 }"
+                  />
+                  <span
+                    class="size-3 rounded-full border border-surface-400/50"
+                    :style="{ backgroundColor: slotProps.option.color3 }"
                   />
                 </span>
                 <span class="grid min-w-0">
-                  <span class="truncate">{{ slotProps.option.name }}</span>
+                  <span class="truncate">{{ slotProps.option.label }}</span>
                   <span class="truncate text-xs text-muted-color">{{
                     slotProps.option.id
                   }}</span>

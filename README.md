@@ -28,6 +28,8 @@ Open **Characters** to browse members grouped by production. Only playable chara
 
 Open the display and language menu in the top-right corner to change site language, game content language, appearance, and member theme. Appearance is saved in this browser; **System** follows the device setting.
 
+Member themes use official character colors, avatars, and motifs. Names follow the game content language; search matches names in all game languages. Sakura Miko is the default, and your selection is saved in this browser. Themes remain available offline; unavailable avatars show a member color swatch and unavailable motifs retain the background gradients.
+
 ## Install and use offline
 
 The site can be installed from a supported browser when served over HTTPS (or localhost). Open **Settings** for a language combination to choose whether its home, cards, and characters pages should be available offline. The current language combination is kept offline; switching to another combination replaces its saved pages after the new selection downloads successfully. The settings page and app resources remain available to manage offline content. Saved card lists support searching, filtering, and sorting offline. Unselected pages, card art, star animations, attribute and stat icons, and character icons require a network connection.
