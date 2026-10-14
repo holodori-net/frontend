@@ -29,7 +29,7 @@ Maintain schema definitions by hand for the tables and columns used by queries. 
 
 Shared helpers live in `server/data/common/`. Each domain reuses a parameterized Drizzle prepared query for language lookups and passes `{ language, text }` rows, the text ID, and source context to the localization helper. Missing or null translations report their language and source field. Cross-domain references use source IDs and return types.
 
-When assigning parallel work, keep each domain's transform, types, tests, and data dictionary under one owner. Coordinate changes to shared helpers, page readers, and the knowledge index with the integration owner. Data typecheck includes all domain source and test files. Data modules use explicit `.ts` import paths and `import type` for types. Runtime imports from the shared directory use Nuxt's `#shared` alias, which Vitest also resolves.
+When assigning parallel work, keep each domain's transform, types, tests, and data dictionary under one owner. Coordinate changes to shared helpers, readers, and the knowledge index with the integration owner. Data typecheck includes all domain source and test files. Data modules use explicit `.ts` relative import paths and `import type` for types. Runtime imports from the shared directory use `#shared`; Nuxt and Vitest resolve the alias, and `package.json` maps it through Node's `imports` field for build scripts.
 
 ## Checks
 

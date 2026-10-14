@@ -1,6 +1,6 @@
 import { asc, eq, sql } from 'drizzle-orm'
-import type { CharacterData } from '#shared/game-data/characters'
-import type { LocalizedText } from '#shared/game-data/localized-text'
+import type { CharacterData } from '#shared/game-data/characters.ts'
+import type { LocalizedText } from '#shared/game-data/localized-text.ts'
 import type { GameDatabase } from '../database.ts'
 import { parseJsonArray } from '../common/json-array.ts'
 import { localizedText } from '../common/localized-text.ts'

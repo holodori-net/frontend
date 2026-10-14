@@ -1,5 +1,5 @@
 import { gameLocales } from '#shared/language'
-import type { LocalizedText } from '#shared/game-data/localized-text'
+import type { LocalizedText } from '#shared/game-data/localized-text.ts'
 import type { SourceFieldContext } from './source-context.ts'
 
 interface LocalizedTextRow {
