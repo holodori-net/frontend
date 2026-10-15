@@ -114,7 +114,7 @@
 
 客戶端對應：`../extraction/work/decompile/05-annotate-decompiled-code/annotated-csharp/Vision.Common.Core/Vision/Common/AddressDefinition.cs` 的 `LocalSpriteAtlas`；屬性由 `Vision.Common/Vision/Common/CardAttributeTypeIcon.cs` 的 `Set` 選取。屬性 1／2／3 引用的靜態欄位 offset 分別為 8120／8168／8144，對應 `cute_cl`／`pure_cl`／`happy_cl`。觀察日期為 2026-10-14。
 
-前端 URL 對照集中於 `shared/game-data/card-icons.ts`。卡片上的屬性與特化使用圖示，三圍與合計使用文字標題，合計位於最右側；篩選與三圍排序選項保留圖示及文字。`CardListIcon` 提供名稱、tooltip、尺寸選擇及載入失敗時的文字 fallback；白色三圍圖示以深色底呈現。
+前端 URL 對照集中於 `shared/game-data/card-icons.ts`。卡片上的屬性與底部三圍使用圖示；底部依表現力、技巧、品味順序呈現「圖示 數值 + 圖示 數值 + 圖示 數值 = 合計」，窄螢幕與缺圖文字按數值項目換行。篩選與三圍排序選項保留圖示及文字。`CardListIcon` 提供名稱、tooltip、尺寸選擇及載入失敗時的文字 fallback；三圍圖示使用透明背景，亮模式顯示黑色、暗模式顯示白色。
 
 ### 星級動畫與星形圖示
 

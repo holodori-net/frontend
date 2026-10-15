@@ -12,7 +12,7 @@ const hasImage = computed(() => Boolean(props.src) && !imageFailed.value)
 const imageSizeClass = computed(() => {
   switch (props.size) {
     case 'small':
-      return 'size-3.5'
+      return 'size-4'
     case 'large':
       return 'size-8'
     default:
@@ -40,7 +40,6 @@ onMounted(() => {
     :class="[
       hasImage && 'shrink-0',
       !hasImage && !label && imageSizeClass,
-      monochrome && hasImage && 'rounded bg-surface-700 p-1',
       !hasImage &&
         label &&
         size === 'large' &&
@@ -54,7 +53,11 @@ onMounted(() => {
       ref="imageElement"
       :src="src!"
       :alt="label"
-      :class="[imageSizeClass, 'object-contain']"
+      :class="[
+        imageSizeClass,
+        'object-contain',
+        monochrome && 'brightness-0 dark:invert',
+      ]"
       draggable="false"
       @error="imageFailed = true"
     />

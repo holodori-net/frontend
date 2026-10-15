@@ -108,64 +108,64 @@ onMounted(() => {
 
       <div class="flex flex-1 flex-col gap-4 p-4">
         <div class="min-w-0 flex-1">
-          <div class="flex min-w-0 items-start gap-2">
-            <div
-              v-if="card.specializations.length"
-              class="flex max-w-[35%] shrink-0 flex-wrap gap-1"
-            >
-              <CardListIcon
-                v-for="stat in card.specializations"
-                :key="stat"
-                :src="getCardStatIconUrl(stat)"
-                :label="
-                  t('cardList.specializationTag', {
-                    stat: t(`cardList.stat.${stat}`),
-                  })
-                "
-                monochrome
-                size="small"
-              />
-            </div>
-            <p
-              class="mb-0 min-w-0 flex-1 text-base font-semibold leading-snug wrap-anywhere"
-            >
-              {{ cardName }}
-            </p>
-          </div>
+          <p
+            class="mb-0 min-w-0 text-base font-semibold leading-snug wrap-anywhere"
+          >
+            {{ cardName }}
+          </p>
           <p class="mb-0 mt-1 text-sm text-muted-color wrap-anywhere">
             {{ characterName }}
           </p>
         </div>
 
-        <dl class="mt-auto grid grid-cols-4 gap-1 text-center text-xs">
+        <dl
+          class="mt-auto flex min-w-0 flex-wrap items-center justify-center gap-x-1 gap-y-1 text-base"
+        >
           <div
             v-for="stat in statKeys"
             :key="stat"
-            class="min-w-0 rounded-lg px-0.5 py-2"
-            :class="
-              card.specializations.includes(stat) &&
-              'bg-primary/10 text-primary'
-            "
+            class="inline-flex min-w-0 max-w-full flex-[0_1_auto] items-center gap-1 py-1"
           >
-            <dt
-              class="mb-1 flex min-h-7 items-center justify-center text-balance text-[0.6875rem] font-semibold leading-tight wrap-anywhere"
-            >
+            <dt class="sr-only">
               {{ t(`cardList.stat.${stat}`) }}
             </dt>
-            <dd class="m-0 font-medium tabular-nums">
-              {{ numberFormatter.format(card.stats[stat]) }}
+            <dd
+              class="m-0 inline-flex min-w-0 items-center gap-1 font-medium tabular-nums"
+            >
+              <span
+                v-if="stat !== statKeys[0]"
+                aria-hidden="true"
+                class="mx-1 shrink-0"
+                >+</span
+              >
+              <CardListIcon
+                :src="getCardStatIconUrl(stat)"
+                :label="t(`cardList.stat.${stat}`)"
+                aria-hidden="true"
+                monochrome
+                size="small"
+              />
+              <span
+                class="ml-px text-sm"
+                :class="card.specializations.includes(stat) && 'text-primary'"
+              >
+                {{ numberFormatter.format(card.stats[stat]) }}
+              </span>
             </dd>
           </div>
           <div
-            class="min-w-0 rounded-lg bg-primary/10 px-0.5 py-2 text-primary"
+            class="inline-flex min-w-0 max-w-full flex-[0_1_auto] items-center gap-1 py-1"
           >
-            <dt
-              class="mb-1 flex min-h-7 items-center justify-center text-balance text-[0.6875rem] font-semibold leading-tight wrap-anywhere"
-            >
+            <dt class="sr-only">
               {{ t('cardList.total') }}
             </dt>
-            <dd class="m-0 font-bold tabular-nums">
-              {{ numberFormatter.format(card.total) }}
+            <dd
+              class="m-0 inline-flex min-w-0 items-center gap-1 font-bold tabular-nums"
+            >
+              <span aria-hidden="true" class="mx-1 shrink-0">=</span>
+              <span>
+                {{ numberFormatter.format(card.total) }}
+              </span>
             </dd>
           </div>
         </dl>

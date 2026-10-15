@@ -41,7 +41,6 @@
       "technique": "Technique",
       "sense": "Sense"
     },
-    "specializationTag": "{stat} specialist",
     "sort": {
       "order": "Default order",
       "rarity": "Rarity",
