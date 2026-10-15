@@ -88,6 +88,7 @@ function onStaticImageError(event: Event) {
         vertical
           ? 'h-7 max-h-7 min-h-0 w-7 shrink -mt-1.5 first:mt-0'
           : 'size-5 shrink-0',
+        !vertical && index > 0 && '-ml-3.5',
         showTextFallback && 'invisible',
       ]"
     >
