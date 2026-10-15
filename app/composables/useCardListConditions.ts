@@ -10,7 +10,9 @@ import {
 export function useCardListConditions(options: ComputedRef<CardFilterOptions>) {
   const route = useRoute()
   const router = useRouter()
-  const conditions = ref<CardListConditions>(createCardListConditions())
+  const conditions = ref<CardListConditions>(
+    createCardListConditions(options.value),
+  )
   const ready = ref(false)
   let applyingRoute = false
   let suppressConditionWatch = false
@@ -30,7 +32,7 @@ export function useCardListConditions(options: ComputedRef<CardFilterOptions>) {
   }
 
   const writeRoute = (replace: boolean) => {
-    const query = toCardListQuery(conditions.value, route.query)
+    const query = toCardListQuery(conditions.value, options.value, route.query)
     const method = replace ? router.replace : router.push
     void method({ query, hash: route.hash })
   }
@@ -82,7 +84,7 @@ export function useCardListConditions(options: ComputedRef<CardFilterOptions>) {
   const reset = () => {
     clearSearchTimer()
     suppressConditionWatch = true
-    conditions.value = createCardListConditions()
+    conditions.value = createCardListConditions(options.value)
     suppressConditionWatch = false
     writeRoute(false)
   }

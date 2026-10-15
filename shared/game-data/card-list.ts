@@ -49,13 +49,15 @@ const queryKeys = new Set<string>([
   'direction',
 ])
 
-export function createCardListConditions(): CardListConditions {
+export function createCardListConditions(
+  options: CardFilterOptions,
+): CardListConditions {
   return {
     q: '',
     character: [],
-    rarity: [],
-    attribute: [],
-    specialization: [],
+    rarity: [...options.rarity],
+    attribute: [...options.attribute],
+    specialization: [...options.specialization],
     sort: 'order',
     direction: 'desc',
   }
@@ -109,6 +111,20 @@ function uniqueValid<T extends string | number>(
   return [...result]
 }
 
+function parseCheckboxSelection<T extends string | number>(
+  value: LocationQuery[string] | undefined,
+  allowed: readonly T[],
+  parse: (value: string) => T | null,
+): T[] {
+  if (value === undefined) return [...allowed]
+
+  const values = queryValues(value)
+  if (values.includes('')) return []
+
+  const selected = uniqueValid(values, allowed, parse)
+  return selected.length ? selected : [...allowed]
+}
+
 function parseInteger(value: string): number | null {
   if (!/^-?\d+$/.test(value)) return null
   const parsed = Number(value)
@@ -119,7 +135,7 @@ export function parseCardListQuery(
   query: LocationQuery,
   options: CardFilterOptions,
 ): CardListConditions {
-  const conditions = createCardListConditions()
+  const conditions = createCardListConditions(options)
   const q = queryValues(query.q)[0]
   if (q !== undefined) conditions.q = q.trim()
 
@@ -128,18 +144,18 @@ export function parseCardListQuery(
     options.character,
     (value) => value,
   )
-  conditions.rarity = uniqueValid(
-    queryValues(query.rarity),
+  conditions.rarity = parseCheckboxSelection(
+    query.rarity,
     options.rarity,
     parseInteger,
   )
-  conditions.attribute = uniqueValid(
-    queryValues(query.attribute),
+  conditions.attribute = parseCheckboxSelection(
+    query.attribute,
     options.attribute,
     parseInteger,
   )
-  conditions.specialization = uniqueValid(
-    queryValues(query.specialization),
+  conditions.specialization = parseCheckboxSelection(
+    query.specialization,
     options.specialization,
     (value) =>
       statKeys.includes(value as CardStatKey) ? (value as CardStatKey) : null,
@@ -158,6 +174,7 @@ export function parseCardListQuery(
 
 export function toCardListQuery(
   conditions: CardListConditions,
+  options: CardFilterOptions,
   existingQuery: LocationQuery = {},
 ): LocationQuery {
   const query: LocationQuery = Object.fromEntries(
@@ -168,24 +185,33 @@ export function toCardListQuery(
   if (q) query.q = q
   if (conditions.character.length)
     query.character = [...new Set(conditions.character)]
-  if (conditions.rarity.length) {
-    query.rarity = [...new Set(conditions.rarity)].map(String)
+  if (!sameSelection(conditions.rarity, options.rarity)) {
+    query.rarity = conditions.rarity.length
+      ? [...new Set(conditions.rarity)].map(String)
+      : ''
   }
-  if (conditions.attribute.length) {
-    query.attribute = [...new Set(conditions.attribute)].map(String)
+  if (!sameSelection(conditions.attribute, options.attribute)) {
+    query.attribute = conditions.attribute.length
+      ? [...new Set(conditions.attribute)].map(String)
+      : ''
   }
-  if (conditions.specialization.length) {
-    query.specialization = [...new Set(conditions.specialization)]
+  if (!sameSelection(conditions.specialization, options.specialization)) {
+    query.specialization = conditions.specialization.length
+      ? [...new Set(conditions.specialization)]
+      : ''
   }
   if (conditions.sort !== 'order') query.sort = conditions.sort
   if (conditions.direction !== 'desc') query.direction = conditions.direction
   return query
 }
 
-function hasSelection<T>(values: readonly T[], selected: readonly T[]) {
-  if (!selected.length) return true
-  const selectedSet = new Set(selected)
-  return values.some((value) => selectedSet.has(value))
+function sameSelection<T>(selection: readonly T[], options: readonly T[]) {
+  const selectedSet = new Set(selection)
+  const optionSet = new Set(options)
+  return (
+    selectedSet.size === optionSet.size &&
+    [...optionSet].every((option) => selectedSet.has(option))
+  )
 }
 
 function searchText(card: CardListItemData) {
@@ -214,19 +240,15 @@ export function filterAndSortCards(
       ) {
         return false
       }
-      if (
-        conditions.rarity.length &&
-        !conditions.rarity.includes(card.rarity)
-      ) {
+      if (!conditions.rarity.includes(card.rarity)) {
         return false
       }
-      if (
-        conditions.attribute.length &&
-        !conditions.attribute.includes(card.attributeType)
-      ) {
+      if (!conditions.attribute.includes(card.attributeType)) {
         return false
       }
-      return hasSelection(card.specializations, conditions.specialization)
+      return card.specializations.some((value) =>
+        conditions.specialization.includes(value),
+      )
     })
     .sort((a, b) => {
       let comparison = 0

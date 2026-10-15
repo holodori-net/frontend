@@ -178,8 +178,8 @@ const layoutOptions = computed<{ value: CardListLayout; label: string }[]>(() =>
           class="mb-7 space-y-4 rounded-xl border border-surface-200 bg-surface-0 p-4 dark:border-surface-700 dark:bg-surface-900 sm:p-5"
           :aria-label="t('cardList.filters')"
         >
-          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <label class="block min-w-0 sm:col-span-2">
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <label class="block min-w-0 lg:col-span-2">
               <span class="mb-1.5 block text-sm font-medium">{{
                 t('cardList.search')
               }}</span>
@@ -235,83 +235,87 @@ const layoutOptions = computed<{ value: CardListLayout; label: string }[]>(() =>
                 </template>
               </MultiSelect>
             </label>
-            <label class="block min-w-0">
-              <span class="mb-1.5 block text-sm font-medium">{{
-                t('cardList.rarity')
-              }}</span>
-              <MultiSelect
-                v-model="conditions.rarity"
-                class="w-full"
-                :options="rarityOptions"
-                option-label="label"
-                option-value="value"
-                :placeholder="t('cardList.allRarities')"
-                :aria-label="t('cardList.rarity')"
-                display="chip"
-              >
-                <template #option="{ option }">
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <fieldset class="min-w-0">
+              <legend class="mb-1.5 text-sm font-medium">
+                {{ t('cardList.rarity') }}
+              </legend>
+              <div class="flex flex-wrap gap-1">
+                <label
+                  v-for="option in rarityOptions"
+                  :key="option.value"
+                  :for="`card-rarity-${option.value}`"
+                  class="flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-2 py-1 hover:bg-surface-100 dark:hover:bg-surface-800"
+                >
+                  <Checkbox
+                    v-model="conditions.rarity"
+                    :input-id="`card-rarity-${option.value}`"
+                    :value="option.value"
+                  />
                   <CardListRarity
                     :count="option.value"
                     :label="option.label"
                     show-label
                     loading-skeleton
                   />
-                </template>
-              </MultiSelect>
-            </label>
-            <label class="block min-w-0">
-              <span class="mb-1.5 block text-sm font-medium">{{
-                t('cardList.attribute')
-              }}</span>
-              <MultiSelect
-                v-model="conditions.attribute"
-                class="w-full"
-                :options="attributeOptions"
-                option-label="label"
-                option-value="value"
-                :placeholder="t('cardList.allAttributes')"
-                :aria-label="t('cardList.attribute')"
-                display="chip"
-              >
-                <template #option="{ option }">
-                  <div class="flex items-center gap-2">
-                    <CardListIcon
-                      :src="getCardAttributeIconUrl(option.value)"
-                      label=""
-                      loading-skeleton
-                    />
-                    <span>{{ option.label }}</span>
-                  </div>
-                </template>
-              </MultiSelect>
-            </label>
-            <label class="block min-w-0">
-              <span class="mb-1.5 block text-sm font-medium">{{
-                t('cardList.specialization')
-              }}</span>
-              <MultiSelect
-                v-model="conditions.specialization"
-                class="w-full"
-                :options="specializationOptions"
-                option-label="label"
-                option-value="value"
-                :placeholder="t('cardList.allSpecializations')"
-                :aria-label="t('cardList.specialization')"
-                display="chip"
-              >
-                <template #option="{ option }">
-                  <div class="flex items-center gap-2">
-                    <CardListIcon
-                      :src="getCardStatIconUrl(option.value)"
-                      label=""
-                      monochrome
-                      loading-skeleton
-                    />
-                    <span>{{ option.label }}</span>
-                  </div>
-                </template>
-              </MultiSelect>
-            </label>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="min-w-0">
+              <legend class="mb-1.5 text-sm font-medium">
+                {{ t('cardList.attribute') }}
+              </legend>
+              <div class="flex flex-wrap gap-1">
+                <label
+                  v-for="option in attributeOptions"
+                  :key="option.value"
+                  :for="`card-attribute-${option.value}`"
+                  class="flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-2 py-1 hover:bg-surface-100 dark:hover:bg-surface-800"
+                >
+                  <Checkbox
+                    v-model="conditions.attribute"
+                    :input-id="`card-attribute-${option.value}`"
+                    :value="option.value"
+                  />
+                  <CardListIcon
+                    :src="getCardAttributeIconUrl(option.value)"
+                    label=""
+                    loading-skeleton
+                  />
+                  <span>{{ option.label }}</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="min-w-0">
+              <legend class="mb-1.5 text-sm font-medium">
+                {{ t('cardList.specialization') }}
+              </legend>
+              <div class="flex flex-wrap gap-1">
+                <label
+                  v-for="option in specializationOptions"
+                  :key="option.value"
+                  :for="`card-specialization-${option.value}`"
+                  class="flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-2 py-1 hover:bg-surface-100 dark:hover:bg-surface-800"
+                >
+                  <Checkbox
+                    v-model="conditions.specialization"
+                    :input-id="`card-specialization-${option.value}`"
+                    :value="option.value"
+                  />
+                  <CardListIcon
+                    :src="getCardStatIconUrl(option.value)"
+                    label=""
+                    monochrome
+                    loading-skeleton
+                  />
+                  <span>{{ option.label }}</span>
+                </label>
+              </div>
+            </fieldset>
           </div>
 
           <div class="flex flex-wrap items-end gap-3">

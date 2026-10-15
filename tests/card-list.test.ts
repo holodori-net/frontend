@@ -94,12 +94,13 @@ const cards = [
 
 describe('card list', () => {
   it('provides defaults and derives unique filter options from the full list', () => {
-    expect(createCardListConditions()).toEqual({
+    const options = getCardFilterOptions(cards)
+    expect(createCardListConditions(options)).toEqual({
       q: '',
       character: [],
-      rarity: [],
-      attribute: [],
-      specialization: [],
+      rarity: [3, 4, 5],
+      attribute: [1, 2, 3],
+      specialization: ['performance', 'technique', 'sense'],
       sort: 'order',
       direction: 'desc',
     })
@@ -129,7 +130,10 @@ describe('card list', () => {
   })
 
   it('searches all localized card and character names with trim and case folding', () => {
-    const conditions = { ...createCardListConditions(), q: '  SAKURA ' }
+    const conditions = {
+      ...createCardListConditions(getCardFilterOptions(cards)),
+      q: '  SAKURA ',
+    }
     expect(
       filterAndSortCards(cards, conditions).map((item) => item.id),
     ).toEqual(['c-02'])
@@ -145,7 +149,7 @@ describe('card list', () => {
 
   it('combines filter groups with AND and values within each group with OR', () => {
     const conditions: CardListConditions = {
-      ...createCardListConditions(),
+      ...createCardListConditions(getCardFilterOptions(cards)),
       character: ['c-a', 'c-b'],
       rarity: [3, 5],
       attribute: [1, 3],
@@ -154,6 +158,20 @@ describe('card list', () => {
     expect(
       filterAndSortCards(cards, conditions).map((item) => item.id),
     ).toEqual(['c-03'])
+  })
+
+  it('returns no results when any checkbox group has no selected values', () => {
+    const defaults = createCardListConditions(getCardFilterOptions(cards))
+    for (const group of ['rarity', 'attribute', 'specialization'] as const) {
+      expect(
+        filterAndSortCards(cards, { ...defaults, [group]: [] }),
+        group,
+      ).toEqual([])
+    }
+
+    expect(
+      filterAndSortCards(cards, { ...defaults, character: [] }),
+    ).toHaveLength(cards.length)
   })
 
   it('sorts every supported key in either direction and resolves ties consistently', () => {
@@ -177,7 +195,7 @@ describe('card list', () => {
     }
     for (const sort of Object.keys(expectedAscending) as CardListSort[]) {
       const ascending = {
-        ...createCardListConditions(),
+        ...createCardListConditions(getCardFilterOptions(cards)),
         sort,
         direction: 'asc' as const,
       }
@@ -195,13 +213,33 @@ describe('card list', () => {
 
   it('sorts characters by source order and breaks character ties by card order then ID', () => {
     const characterCards = [
-      card('a-02', { characterId: 'c-a', characterOrder: 1, order: 9 }),
-      card('a-01', { characterId: 'c-a', characterOrder: 1, order: 9 }),
-      card('a-00', { characterId: 'c-a', characterOrder: 1, order: 2 }),
-      card('b-00', { characterId: 'c-b', characterOrder: 2, order: 1 }),
+      card('a-02', {
+        characterId: 'c-a',
+        characterOrder: 1,
+        order: 9,
+        specializations: ['performance'],
+      }),
+      card('a-01', {
+        characterId: 'c-a',
+        characterOrder: 1,
+        order: 9,
+        specializations: ['performance'],
+      }),
+      card('a-00', {
+        characterId: 'c-a',
+        characterOrder: 1,
+        order: 2,
+        specializations: ['performance'],
+      }),
+      card('b-00', {
+        characterId: 'c-b',
+        characterOrder: 2,
+        order: 1,
+        specializations: ['performance'],
+      }),
     ]
     const ascending = {
-      ...createCardListConditions(),
+      ...createCardListConditions(getCardFilterOptions(cards)),
       sort: 'character' as const,
       direction: 'asc' as const,
     }
@@ -240,7 +278,10 @@ describe('card list', () => {
       sort: 'total',
       direction: 'asc',
     })
-    const serialized = toCardListQuery(parsed, { unrelated: 'keep', page: '2' })
+    const serialized = toCardListQuery(parsed, options, {
+      unrelated: 'keep',
+      page: '2',
+    })
     expect(serialized).toEqual({
       unrelated: 'keep',
       page: '2',
@@ -254,7 +295,7 @@ describe('card list', () => {
     })
     expect(parseCardListQuery(serialized, options)).toEqual(parsed)
     expect(
-      toCardListQuery(createCardListConditions(), {
+      toCardListQuery(createCardListConditions(options), options, {
         q: 'old',
         layout: 'vertical',
         custom: 'x',
@@ -278,19 +319,78 @@ describe('card list', () => {
       custom: ['keep', null],
     }
     const queryBefore = structuredClone(query)
-    const conditions = createCardListConditions()
+    const conditions = createCardListConditions(options)
     const conditionsBefore = structuredClone(conditions)
     const parsed = parseCardListQuery(query, options)
 
-    expect(parsed).toEqual(createCardListConditions())
+    expect(parsed).toEqual(createCardListConditions(options))
     expect(query).toEqual(queryBefore)
     expect(conditions).toEqual(conditionsBefore)
 
     const existingQuery = { q: 'old', custom: ['keep', null] }
     const existingQueryBefore = structuredClone(existingQuery)
-    const serialized = toCardListQuery(conditions, existingQuery)
+    const serialized = toCardListQuery(conditions, options, existingQuery)
     expect(serialized).toEqual({ custom: ['keep', null] })
     expect(existingQuery).toEqual(existingQueryBefore)
+  })
+
+  it('distinguishes absent, explicitly empty, invalid-only, and mixed checkbox query values', () => {
+    const options = getCardFilterOptions(cards)
+    const defaults = createCardListConditions(options)
+
+    expect(parseCardListQuery({}, options)).toEqual(defaults)
+    expect(
+      parseCardListQuery(
+        { rarity: '', attribute: '', specialization: '' },
+        options,
+      ),
+    ).toEqual({ ...defaults, rarity: [], attribute: [], specialization: [] })
+    expect(
+      parseCardListQuery(
+        { rarity: 'invalid', attribute: '99', specialization: 'unknown' },
+        options,
+      ),
+    ).toEqual(defaults)
+    expect(
+      parseCardListQuery(
+        {
+          rarity: ['4', 'invalid'],
+          attribute: ['2', '99'],
+          specialization: ['sense', 'unknown'],
+        },
+        options,
+      ),
+    ).toEqual({
+      ...defaults,
+      rarity: [4],
+      attribute: [2],
+      specialization: ['sense'],
+    })
+  })
+
+  it('omits full checkbox selections and serializes empty selections explicitly', () => {
+    const options = getCardFilterOptions(cards)
+    const defaults = createCardListConditions(options)
+
+    expect(toCardListQuery(defaults, options, { custom: 'keep' })).toEqual({
+      custom: 'keep',
+    })
+    const empty = {
+      ...defaults,
+      rarity: [],
+      attribute: [],
+      specialization: [],
+    }
+    const serialized = toCardListQuery(empty, options, {
+      custom: 'keep',
+    })
+    expect(serialized).toEqual({
+      custom: 'keep',
+      rarity: '',
+      attribute: '',
+      specialization: '',
+    })
+    expect(parseCardListQuery(serialized, options)).toEqual(empty)
   })
 
   it('uses the selected card image CDN path and returns null when the asset is absent', () => {

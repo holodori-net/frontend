@@ -102,8 +102,8 @@ describe('useCardListConditions', () => {
       q: 'Sakura',
       character: [],
       rarity: [5],
-      attribute: [],
-      specialization: [],
+      attribute: [1, 2, 3],
+      specialization: ['performance', 'technique', 'sense'],
       sort: 'order',
       direction: 'desc',
     })
@@ -144,9 +144,9 @@ describe('useCardListConditions', () => {
     expect(context.result.conditions.value).toEqual({
       q: '',
       character: [],
-      rarity: [],
-      attribute: [],
-      specialization: [],
+      rarity: [3, 4, 5],
+      attribute: [1, 2, 3],
+      specialization: ['performance', 'technique', 'sense'],
       sort: 'order',
       direction: 'desc',
     })
@@ -177,6 +177,28 @@ describe('useCardListConditions', () => {
       query: { q: 'ab', rarity: ['5'] },
       hash: '',
     })
+    context.app.unmount()
+  })
+
+  it('restores all checkbox options on reset and removes explicit empty selections', async () => {
+    const context = mountComposable({
+      rarity: '',
+      attribute: '',
+      specialization: '',
+    })
+    await nextTick()
+    expect(context.result.conditions.value.rarity).toEqual([])
+    expect(context.result.conditions.value.attribute).toEqual([])
+    expect(context.result.conditions.value.specialization).toEqual([])
+
+    context.result.reset()
+
+    expect(context.result.conditions.value.rarity).toEqual(options.rarity)
+    expect(context.result.conditions.value.attribute).toEqual(options.attribute)
+    expect(context.result.conditions.value.specialization).toEqual(
+      options.specialization,
+    )
+    expect(context.push).toHaveBeenCalledWith({ query: {}, hash: '' })
     context.app.unmount()
   })
 
