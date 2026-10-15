@@ -81,6 +81,8 @@ HTML language tags are `ja`, `en`, `id`, `ko`, `zh-Hant-TW`, and `zh-Hans-CN` fo
 
 The shared Google Fonts CSS2 stylesheet requests Noto Sans, Noto Sans JP, TC, SC, and KR at weights 400, 500, 600, and 700 with `display=swap`. Language selectors in `app/assets/css/main.css` use Noto Sans for Latin characters before the matching CJK family; Chinese selectors use `:lang(zh-Hant)` and `:lang(zh-Hans)`. Keep Google's Unicode subsets so browsers download only the required font files.
 
+`service-worker/sw.ts` uses Workbox's `googleFontsCache` recipe: stale-while-revalidate for the stylesheet and cache-first for font files, with cache prefix `holodori-google-fonts`, at most 256 font files, and a one-year maximum age. Keep `workbox-recipes` and `workbox-precaching` versions aligned. Font requests populate this cache during browsing; offline page synchronization downloads only its own pages and application resources. Verify mixed interface/content languages, overlays, chips, narrow-screen wrapping, and cached and unavailable fonts offline when changing these settings.
+
 Localized pages live under `app/pages/[gameLocale]/`. Nuxt's `pages:extend` hook derives matching language entry routes from those pages and uses `app/components/LanguageEntry.vue` for each entry. Add a localized page in that directory to create its unprefixed entry automatically; keep prerender entry routes derived from the same scanned route list.
 
 Add language resolution and route behavior tests under `tests/` when changing language handling. Verify offline selection changes preserve the previous cache if any requested page or payload cannot be downloaded.

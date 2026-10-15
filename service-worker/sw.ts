@@ -5,6 +5,7 @@ import {
   getCacheKeyForURL,
   precacheAndRoute,
 } from 'workbox-precaching'
+import { googleFontsCache } from 'workbox-recipes'
 import {
   isGameLocale,
   isSiteLocale,
@@ -35,6 +36,11 @@ let selectionQueue: Promise<unknown> = Promise.resolve()
 
 precacheAndRoute(precacheEntries)
 cleanupOutdatedCaches()
+googleFontsCache({
+  cachePrefix: 'holodori-google-fonts',
+  maxEntries: 256,
+  maxAgeSeconds: 60 * 60 * 24 * 365,
+})
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

@@ -36,6 +36,8 @@ The site can be installed from a supported browser when served over HTTPS (or lo
 
 Settings displays download progress. If synchronization fails, the previous offline selection remains available.
 
+Text uses Noto Sans from Google Fonts. After the service worker controls the page, fonts used while browsing are cached independently of offline page downloads. Cached fonts remain available offline; font files that are unavailable, expired, or removed from the cache use system fonts.
+
 The site checks for updates when a page is opened. An update ready during that check activates and reloads the page once. Updates are not applied during in-app navigation.
 
 ## Run locally

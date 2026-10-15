@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+vi.mock('workbox-recipes', () => ({ googleFontsCache: vi.fn() }))
+
 vi.mock('workbox-precaching', () => ({
   cleanupOutdatedCaches: vi.fn(),
   getCacheKeyForURL: (url: string) => url,
