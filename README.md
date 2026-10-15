@@ -32,7 +32,7 @@ Member themes use official character colors, avatars, and motifs. Names follow t
 
 ## Install and use offline
 
-The site can be installed from a supported browser when served over HTTPS (or localhost). Open **Settings** for a language combination to choose whether its home, cards, and characters pages should be available offline. The current language combination is kept offline; switching to another combination replaces its saved pages after the new selection downloads successfully. The settings page and app resources remain available to manage offline content. Saved card lists support searching, filtering, and sorting offline. Unselected pages, card art, star animations, attribute and stat icons, and character icons require a network connection.
+The site can be installed from a supported browser when served over HTTPS (or localhost). The close button remembers your choice in this browser until you clear its site data; you can still install from the browser menu. Open **Settings** for a language combination to choose whether its home, cards, and characters pages should be available offline. The current language combination is kept offline; switching to another combination replaces its saved pages after the new selection downloads successfully. The settings page and app resources remain available to manage offline content. Saved card lists support searching, filtering, and sorting offline. Unselected pages, card art, star animations, attribute and stat icons, and character icons require a network connection.
 
 Settings displays download progress. If synchronization fails, the previous offline selection remains available.
 

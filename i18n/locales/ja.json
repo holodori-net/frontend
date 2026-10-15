@@ -78,5 +78,6 @@
   "offlineSyncReady": "ページを選ぶと、オンライン時に保存します。",
   "pwaInstall": "アプリをインストール",
   "pwaInstallDescription": "Holodori Database をホーム画面に追加できます。",
-  "pwaIosInstallHelp": "インストールするには、共有ボタンから「ホーム画面に追加」を選択してください。"
+  "pwaIosInstallHelp": "インストールするには、共有ボタンから「ホーム画面に追加」を選択してください。",
+  "pwaDismissInstall": "インストール案内を閉じる"
 }

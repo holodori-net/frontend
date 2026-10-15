@@ -78,5 +78,6 @@
   "offlineSyncReady": "Choose pages to save while online.",
   "pwaInstall": "Install app",
   "pwaInstallDescription": "Add Holodori Database to your home screen.",
-  "pwaIosInstallHelp": "To install, use the Share button and choose “Add to Home Screen.”"
+  "pwaIosInstallHelp": "To install, use the Share button and choose “Add to Home Screen.”",
+  "pwaDismissInstall": "Dismiss install prompt"
 }

@@ -5,11 +5,23 @@ interface InstallPromptEvent extends Event {
 }
 
 const { t } = useI18n()
+const INSTALL_DISMISSED_STORAGE_KEY = 'holodori-pwa-install-dismissed'
 const installPrompt = ref<InstallPromptEvent | null>(null)
 const isIos = ref(false)
 const isInstalled = ref(false)
+const isInstallDismissed = ref(false)
 
 onMounted(() => {
+  try {
+    isInstallDismissed.value =
+      localStorage.getItem(INSTALL_DISMISSED_STORAGE_KEY) === 'true'
+  } catch (error) {
+    console.warn(
+      'Unable to read PWA install dismissal preference from localStorage.',
+      error,
+    )
+  }
+
   const userAgent = navigator.userAgent.toLowerCase()
   isIos.value = /iphone|ipad|ipod/.test(userAgent)
   isInstalled.value =
@@ -28,6 +40,18 @@ function onInstallPrompt(event: Event) {
   installPrompt.value = event as InstallPromptEvent
 }
 
+function dismissInstall() {
+  isInstallDismissed.value = true
+  try {
+    localStorage.setItem(INSTALL_DISMISSED_STORAGE_KEY, 'true')
+  } catch (error) {
+    console.warn(
+      'Unable to save PWA install dismissal preference to localStorage.',
+      error,
+    )
+  }
+}
+
 async function install() {
   if (!installPrompt.value) return
   await installPrompt.value.prompt()
@@ -37,16 +61,43 @@ async function install() {
 </script>
 
 <template>
-  <aside v-if="!isInstalled && (installPrompt || isIos)" class="pwa-notice">
-    <div
-      v-if="installPrompt"
-      class="flex items-center justify-between gap-4 rounded-2xl border border-surface-200 bg-surface-0 p-4 text-sm shadow-lg dark:border-surface-700 dark:bg-surface-900"
-    >
-      <span>{{ t('pwaInstallDescription') }}</span>
-      <Button :label="t('pwaInstall')" severity="secondary" @click="install" />
+  <aside
+    v-if="!isInstalled && !isInstallDismissed && (installPrompt || isIos)"
+    class="pwa-notice"
+  >
+    <div class="pwa-install-help flex items-start gap-2">
+      <div class="min-w-0 flex-1">
+        <template v-if="installPrompt">
+          <p class="mb-3">{{ t('pwaInstallDescription') }}</p>
+          <Button
+            :label="t('pwaInstall')"
+            severity="secondary"
+            @click="install"
+          />
+        </template>
+        <p v-else-if="isIos" class="mb-0">
+          {{ t('pwaIosInstallHelp') }}
+        </p>
+      </div>
+      <Button
+        class="!size-11 !shrink-0 !p-0"
+        :aria-label="t('pwaDismissInstall')"
+        :title="t('pwaDismissInstall')"
+        severity="secondary"
+        text
+        @click="dismissInstall"
+      >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          class="size-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="m18 6-12 12M6 6l12 12" />
+        </svg>
+      </Button>
     </div>
-    <p v-else-if="isIos" class="pwa-install-help">
-      {{ t('pwaIosInstallHelp') }}
-    </p>
   </aside>
 </template>

@@ -78,5 +78,6 @@
   "offlineSyncReady": "連線時會儲存所選頁面。",
   "pwaInstall": "安裝應用程式",
   "pwaInstallDescription": "將 Holodori 資料庫加入主畫面。",
-  "pwaIosInstallHelp": "若要安裝，請點選分享按鈕，再選擇「加入主畫面」。"
+  "pwaIosInstallHelp": "若要安裝，請點選分享按鈕，再選擇「加入主畫面」。",
+  "pwaDismissInstall": "關閉安裝提示"
 }
