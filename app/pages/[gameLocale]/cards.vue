@@ -161,11 +161,13 @@ const selectedSortOption = computed(() =>
               display="chip"
             >
               <template #option="{ option }">
-                <span :lang="option.lang">{{ option.text }}</span>
+                <span class="game-text" :lang="option.lang">{{
+                  option.text
+                }}</span>
               </template>
               <template #chip="{ value, removeCallback }">
                 <Chip
-                  class="p-multiselect-chip"
+                  class="game-text p-multiselect-chip"
                   :label="
                     characterOptions.find((option) => option.value === value)
                       ?.text ?? value

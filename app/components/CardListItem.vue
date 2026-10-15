@@ -103,13 +103,13 @@ onMounted(() => {
       <div class="flex flex-1 flex-col gap-4 p-4">
         <div class="min-w-0 flex-1">
           <p
-            class="mb-0 min-w-0 text-base font-semibold leading-snug wrap-anywhere"
+            class="game-text mb-0 min-w-0 text-base font-semibold leading-snug wrap-anywhere"
             :lang="cardName.lang"
           >
             {{ cardName.text }}
           </p>
           <p
-            class="mb-0 mt-1 text-sm text-muted-color wrap-anywhere"
+            class="game-text mb-0 mt-1 text-sm text-muted-color wrap-anywhere"
             :lang="characterName.lang"
           >
             {{ characterName.text }}

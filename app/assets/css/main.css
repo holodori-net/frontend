@@ -47,6 +47,10 @@
   box-sizing: border-box;
 }
 
+.game-text {
+  text-autospace: normal;
+}
+
 html,
 body,
 #__nuxt {
