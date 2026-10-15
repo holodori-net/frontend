@@ -6,11 +6,15 @@ const props = defineProps<{
   label: string
   showLabel?: boolean
   vertical?: boolean
+  loadingSkeleton?: boolean
 }>()
 
 const canvasElements = ref<HTMLCanvasElement[]>([])
 const staticImages = ref<HTMLImageElement[]>([])
 const animatedIndexes = ref(new Set<number>())
+const staticImageStates = ref(
+  new Map<number, 'loading' | 'loaded' | 'failed'>(),
+)
 const staticImageFailed = ref(false)
 const showTextFallback = computed(
   () => staticImageFailed.value && animatedIndexes.value.size === 0,
@@ -26,16 +30,33 @@ useCardRarityAnimation(canvasElements, (index, active) => {
   animatedIndexes.value = indexes
 })
 
-onMounted(() => {
-  if (
-    staticImages.value.some((image) => image.complete && !image.naturalWidth)
-  ) {
-    staticImageFailed.value = true
-  }
+onMounted(async () => {
+  await nextTick()
+  staticImages.value.forEach((image, index) => {
+    if (!image.complete) return
+    setStaticImageState(index, image.naturalWidth > 0 ? 'loaded' : 'failed')
+  })
 })
 
-function onStaticImageError() {
-  staticImageFailed.value = true
+function setStaticImageState(index: number, state: 'loaded' | 'failed') {
+  const states = new Map(staticImageStates.value)
+  states.set(index, state)
+  staticImageStates.value = states
+  if (state === 'failed') staticImageFailed.value = true
+}
+
+function onStaticImageLoad(index: number, event: Event) {
+  const image = event.currentTarget as HTMLImageElement
+  if (image.getAttribute('src') === cardRarityStaticUrl) {
+    setStaticImageState(index, 'loaded')
+  }
+}
+
+function onStaticImageError(index: number, event: Event) {
+  const image = event.currentTarget as HTMLImageElement
+  if (image.getAttribute('src') === cardRarityStaticUrl) {
+    setStaticImageState(index, 'failed')
+  }
 }
 </script>
 
@@ -70,6 +91,18 @@ function onStaticImageError() {
       ]"
     >
       <span class="relative aspect-square h-full max-w-full">
+        <Skeleton
+          v-if="
+            loadingSkeleton &&
+            !animatedIndexes.has(index) &&
+            staticImageStates.get(index) !== 'failed' &&
+            staticImageStates.get(index) !== 'loaded'
+          "
+          class="image-skeleton !absolute inset-0"
+          width="100%"
+          height="100%"
+          border-radius="50%"
+        />
         <img
           ref="staticImages"
           :src="cardRarityStaticUrl"
@@ -84,7 +117,8 @@ function onStaticImageError() {
             height: '94.5%',
           }"
           draggable="false"
-          @error="onStaticImageError"
+          @load="onStaticImageLoad(index, $event)"
+          @error="onStaticImageError(index, $event)"
         />
         <canvas
           ref="canvasElements"

@@ -199,6 +199,7 @@ const selectedSortOption = computed(() =>
                   :count="option.value"
                   :label="option.label"
                   show-label
+                  loading-skeleton
                 />
               </template>
             </MultiSelect>
@@ -222,6 +223,7 @@ const selectedSortOption = computed(() =>
                   <CardListIcon
                     :src="getCardAttributeIconUrl(option.value)"
                     label=""
+                    loading-skeleton
                   />
                   <span>{{ option.label }}</span>
                 </div>
@@ -248,6 +250,7 @@ const selectedSortOption = computed(() =>
                     :src="getCardStatIconUrl(option.value)"
                     label=""
                     monochrome
+                    loading-skeleton
                   />
                   <span>{{ option.label }}</span>
                 </div>
@@ -276,6 +279,7 @@ const selectedSortOption = computed(() =>
                     :src="getCardStatIconUrl(option.value)"
                     label=""
                     monochrome
+                    loading-skeleton
                   />
                   <span>{{ option.label }}</span>
                 </div>
@@ -287,6 +291,7 @@ const selectedSortOption = computed(() =>
                     :src="getCardStatIconUrl(selectedSortOption.value)"
                     label=""
                     monochrome
+                    loading-skeleton
                   />
                   <span>{{ selectedSortOption.label }}</span>
                 </div>

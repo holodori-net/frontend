@@ -4,11 +4,13 @@ const props = defineProps<{
   label: string
   monochrome?: boolean
   size?: 'small' | 'medium' | 'large'
+  loadingSkeleton?: boolean
 }>()
 
-const imageFailed = ref(false)
-const imageElement = ref<HTMLImageElement | null>(null)
-const hasImage = computed(() => Boolean(props.src) && !imageFailed.value)
+const { status, imageElement, onLoad, onError } = useImageLoading(
+  computed(() => props.src),
+)
+const hasImage = computed(() => Boolean(props.src) && status.value !== 'failed')
 const imageSizeClass = computed(() => {
   switch (props.size) {
     case 'small':
@@ -19,24 +21,11 @@ const imageSizeClass = computed(() => {
       return 'size-5'
   }
 })
-
-watch(
-  () => props.src,
-  () => {
-    imageFailed.value = false
-  },
-)
-
-onMounted(() => {
-  if (imageElement.value?.complete && imageElement.value.naturalWidth === 0) {
-    imageFailed.value = true
-  }
-})
 </script>
 
 <template>
   <span
-    class="inline-flex max-w-full items-center justify-center"
+    class="relative inline-flex max-w-full items-center justify-center"
     :class="[
       hasImage && 'shrink-0',
       !hasImage && !label && imageSizeClass,
@@ -48,18 +37,29 @@ onMounted(() => {
     :title="label || undefined"
     :aria-hidden="label ? undefined : true"
   >
+    <Skeleton
+      v-if="loadingSkeleton && hasImage && status === 'loading'"
+      class="image-skeleton !absolute inset-0"
+      :class="imageSizeClass"
+      width="100%"
+      height="100%"
+      border-radius="0.125rem"
+    />
     <img
       v-if="hasImage"
       ref="imageElement"
+      :key="src!"
       :src="src!"
       :alt="label"
       :class="[
         imageSizeClass,
+        'relative',
         'object-contain',
         monochrome && 'brightness-0 dark:invert',
       ]"
       draggable="false"
-      @error="imageFailed = true"
+      @load="onLoad"
+      @error="onError"
     />
     <span
       v-else-if="label"

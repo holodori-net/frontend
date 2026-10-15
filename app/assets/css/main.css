@@ -176,6 +176,12 @@ p {
   color: var(--p-red-600);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .image-skeleton::after {
+    animation: none;
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
