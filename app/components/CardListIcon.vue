@@ -25,7 +25,7 @@ const imageSizeClass = computed(() => {
 
 <template>
   <span
-    class="relative inline-flex max-w-full items-center justify-center"
+    class="relative inline-flex max-w-full select-none items-center justify-center"
     :class="[
       hasImage && 'shrink-0',
       !hasImage && !label && imageSizeClass,

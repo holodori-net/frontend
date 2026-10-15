@@ -47,6 +47,13 @@
   box-sizing: border-box;
 }
 
+img,
+svg,
+[role='img'] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 .game-text {
   text-autospace: normal;
 }
