@@ -48,7 +48,7 @@ function sampleTheme(id: string, color: string): MemberTheme {
     color2: color,
     color3: color,
     color4: color,
-    assets: { avatar: null, motifMain: null },
+    assets: { avatar: null, motifMain: null, motifLight: null },
   }
 }
 
@@ -203,13 +203,11 @@ describe('member theme styles', () => {
     for (const theme of themes) {
       expect(css).toContain(`:root[data-theme-id="${theme.id}"]{`)
     }
-    expect(css).toContain('--theme-motif:url("https://assets.holodori.net/')
   })
 
   it('keeps the decorative background and generated palette when a motif is absent', () => {
     const theme = sampleTheme(defaultThemeId, '#C9345D')
     const css = renderMemberThemeCss([theme])
-    expect(css).toContain('--theme-motif:none;')
     expect(css).toContain('--member-background-accent-1:')
     expect(css).toContain('--member-background-accent-2:')
   })

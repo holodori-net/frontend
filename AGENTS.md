@@ -20,7 +20,7 @@
 ## 主題與素材
 
 - 主題 ID 使用 `Character.id`，預設為みこ `chr-00015`。
-- `shared/theme.ts` 定義主題型別、預設及 `avatar`／`motifMain` 素材用途；素材網址保留 `assetId` 前導零，缺圖時保留成員色票或漸層底色。
+- `shared/theme.ts` 定義主題型別、預設及 `avatar`／`motifMain`／`motifLight` 素材用途；素材網址保留 `assetId` 前導零，缺圖時保留成員色票或漸層底色。
 - `app/plugins/member-theme.ts` 以 `useAsyncData('member-themes', ...)` 保存 Nuxt payload，初始化偏好並更新 `data-theme-id`；composable 以 `useNuxtData` 與 `useState` 共用資料及選擇。靜態 HTML 使用みこ，hydration 後套用 cookie；無效 ID 使用預設。
 - 主題四色來自角色資料，缺少選填色時使用主色；`color1` 衍生頁面、surface 與 topbar 底色、`color2/3` 裝飾與色票、`color4` 互動色、topbar 品牌文字與顯示設定圖示。共用規則生成亮暗色階，主要文字及按鈕文字須維持 4.5:1 對比。
 - CSS 與 PWA manifest 直接使用同一 reader；主題資料沿用 Nuxt payload。選單名稱跟隨遊戲語言並支援六語搜尋；離線切換保留配色並提供遠端素材 fallback。

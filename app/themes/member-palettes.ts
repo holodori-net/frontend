@@ -25,7 +25,6 @@ export interface MemberThemePalette {
   primary: Record<(typeof primaryShades)[number], string>
   light: MemberThemeColors
   dark: MemberThemeColors
-  motif: { size: number }
 }
 
 const white = '#FFFFFF'
@@ -159,9 +158,10 @@ function modeColors(
     surface,
     page: { background, color: pageColor },
     headerBackground,
-    motifColor: theme.assets.motifMain
-      ? `color-mix(in srgb, ${theme.color2} 4%, transparent)`
-      : 'transparent',
+    motifColor:
+      theme.assets.motifMain || theme.assets.motifLight
+        ? `color-mix(in srgb, ${theme.color2} 4%, transparent)`
+        : 'transparent',
     backgroundAccent1,
     backgroundAccent2,
   }
@@ -194,6 +194,5 @@ export function createMemberThemePalette(
       mix(theme.color1, '#101014', 12),
       true,
     ),
-    motif: { size: 48 },
   }
 }

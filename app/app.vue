@@ -10,6 +10,7 @@ import {
 const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n()
+const { theme } = useMemberTheme()
 useHead({
   htmlAttrs: {
     lang: computed(() => siteLocaleLanguages[locale.value as SiteLocale]),
@@ -78,6 +79,55 @@ async function keepLinkedLanguages() {
 </script>
 
 <template>
+  <svg
+    class="member-theme-background"
+    aria-hidden="true"
+    focusable="false"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      <pattern
+        id="member-theme-motif-pattern"
+        width="80"
+        height="80"
+        patternUnits="userSpaceOnUse"
+      >
+        <image
+          v-if="theme.assets.motifMain"
+          :href="theme.assets.motifMain"
+          x="6"
+          y="6"
+          width="28"
+          height="28"
+        />
+        <image
+          v-if="theme.assets.motifLight"
+          :href="theme.assets.motifLight"
+          x="46"
+          y="46"
+          width="28"
+          height="28"
+        />
+      </pattern>
+      <mask
+        id="member-theme-motif-mask"
+        maskContentUnits="userSpaceOnUse"
+        mask-type="alpha"
+      >
+        <rect
+          width="100%"
+          height="100%"
+          fill="url(#member-theme-motif-pattern)"
+        />
+      </mask>
+    </defs>
+    <rect
+      width="100%"
+      height="100%"
+      fill="var(--member-motif-color)"
+      mask="url(#member-theme-motif-mask)"
+    />
+  </svg>
   <div class="min-h-screen">
     <VitePwaManifest />
     <NuxtPage />

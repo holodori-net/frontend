@@ -14,12 +14,14 @@ export interface MemberTheme {
   assets: {
     avatar: string | null
     motifMain: string | null
+    motifLight: string | null
   }
 }
 
 const memberAssetRoles = {
   avatar: 'img_chr_icon_normal',
   motifMain: 'img_chr_motif_icon_default_main',
+  motifLight: 'img_chr_motif_icon_light_main',
 } as const
 
 export function getMemberThemeAssets(
@@ -30,7 +32,11 @@ export function getMemberThemeAssets(
     const name = `${memberAssetRoles[role]}_${assetId}`
     return `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.png`
   }
-  return { avatar: url('avatar'), motifMain: url('motifMain') }
+  return {
+    avatar: url('avatar'),
+    motifMain: url('motifMain'),
+    motifLight: url('motifLight'),
+  }
 }
 
 export function resolveMemberTheme(

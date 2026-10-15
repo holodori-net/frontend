@@ -32,16 +32,9 @@ function themeCss(theme: MemberTheme, fallback: boolean): string {
   const darkModeSelector = fallback
     ? `:root.dark,${darkSelector}`
     : darkSelector
-  const motif = theme.assets.motifMain
-    ? `url(${JSON.stringify(theme.assets.motifMain)})`
-    : 'none'
-  const common = [
-    ...primaryShades.map(
-      (shade) => `--member-primary-${shade}:${palette.primary[shade]};`,
-    ),
-    `--theme-motif:${motif};`,
-    `--theme-motif-size:${palette.motif.size}px;`,
-  ].join('')
+  const common = primaryShades
+    .map((shade) => `--member-primary-${shade}:${palette.primary[shade]};`)
+    .join('')
 
   return `${lightSelector}{${common}${modeVariables(palette.light)}}\n${darkModeSelector}{${modeVariables(palette.dark)}}`
 }

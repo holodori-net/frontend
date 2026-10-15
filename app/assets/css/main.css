@@ -72,8 +72,7 @@ body {
   background: var(--member-page-background);
 }
 
-body::before,
-body::after {
+body::before {
   position: fixed;
   z-index: 0;
   inset: 0;
@@ -95,19 +94,18 @@ body::before {
     );
 }
 
-body::after {
-  background-color: var(--member-motif-color);
-  mask-image: var(--theme-motif, none);
-  mask-repeat: repeat;
-  mask-size: var(--theme-motif-size) var(--theme-motif-size);
-  -webkit-mask-image: var(--theme-motif, none);
-  -webkit-mask-repeat: repeat;
-  -webkit-mask-size: var(--theme-motif-size) var(--theme-motif-size);
-}
-
-#__nuxt > * {
+#__nuxt > *:not(.member-theme-background) {
   position: relative;
   z-index: 1;
+}
+
+.member-theme-background {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 @layer base {

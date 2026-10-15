@@ -57,6 +57,8 @@ describe('member theme projection', () => {
           'https://assets.holodori.net/cdn/img_chr_icon_normal_00015/Texture2D/img_chr_icon_normal_00015.png',
         motifMain:
           'https://assets.holodori.net/cdn/img_chr_motif_icon_default_main_00015/Texture2D/img_chr_motif_icon_default_main_00015.png',
+        motifLight:
+          'https://assets.holodori.net/cdn/img_chr_motif_icon_light_main_00015/Texture2D/img_chr_motif_icon_light_main_00015.png',
       },
     })
     expect(Object.keys(theme!.name).sort()).toEqual([...gameLocales].sort())
@@ -83,9 +85,13 @@ describe('member theme projection', () => {
       color2: '#AABBCC',
       color3: '#AABBCC',
       color4: '#AABBCC',
-      assets: { avatar: null, motifMain: null },
+      assets: { avatar: null, motifMain: null, motifLight: null },
     })
-    expect(getMemberThemeAssets('')).toEqual({ avatar: null, motifMain: null })
+    expect(getMemberThemeAssets('')).toEqual({
+      avatar: null,
+      motifMain: null,
+      motifLight: null,
+    })
   })
 
   it('sorts by source order and ID', () => {
