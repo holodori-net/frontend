@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { GameLocale } from '#shared/language'
+import { resolveLocalizedName, type GameLocale } from '#shared/language'
 import type { CharacterListItemData } from '#shared/game-data/characters'
 import { getCharacterIconUrl } from '#shared/game-data/character-list'
 
@@ -13,11 +13,8 @@ const imageFailed = ref(false)
 const imageElement = ref<HTMLImageElement | null>(null)
 const imageUrl = computed(() => getCharacterIconUrl(props.character.assetId))
 const hasIcon = computed(() => Boolean(imageUrl.value) && !imageFailed.value)
-const displayName = computed(
-  () =>
-    props.character.name[props.gameLocale] ||
-    props.character.name.jpn ||
-    props.character.name.eng,
+const displayName = computed(() =>
+  resolveLocalizedName(props.character.name, props.gameLocale),
 )
 const fallbackBackground = computed(() => {
   const color = props.character.color1
@@ -66,8 +63,11 @@ onMounted(() => {
           {{ t('characterIconUnavailable') }}
         </span>
       </div>
-      <p class="m-0 w-full text-center text-sm leading-snug">
-        {{ displayName }}
+      <p
+        class="m-0 w-full text-center text-sm leading-snug"
+        :lang="displayName.lang"
+      >
+        {{ displayName.text }}
       </p>
     </article>
   </li>

@@ -6,13 +6,38 @@ export type SiteLocale = (typeof siteLocales)[number]
 export const gameLocales = ['jpn', 'eng', 'ind', 'kor', 'cht', 'chs'] as const
 export type GameLocale = (typeof gameLocales)[number]
 
+export const htmlLanguages = [
+  'ja',
+  'en',
+  'id',
+  'ko',
+  'zh-Hant-TW',
+  'zh-Hans-CN',
+] as const
+export type HtmlLanguage = (typeof htmlLanguages)[number]
+
+export const siteLocaleLanguages: Record<SiteLocale, HtmlLanguage> = {
+  ja: 'ja',
+  en: 'en',
+  'zh-TW': 'zh-Hant-TW',
+}
+
+export const gameLocaleLanguages: Record<GameLocale, HtmlLanguage> = {
+  jpn: 'ja',
+  eng: 'en',
+  ind: 'id',
+  kor: 'ko',
+  cht: 'zh-Hant-TW',
+  chs: 'zh-Hans-CN',
+}
+
 export const siteLanguageMetadata: Record<
   SiteLocale,
-  { language: string; name: string }
+  { language: HtmlLanguage; name: string }
 > = {
-  ja: { language: 'ja-JP', name: '日本語' },
-  en: { language: 'en', name: 'English' },
-  'zh-TW': { language: 'zh-TW', name: '繁體中文' },
+  ja: { language: siteLocaleLanguages.ja, name: '日本語' },
+  en: { language: siteLocaleLanguages.en, name: 'English' },
+  'zh-TW': { language: siteLocaleLanguages['zh-TW'], name: '繁體中文' },
 }
 
 export const gameLanguageNames: Record<GameLocale, string> = {
@@ -27,11 +52,24 @@ export const gameLanguageNames: Record<GameLocale, string> = {
 export const siteLanguageOptions = siteLocales.map((value) => ({
   value,
   label: siteLanguageMetadata[value].name,
+  lang: siteLocaleLanguages[value],
 }))
 export const gameLanguageOptions = gameLocales.map((value) => ({
   value,
   label: gameLanguageNames[value],
+  lang: gameLocaleLanguages[value],
 }))
+
+export function resolveLocalizedName(
+  names: Readonly<Record<GameLocale, string>>,
+  selectedLocale: GameLocale,
+) {
+  for (const locale of [selectedLocale, 'jpn', 'eng'] as const) {
+    const text = names[locale]
+    if (text) return { text, lang: gameLocaleLanguages[locale] }
+  }
+  return { text: '', lang: gameLocaleLanguages[selectedLocale] }
+}
 
 export const sitePages = ['home', 'cards', 'characters', 'settings'] as const
 export type PageKind = (typeof sitePages)[number]

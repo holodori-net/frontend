@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { GameLocale } from '#shared/language'
+import { resolveLocalizedName, type GameLocale } from '#shared/language'
 import type {
   CardListItemData,
   CardStatKey,
@@ -23,17 +23,11 @@ const imageElement = ref<HTMLImageElement | null>(null)
 const imageUrl = computed(() => getCardImageUrl(props.card.assetId))
 const numberFormatter = computed(() => new Intl.NumberFormat(locale.value))
 const hasImage = computed(() => Boolean(imageUrl.value) && !imageFailed.value)
-const cardName = computed(
-  () =>
-    props.card.name[props.gameLocale] ||
-    props.card.name.jpn ||
-    props.card.name.eng,
+const cardName = computed(() =>
+  resolveLocalizedName(props.card.name, props.gameLocale),
 )
-const characterName = computed(
-  () =>
-    props.card.characterName[props.gameLocale] ||
-    props.card.characterName.jpn ||
-    props.card.characterName.eng,
+const characterName = computed(() =>
+  resolveLocalizedName(props.card.characterName, props.gameLocale),
 )
 
 function settleCompletedImage() {
@@ -110,11 +104,15 @@ onMounted(() => {
         <div class="min-w-0 flex-1">
           <p
             class="mb-0 min-w-0 text-base font-semibold leading-snug wrap-anywhere"
+            :lang="cardName.lang"
           >
-            {{ cardName }}
+            {{ cardName.text }}
           </p>
-          <p class="mb-0 mt-1 text-sm text-muted-color wrap-anywhere">
-            {{ characterName }}
+          <p
+            class="mb-0 mt-1 text-sm text-muted-color wrap-anywhere"
+            :lang="characterName.lang"
+          >
+            {{ characterName.text }}
           </p>
         </div>
 

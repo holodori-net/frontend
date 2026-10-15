@@ -77,6 +77,10 @@ The adapter uses Nitro's prerender entry. Recheck it when upgrading Nuxt or Nitr
 
 Language identifiers, display names, browser aliases, and Nuxt locale metadata are configured in `shared/language.ts`.
 
+HTML language tags are `ja`, `en`, `id`, `ko`, `zh-Hant-TW`, and `zh-Hans-CN` for both interface and game text. Names carry the language actually selected after falling back to Japanese and then English. Mark game names and language names explicitly, including PrimeVue overlay options and selected chips; interface labels and placeholders inherit the site language. Route, cookie, and data locale identifiers retain their existing values.
+
+The shared Google Fonts CSS2 stylesheet requests Noto Sans, Noto Sans JP, TC, SC, and KR at weights 400, 500, 600, and 700 with `display=swap`. Language selectors in `app/assets/css/main.css` use Noto Sans for Latin characters before the matching CJK family; Chinese selectors use `:lang(zh-Hant)` and `:lang(zh-Hans)`. Keep Google's Unicode subsets so browsers download only the required font files.
+
 Localized pages live under `app/pages/[gameLocale]/`. Nuxt's `pages:extend` hook derives matching language entry routes from those pages and uses `app/components/LanguageEntry.vue` for each entry. Add a localized page in that directory to create its unprefixed entry automatically; keep prerender entry routes derived from the same scanned route list.
 
 Add language resolution and route behavior tests under `tests/` when changing language handling. Verify offline selection changes preserve the previous cache if any requested page or payload cannot be downloaded.

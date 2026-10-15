@@ -4,14 +4,94 @@ import {
   buildLocalizedPath,
   buildLocalizedRoute,
   gameLocales,
+  gameLocaleLanguages,
   getManualPreferenceConflict,
+  htmlLanguages,
+  resolveLocalizedName,
   resolveBrowserGameLocale,
   resolveBrowserSiteLocale,
   resolveEntryLocales,
+  siteLanguageMetadata,
+  siteLocaleLanguages,
   siteLocales,
 } from '../shared/language'
 
 describe('language resolution', () => {
+  it('maps all game locales to their HTML language tags', () => {
+    expect(htmlLanguages).toEqual([
+      'ja',
+      'en',
+      'id',
+      'ko',
+      'zh-Hant-TW',
+      'zh-Hans-CN',
+    ])
+    expect(gameLocales.map((locale) => gameLocaleLanguages[locale])).toEqual([
+      'ja',
+      'en',
+      'id',
+      'ko',
+      'zh-Hant-TW',
+      'zh-Hans-CN',
+    ])
+    expect(siteLocales.map((locale) => siteLocaleLanguages[locale])).toEqual([
+      'ja',
+      'en',
+      'zh-Hant-TW',
+    ])
+    expect(
+      siteLocales.map((locale) => siteLanguageMetadata[locale].language),
+    ).toEqual(siteLocales.map((locale) => siteLocaleLanguages[locale]))
+  })
+
+  it('returns the language of the selected name or the actual fallback', () => {
+    const names = {
+      jpn: '日本語の名前',
+      eng: 'English name',
+      ind: '',
+      kor: '',
+      cht: '',
+      chs: '',
+    }
+
+    expect(resolveLocalizedName(names, 'cht')).toEqual({
+      text: '日本語の名前',
+      lang: 'ja',
+    })
+    expect(resolveLocalizedName(names, 'ind')).toEqual({
+      text: '日本語の名前',
+      lang: 'ja',
+    })
+    expect(resolveLocalizedName({ ...names, jpn: '' }, 'kor')).toEqual({
+      text: 'English name',
+      lang: 'en',
+    })
+    expect(
+      resolveLocalizedName(
+        { ...names, jpn: '', eng: '', kor: '한국어 이름' },
+        'kor',
+      ),
+    ).toEqual({ text: '한국어 이름', lang: 'ko' })
+  })
+
+  it.each(gameLocales)(
+    'preserves the selected name and language for %s',
+    (locale) => {
+      const names = {
+        jpn: 'さくらみこ',
+        eng: 'Sakura Miko',
+        ind: 'Sakura Miko',
+        kor: '사쿠라 미코',
+        cht: '櫻花巫女',
+        chs: '樱花巫女',
+      }
+      expect(resolveLocalizedName(names, locale)).toEqual({
+        text: names[locale],
+        lang: gameLocaleLanguages[locale],
+      })
+    },
+  )
+
   it('uses a manual choice per language dimension without coupling the other', () => {
     expect(resolveEntryLocales(['en-US'], 'zh-TW', null)).toEqual({
       siteLocale: 'zh-TW',

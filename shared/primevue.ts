@@ -1,6 +1,7 @@
 export const primeVueComponents = [
   'Button',
   'Checkbox',
+  'Chip',
   'Dialog',
   'InputText',
   'Message',

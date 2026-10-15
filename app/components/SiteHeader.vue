@@ -2,9 +2,10 @@
 import {
   buildLocalizedPath,
   buildLocalizedRoute,
-  isGameLocale,
-  siteLanguageOptions,
   gameLanguageOptions,
+  isGameLocale,
+  resolveLocalizedName,
+  siteLanguageOptions,
   sitePages,
   type GameLocale,
   type SiteLocale,
@@ -37,12 +38,19 @@ const preferredGameLocale = useCookie<string | null>('holodori-game-locale', {
 
 const localizedRoute = (site: SiteLocale, game: GameLocale) =>
   buildLocalizedRoute(site, game, route)
+const themeName = computed(() =>
+  resolveLocalizedName(theme.value.name, activeGameLocale.value),
+)
 const themeOptions = computed(() =>
-  (themes.value ?? []).map((memberTheme) => ({
-    ...memberTheme,
-    label: memberTheme.name[activeGameLocale.value],
-    searchNames: Object.values(memberTheme.name).join(' '),
-  })),
+  (themes.value ?? []).map((memberTheme) => {
+    const name = resolveLocalizedName(memberTheme.name, activeGameLocale.value)
+    return {
+      ...memberTheme,
+      ...name,
+      label: name.text,
+      searchNames: Object.values(memberTheme.name).join(' '),
+    }
+  }),
 )
 const appearanceOptions = computed(() => [
   { value: 'system', label: t('modeSystem'), icon: 'computer' },
@@ -144,7 +152,24 @@ async function chooseGameLocale(value: GameLocale) {
               append-to="self"
               class="w-full"
               @update:model-value="chooseSiteLocale"
-            />
+            >
+              <template #option="{ option }">
+                <span :lang="option.lang">{{ option.label }}</span>
+              </template>
+              <template #value="{ value }">
+                <span
+                  :lang="
+                    siteLanguageOptions.find((option) => option.value === value)
+                      ?.lang
+                  "
+                >
+                  {{
+                    siteLanguageOptions.find((option) => option.value === value)
+                      ?.label
+                  }}
+                </span>
+              </template>
+            </Select>
           </label>
           <label class="grid gap-2 text-sm font-medium">
             {{ t('gameLanguage') }}
@@ -157,7 +182,24 @@ async function chooseGameLocale(value: GameLocale) {
               append-to="self"
               class="w-full"
               @update:model-value="chooseGameLocale"
-            />
+            >
+              <template #option="{ option }">
+                <span :lang="option.lang">{{ option.label }}</span>
+              </template>
+              <template #value="{ value }">
+                <span
+                  :lang="
+                    gameLanguageOptions.find((option) => option.value === value)
+                      ?.lang
+                  "
+                >
+                  {{
+                    gameLanguageOptions.find((option) => option.value === value)
+                      ?.label
+                  }}
+                </span>
+              </template>
+            </Select>
           </label>
         </div>
         <fieldset class="grid gap-3 border-0 p-0">
@@ -273,7 +315,9 @@ async function chooseGameLocale(value: GameLocale) {
                   :src="theme.assets.avatar"
                   :color="theme.color1"
                 />
-                <span class="truncate">{{ theme.name[activeGameLocale] }}</span>
+                <span class="truncate" :lang="themeName.lang">{{
+                  themeName.text
+                }}</span>
                 <span class="ml-auto flex shrink-0 gap-1" aria-hidden="true">
                   <span
                     class="size-3 rounded-full border border-surface-400/50"
@@ -304,7 +348,9 @@ async function chooseGameLocale(value: GameLocale) {
                   />
                 </span>
                 <span class="grid min-w-0">
-                  <span class="truncate">{{ slotProps.option.label }}</span>
+                  <span class="truncate" :lang="slotProps.option.lang">{{
+                    slotProps.option.text
+                  }}</span>
                   <span class="truncate text-xs text-muted-color">{{
                     slotProps.option.id
                   }}</span>

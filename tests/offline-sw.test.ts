@@ -244,9 +244,9 @@ describe('offline service worker selection', () => {
     const html = await page.text()
     expect(page.status).toBe(200)
     expect(page.headers.get('Content-Type')).toContain('text/html')
-    expect(html).toContain('lang="zh-TW"')
+    expect(html).toContain('lang="zh-Hant-TW"')
     expect(html).toContain('此頁面尚未儲存供離線使用。')
-    expect(html).toContain('href="/">Home</a>')
+    expect(html).toContain('href="/" lang="en">Home</a>')
 
     let payloadResponse: Promise<Response> | undefined
     listeners.get('fetch')!({

@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { isGameLocale, type GameLocale } from '#shared/language'
+import {
+  gameLocaleLanguages,
+  isGameLocale,
+  resolveLocalizedName,
+  type GameLocale,
+} from '#shared/language'
 import type {
   CardListItemData,
   CardStatKey,
@@ -60,9 +65,13 @@ const characterOptions = computed(() => {
   )
   return filterOptions.value.character.map((id) => {
     const name = names.get(id)
+    const localizedName = name
+      ? resolveLocalizedName(name, gameLocale.value)
+      : { text: id, lang: gameLocaleLanguages[gameLocale.value] }
     return {
       value: id,
-      label: name?.[gameLocale.value] || name?.jpn || name?.eng || id,
+      ...localizedName,
+      label: localizedName.text,
     }
   })
 })
@@ -150,7 +159,26 @@ const selectedSortOption = computed(() =>
               :aria-label="t('cardList.character')"
               filter
               display="chip"
-            />
+            >
+              <template #option="{ option }">
+                <span :lang="option.lang">{{ option.text }}</span>
+              </template>
+              <template #chip="{ value, removeCallback }">
+                <Chip
+                  class="p-multiselect-chip"
+                  :label="
+                    characterOptions.find((option) => option.value === value)
+                      ?.text ?? value
+                  "
+                  :lang="
+                    characterOptions.find((option) => option.value === value)
+                      ?.lang
+                  "
+                  removable
+                  @remove="removeCallback($event, value)"
+                />
+              </template>
+            </MultiSelect>
           </label>
           <label class="block min-w-0">
             <span class="mb-1.5 block text-sm font-medium">{{

@@ -3,6 +3,7 @@ import {
   buildLocalizedRoute,
   getManualPreferenceConflict,
   isGameLocale,
+  siteLocaleLanguages,
   type SiteLocale,
 } from '#shared/language'
 
@@ -11,7 +12,7 @@ const router = useRouter()
 const { locale, t } = useI18n()
 useHead({
   htmlAttrs: {
-    lang: computed(() => locale.value),
+    lang: computed(() => siteLocaleLanguages[locale.value as SiteLocale]),
   },
 })
 const preferredSiteLocale = useCookie<string | null>('holodori-site-locale', {
