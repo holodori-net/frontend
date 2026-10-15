@@ -50,9 +50,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <li class="min-w-0">
+  <li class="card-list-container block min-w-0">
     <article
-      class="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-surface-200 bg-surface-0 shadow-sm dark:border-surface-700 dark:bg-surface-900"
+      class="card-list-content flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-surface-200 bg-surface-0 shadow-sm dark:border-surface-700 dark:bg-surface-900"
     >
       <div
         class="relative aspect-video w-full overflow-hidden bg-surface-100 dark:bg-surface-800"
@@ -173,6 +173,16 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.card-list-container {
+  container-type: inline-size;
+}
+
+.card-list-content {
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto 24rem;
+  contain-intrinsic-block-size: auto calc(56.25cqw + 12rem);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card-image-skeleton::after {
     animation: none;
