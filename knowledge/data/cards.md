@@ -97,6 +97,8 @@
 
 完整卡圖使用 `https://assets.holodori.net/cdn/img_card_full_{assetId}/Texture2D/img_card_full_{assetId}.png`，以 16:9 完整顯示。載入期間顯示 skeleton，偏好減少動態效果時停止其動畫；載入完成後移除，失敗時保留文字及占位。素材用途與 URL 由 `shared/game-data/card-list.ts` 管理。
 
+**CONFIRMED**：`06003-5-uniq-0091-00`、`00034-5-uniq-0090-00` 與 `00001-3-nrml-0000-00` 的完整卡圖均為 2048×1152 PNG，檔案分別為 3,436,240、2,939,695 與 1,871,417 bytes。每張圖的 RGBA8 像素資料為 9 MiB。
+
 ### 三圍與屬性圖示
 
 **CONFIRMED**：APK 圖集包含以下 Sprite；三圍為透明底白色字母，屬性使用彩色圓形圖示。尺寸為圖集中裁切後的 PNG 像素大小。
