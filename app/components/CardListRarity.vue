@@ -56,7 +56,11 @@ function onStaticImageError(event: Event) {
     ref="rootElement"
     class="inline-flex min-w-0 items-center"
     :class="
-      vertical ? 'relative h-full w-max flex-col justify-end gap-0.5' : 'gap-1'
+      vertical
+        ? 'relative h-full w-max flex-col justify-end gap-0.5'
+        : showLabel
+          ? 'gap-2'
+          : 'gap-1'
     "
     role="img"
     :aria-label="label"
@@ -64,8 +68,8 @@ function onStaticImageError(event: Event) {
   >
     <span
       v-if="showTextFallback"
-      class="text-xs leading-tight"
       :class="[
+        !(showLabel && !vertical) && 'text-xs leading-tight',
         vertical && 'absolute bottom-0 left-0',
         vertical &&
           'max-w-44 rounded-md bg-surface-0/90 px-2 py-1 font-medium text-color shadow-sm dark:bg-surface-900/90',
@@ -118,7 +122,10 @@ function onStaticImageError(event: Event) {
         />
       </span>
     </span>
-    <span v-if="showLabel && !showTextFallback" class="text-xs leading-tight">
+    <span
+      v-if="showLabel && !showTextFallback"
+      :class="vertical && 'text-xs leading-tight'"
+    >
       {{ label }}
     </span>
     <span
