@@ -65,20 +65,10 @@ async function install() {
     v-if="!isInstalled && !isInstallDismissed && (installPrompt || isIos)"
     class="pwa-notice"
   >
-    <div class="pwa-install-help flex items-start gap-2">
-      <div class="min-w-0 flex-1">
-        <template v-if="installPrompt">
-          <p class="mb-3">{{ t('pwaInstallDescription') }}</p>
-          <Button
-            :label="t('pwaInstall')"
-            severity="secondary"
-            @click="install"
-          />
-        </template>
-        <p v-else-if="isIos" class="mb-0">
-          {{ t('pwaIosInstallHelp') }}
-        </p>
-      </div>
+    <div class="pwa-install-help">
+      <p class="m-0 min-w-0">
+        {{ t(installPrompt ? 'pwaInstallDescription' : 'pwaIosInstallHelp') }}
+      </p>
       <Button
         class="!size-11 !shrink-0 !p-0"
         :aria-label="t('pwaDismissInstall')"
@@ -98,6 +88,13 @@ async function install() {
           <path d="m18 6-12 12M6 6l12 12" />
         </svg>
       </Button>
+      <Button
+        v-if="installPrompt"
+        class="pwa-install-action"
+        :label="t('pwaInstall')"
+        severity="secondary"
+        @click="install"
+      />
     </div>
   </aside>
 </template>
