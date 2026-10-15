@@ -6,6 +6,7 @@ export interface CardListItemData {
   id: string
   characterId: string
   characterOrder: number
+  characterAssetId: string | null
   name: LocalizedNames
   characterName: LocalizedNames
   rarity: number

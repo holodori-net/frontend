@@ -13,6 +13,7 @@ import {
   getCardAttributeIconUrl,
   getCardStatIconUrl,
 } from '#shared/game-data/card-icons'
+import { getCharacterIconUrl } from '#shared/game-data/character-list'
 import {
   filterAndSortCards,
   getCardFilterOptions,
@@ -60,16 +61,18 @@ const visibleCards = computed(() =>
   filterAndSortCards(cardItems.value, conditions.value),
 )
 const characterOptions = computed(() => {
-  const names = new Map(
-    cardItems.value.map((card) => [card.characterId, card.characterName]),
+  const characters = new Map(
+    cardItems.value.map((card) => [card.characterId, card]),
   )
   return filterOptions.value.character.map((id) => {
-    const name = names.get(id)
+    const character = characters.get(id)
+    const name = character?.characterName
     const localizedName = name
       ? resolveLocalizedName(name, gameLocale.value)
       : { text: id, lang: gameLocaleLanguages[gameLocale.value] }
     return {
       value: id,
+      icon: getCharacterIconUrl(character?.characterAssetId ?? null),
       ...localizedName,
       label: localizedName.text,
     }
@@ -161,9 +164,17 @@ const selectedSortOption = computed(() =>
               display="chip"
             >
               <template #option="{ option }">
-                <span class="game-text" :lang="option.lang">{{
-                  option.text
-                }}</span>
+                <div class="flex items-center gap-2">
+                  <CardListIcon
+                    :src="option.icon"
+                    label=""
+                    size="large"
+                    loading-skeleton
+                  />
+                  <span class="game-text" :lang="option.lang">{{
+                    option.text
+                  }}</span>
+                </div>
               </template>
               <template #chip="{ value, removeCallback }">
                 <Chip

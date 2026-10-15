@@ -37,6 +37,7 @@ function card(
     id,
     characterId: values.characterId,
     characterOrder: values.characterOrder,
+    characterAssetId: values.characterAssetId ?? null,
     name: values.name ?? name,
     characterName: values.characterName ?? characterName,
     rarity: values.rarity ?? 3,

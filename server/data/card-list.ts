@@ -60,6 +60,7 @@ export function readCardList(): CardListItemData[] {
         id: card.id,
         characterId: card.characterId,
         characterOrder: character.order,
+        characterAssetId: character.assetId,
         name: card.name,
         characterName: character.name,
         rarity: card.rarity,

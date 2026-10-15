@@ -58,7 +58,9 @@ function createCard(overrides: Partial<CardData> = {}): CardData {
   }
 }
 
-function createCharacter(): CharacterData {
+function createCharacter(
+  overrides: Partial<CharacterData> = {},
+): CharacterData {
   return {
     id: 'chr-1',
     name: names,
@@ -93,6 +95,7 @@ function createCharacter(): CharacterData {
       skillTreeNodePositionGroupId: null,
       skillTreePointId: null,
     },
+    ...overrides,
   }
 }
 
@@ -178,9 +181,19 @@ describe('card list reader', () => {
       } catch (error) {
         writeError = error
       }
-      return [createCard()]
+      return [
+        createCard(),
+        createCard({
+          id: 'card-2',
+          characterId: 'chr-2',
+          assetId: 'card-asset-2',
+        }),
+      ]
     })
-    transformCharactersMock.mockReturnValue([createCharacter()])
+    transformCharactersMock.mockReturnValue([
+      createCharacter({ assetId: 'character-asset-1' }),
+      createCharacter({ id: 'chr-2', assetId: null }),
+    ])
     transformCardGrowthMock.mockReturnValue(createGrowth())
 
     expect(readCardList()).toEqual([
@@ -188,11 +201,28 @@ describe('card list reader', () => {
         id: 'card-1',
         characterId: 'chr-1',
         characterOrder: 7,
+        characterAssetId: 'character-asset-1',
         name: names,
         characterName: names,
         rarity: 5,
         attributeType: 2,
         assetId: 'asset-1',
+        order: 3,
+        level: 80,
+        stats: { performance: 4400, technique: 3300, sense: 3300 },
+        total: 11000,
+        specializations: ['performance'],
+      },
+      {
+        id: 'card-2',
+        characterId: 'chr-2',
+        characterOrder: 7,
+        characterAssetId: null,
+        name: names,
+        characterName: names,
+        rarity: 5,
+        attributeType: 2,
+        assetId: 'card-asset-2',
         order: 3,
         level: 80,
         stats: { performance: 4400, technique: 3300, sense: 3300 },
