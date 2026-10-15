@@ -83,6 +83,7 @@ const characterOptions = computed(() => {
       icon: getCharacterIconUrl(character?.characterAssetId ?? null),
       ...localizedName,
       label: localizedName.text,
+      searchNames: name ? Object.values(name).join(' ') : '',
     }
   })
 })
@@ -203,6 +204,7 @@ const layoutOptions = computed<{ value: CardListLayout; label: string }[]>(() =>
                 :placeholder="t('cardList.allCharacters')"
                 :aria-label="t('cardList.character')"
                 filter
+                :filter-fields="['searchNames', 'value']"
                 display="chip"
               >
                 <template #option="{ option }">
