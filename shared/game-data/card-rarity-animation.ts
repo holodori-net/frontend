@@ -1,3 +1,7 @@
+export const cardRarityAnimationName = 'card-rarity-sprite-animation'
+export const cardRarityAnimationDuration = 64 / 60
+export const cardRarityFrameCount = 64
+
 // Unity sprite mesh polygons remove extrusion outside each animation frame.
 export const cardRarityFramePolygons = [
   [

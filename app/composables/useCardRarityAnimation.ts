@@ -1,17 +1,17 @@
 import type { Ref } from 'vue'
+import { nextTick, watch } from 'vue'
 import { cardRaritySpriteSheetUrl } from '#shared/game-data/card-icons'
-import { cardRarityFramePolygons } from '#shared/game-data/card-rarity-animation'
+import {
+  cardRarityAnimationDuration,
+  cardRarityAnimationName,
+} from '#shared/game-data/card-rarity-animation'
+import { createCardRaritySpriteAtlas } from '~/utils/card-rarity-sprite'
 
-const frameSize = 200
-const frameCount = 64
-const frameRate = 60
-
-type CanvasSubscriber = {
-  canvas: HTMLCanvasElement
-  context: CanvasRenderingContext2D
-  onAnimationChange: (active: boolean) => void
+type Subscriber = {
+  element: HTMLElement
+  onSpriteSheetChange: (spriteSheetUrl: string | undefined) => void
   visible: boolean
-  lastFrame: number
+  active: boolean
 }
 
 type AnimationManager = ReturnType<typeof createAnimationManager>
@@ -19,164 +19,189 @@ type AnimationManager = ReturnType<typeof createAnimationManager>
 const managers = new WeakMap<object, AnimationManager>()
 
 function createAnimationManager(app: object) {
-  const subscribers = new Set<CanvasSubscriber>()
+  const subscribers = new Map<HTMLElement, Subscriber>()
   const image = new Image()
   const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-  let imageState: 'idle' | 'loading' | 'ready' | 'failed' = 'idle'
-  let frame = 0
+  let imageState: 'idle' | 'loading' | 'preparing' | 'ready' | 'failed' = 'idle'
+  let spriteSheetUrl: string | undefined
+  let pendingSpriteSheetUrl: string | undefined
   let elapsed = 0
-  let lastTick: number | undefined
-  let requestId: number | undefined
+  let startedAt: number | undefined
+  let disposed = false
+
+  function timelineNow(): number {
+    return Number(document.timeline.currentTime ?? performance.now())
+  }
+
+  function shouldPlay(): boolean {
+    return imageState === 'ready' && !motionQuery.matches && !document.hidden
+  }
+
+  function hasVisibleSubscriber(): boolean {
+    for (const subscriber of subscribers.values()) {
+      if (subscriber.visible) return true
+    }
+    return false
+  }
+
+  function phase(): number {
+    const currentElapsed =
+      elapsed + (startedAt === undefined ? 0 : timelineNow() - startedAt)
+    return currentElapsed % (cardRarityAnimationDuration * 1000)
+  }
+
+  function synchronizeAnimation(subscriber: Subscriber): void {
+    const element = subscriber.element
+    void nextTick().then(() => {
+      if (
+        subscribers.get(element) !== subscriber ||
+        !subscriber.active ||
+        !element.isConnected
+      ) {
+        return
+      }
+
+      const sharedStartTime = timelineNow() - phase()
+      for (const sprite of element.querySelectorAll('.card-rarity-sprite')) {
+        for (const animation of sprite.getAnimations()) {
+          if (
+            'animationName' in animation &&
+            (animation as CSSAnimation).animationName ===
+              cardRarityAnimationName
+          ) {
+            animation.startTime = sharedStartTime
+          }
+        }
+      }
+    })
+  }
+
+  function setActive(subscriber: Subscriber, active: boolean): void {
+    if (subscriber.active === active) return
+    subscriber.active = active
+    subscriber.onSpriteSheetChange(active ? spriteSheetUrl : undefined)
+    if (active) synchronizeAnimation(subscriber)
+  }
+
+  function refresh(): void {
+    if (disposed) return
+
+    const shouldLoad =
+      hasVisibleSubscriber() && !motionQuery.matches && !document.hidden
+
+    if (shouldLoad && imageState === 'idle') {
+      imageState = 'loading'
+      image.crossOrigin = 'anonymous'
+      image.src = cardRaritySpriteSheetUrl
+    }
+
+    const shouldRun = shouldPlay() && hasVisibleSubscriber()
+    if (shouldRun && startedAt === undefined) startedAt = timelineNow()
+    if (!shouldRun && startedAt !== undefined) {
+      elapsed += timelineNow() - startedAt
+      startedAt = undefined
+    }
+
+    for (const subscriber of subscribers.values()) {
+      setActive(subscriber, subscriber.visible && shouldPlay())
+    }
+  }
 
   const observer = new IntersectionObserver((entries) => {
+    if (disposed) return
     for (const entry of entries) {
-      const subscriber = [...subscribers].find(
-        (item) => item.canvas === entry.target,
-      )
-      if (!subscriber) continue
-      subscriber.visible = entry.isIntersecting
-      updateSubscriber(subscriber)
+      const subscriber = subscribers.get(entry.target as HTMLElement)
+      if (subscriber) subscriber.visible = entry.isIntersecting
     }
-    updateClock()
+    refresh()
   })
 
-  function canAnimate() {
-    return !motionQuery.matches && !document.hidden && imageState === 'ready'
-  }
+  image.onload = async () => {
+    imageState = 'preparing'
+    try {
+      const blob = await createCardRaritySpriteAtlas(image)
+      if (disposed || subscribers.size === 0) return
 
-  function draw(subscriber: CanvasSubscriber) {
-    const context = subscriber.context
-    const { width, height } = subscriber.canvas
+      const preparedUrl = URL.createObjectURL(blob)
+      pendingSpriteSheetUrl = preparedUrl
+      const preparedImage = new Image()
+      preparedImage.src = preparedUrl
+      await preparedImage.decode()
 
-    const column = frame % 8
-    const row = Math.floor(frame / 8)
-    const polygon = cardRarityFramePolygons[frame]!
-
-    context.clearRect(0, 0, width, height)
-    context.save()
-    context.scale(width / frameSize, height / frameSize)
-    context.beginPath()
-    polygon.forEach(([x, y], index) => {
-      if (index === 0) context.moveTo(x, y)
-      else context.lineTo(x, y)
-    })
-    context.closePath()
-    context.clip()
-    context.drawImage(
-      image,
-      column * frameSize,
-      row * frameSize,
-      frameSize,
-      frameSize,
-      0,
-      0,
-      frameSize,
-      frameSize,
-    )
-    context.restore()
-    subscriber.lastFrame = frame
-  }
-
-  function updateSubscriber(subscriber: CanvasSubscriber) {
-    const active = subscriber.visible && canAnimate()
-    subscriber.onAnimationChange(active)
-    if (active && subscriber.lastFrame !== frame) draw(subscriber)
-  }
-
-  function tick(timestamp: number) {
-    requestId = undefined
-    if (!hasVisibleSubscribers() || !canAnimate()) return
-
-    if (lastTick !== undefined) elapsed += timestamp - lastTick
-    lastTick = timestamp
-    const nextFrame = Math.floor((elapsed * frameRate) / 1000) % frameCount
-    if (nextFrame !== frame) {
-      frame = nextFrame
-      for (const subscriber of subscribers) {
-        if (subscriber.visible) draw(subscriber)
+      if (disposed || subscribers.size === 0) {
+        URL.revokeObjectURL(preparedUrl)
+        pendingSpriteSheetUrl = undefined
+        return
       }
+
+      pendingSpriteSheetUrl = undefined
+      spriteSheetUrl = preparedUrl
+      imageState = 'ready'
+      refresh()
+    } catch (error) {
+      if (pendingSpriteSheetUrl) {
+        URL.revokeObjectURL(pendingSpriteSheetUrl)
+        pendingSpriteSheetUrl = undefined
+      }
+      if (disposed) return
+      imageState = 'failed'
+      console.warn(
+        '[CardListRarity] Unable to prepare the animated sprite atlas; using the static frame.',
+        error,
+      )
+      refresh()
     }
-    requestId = window.requestAnimationFrame(tick)
   }
-
-  function hasVisibleSubscribers() {
-    return [...subscribers].some((subscriber) => subscriber.visible)
-  }
-
-  function updateClock() {
-    const shouldLoad =
-      hasVisibleSubscribers() && !motionQuery.matches && !document.hidden
-
-    if (shouldLoad) {
-      if (imageState === 'idle') {
-        imageState = 'loading'
-        image.src = cardRaritySpriteSheetUrl
-      }
-      if (imageState === 'ready' && requestId === undefined) {
-        lastTick = undefined
-        requestId = window.requestAnimationFrame(tick)
-      }
-      return
-    }
-
-    if (requestId !== undefined) window.cancelAnimationFrame(requestId)
-    requestId = undefined
-    lastTick = undefined
-  }
-
-  image.onload = () => {
-    imageState = 'ready'
-    for (const subscriber of subscribers) updateSubscriber(subscriber)
-    updateClock()
-  }
-  image.onerror = () => {
+  image.onerror = (event) => {
+    if (disposed) return
     imageState = 'failed'
-    for (const subscriber of subscribers) {
-      subscriber.onAnimationChange(false)
-    }
-    updateClock()
+    console.warn(
+      '[CardListRarity] Unable to load the animated sprite sheet; using the static frame.',
+      event,
+    )
+    refresh()
   }
 
-  const onEnvironmentChange = () => {
-    for (const subscriber of subscribers) updateSubscriber(subscriber)
-    updateClock()
-  }
+  const onEnvironmentChange = () => refresh()
   motionQuery.addEventListener('change', onEnvironmentChange)
   document.addEventListener('visibilitychange', onEnvironmentChange)
 
   function subscribe(
-    canvas: HTMLCanvasElement,
-    onAnimationChange: CanvasSubscriber['onAnimationChange'],
-  ) {
-    const pixelSize = Math.ceil(28 * window.devicePixelRatio)
-    canvas.width = pixelSize
-    canvas.height = pixelSize
-    const context = canvas.getContext('2d')
-    if (!context) return () => {}
-
-    const subscriber: CanvasSubscriber = {
-      canvas,
-      context,
-      onAnimationChange,
+    element: HTMLElement,
+    onSpriteSheetChange: Subscriber['onSpriteSheetChange'],
+  ): () => void {
+    const subscriber: Subscriber = {
+      element,
+      onSpriteSheetChange,
       visible: false,
-      lastFrame: -1,
+      active: false,
     }
-    subscribers.add(subscriber)
-    observer.observe(canvas)
+    subscribers.set(element, subscriber)
+    observer.observe(element)
 
     return () => {
-      observer.unobserve(canvas)
-      subscribers.delete(subscriber)
-      subscriber.onAnimationChange(false)
-      updateClock()
+      observer.unobserve(element)
+      subscribers.delete(element)
+      setActive(subscriber, false)
+      refresh()
       if (subscribers.size === 0) {
+        disposed = true
         observer.disconnect()
         motionQuery.removeEventListener('change', onEnvironmentChange)
         document.removeEventListener('visibilitychange', onEnvironmentChange)
-        if (requestId !== undefined) window.cancelAnimationFrame(requestId)
         image.onload = null
         image.onerror = null
+        image.removeAttribute('src')
         managers.delete(app)
+
+        const urlToRevoke = spriteSheetUrl
+        const pendingUrlToRevoke = pendingSpriteSheetUrl
+        spriteSheetUrl = undefined
+        pendingSpriteSheetUrl = undefined
+        if (pendingUrlToRevoke) URL.revokeObjectURL(pendingUrlToRevoke)
+        if (urlToRevoke) {
+          void nextTick().then(() => URL.revokeObjectURL(urlToRevoke))
+        }
       }
     }
   }
@@ -185,59 +210,35 @@ function createAnimationManager(app: object) {
 }
 
 export function useCardRarityAnimation(
-  canvases: Ref<HTMLCanvasElement[]>,
-  onAnimationChange: (index: number, active: boolean) => void,
-) {
-  const cleanups = new Map<
-    HTMLCanvasElement,
-    { cleanup: () => void; index: number }
-  >()
+  rootElement: Ref<HTMLElement | null>,
+  onSpriteSheetChange: (spriteSheetUrl: string | undefined) => void,
+): void {
   let nuxtApp: ReturnType<typeof useNuxtApp> | undefined
+  let cleanup: (() => void) | undefined
 
-  function syncSubscriptions() {
-    if (!nuxtApp) return
-    const currentCanvases = new Set(canvases.value)
+  function syncSubscription(): void {
+    cleanup?.()
+    cleanup = undefined
+    const element = rootElement.value
+    if (!nuxtApp || !element || !('IntersectionObserver' in window)) return
 
-    for (const [canvas, subscription] of cleanups) {
-      const index = canvases.value.indexOf(canvas)
-      if (index === -1 || index !== subscription.index) {
-        subscription.cleanup()
-        onAnimationChange(subscription.index, false)
-        cleanups.delete(canvas)
-      }
-    }
-
-    const canvasesWithContext = [...currentCanvases].filter(
-      (canvas) => canvas.getContext('2d') !== null,
-    )
-    if (!canvasesWithContext.length) return
     let manager = managers.get(nuxtApp)
     if (!manager) {
       manager = createAnimationManager(nuxtApp)
       managers.set(nuxtApp, manager)
     }
-
-    for (const canvas of canvasesWithContext) {
-      if (cleanups.has(canvas)) continue
-      const index = canvases.value.indexOf(canvas)
-      const cleanup = manager.subscribe(canvas, (active) => {
-        const index = canvases.value.indexOf(canvas)
-        if (index !== -1) onAnimationChange(index, active)
-      })
-      cleanups.set(canvas, { cleanup, index })
-    }
+    cleanup = manager.subscribe(element, onSpriteSheetChange)
   }
 
   onMounted(() => {
-    if (!('IntersectionObserver' in window)) return
     nuxtApp = useNuxtApp()
-    syncSubscriptions()
+    syncSubscription()
   })
 
-  watch(() => [...canvases.value], syncSubscriptions, { flush: 'post' })
+  watch(rootElement, syncSubscription, { flush: 'post' })
 
   onBeforeUnmount(() => {
-    for (const subscription of cleanups.values()) subscription.cleanup()
-    cleanups.clear()
+    cleanup?.()
+    cleanup = undefined
   })
 }

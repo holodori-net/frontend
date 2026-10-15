@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import theme from '../../app/themes/primevue.ts'
 import { readMemberThemes } from '../../server/data/member-themes.ts'
 import { renderMemberThemeCss } from './member-themes.ts'
+import { renderCardRarityCss } from './card-rarity.ts'
 import { generatePrimeVueStyles } from './primevue.ts'
 
 const outputPath = fileURLToPath(
@@ -14,7 +15,13 @@ const layerOrder = 'theme, base, primevue, components, utilities'
 async function main(): Promise<void> {
   const { css: primeVueCss, styleIds } = await generatePrimeVueStyles(theme)
   const memberCss = renderMemberThemeCss(readMemberThemes()).trim()
-  const output = [`@layer ${layerOrder};`, memberCss, primeVueCss]
+  const cardRarityCss = renderCardRarityCss()
+  const output = [
+    `@layer ${layerOrder};`,
+    memberCss,
+    cardRarityCss,
+    primeVueCss,
+  ]
     .filter(Boolean)
     .join('\n\n')
     .concat('\n')

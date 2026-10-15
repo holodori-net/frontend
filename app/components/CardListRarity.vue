@@ -9,59 +9,51 @@ const props = defineProps<{
   loadingSkeleton?: boolean
 }>()
 
-const canvasElements = ref<HTMLCanvasElement[]>([])
-const staticImages = ref<HTMLImageElement[]>([])
-const animatedIndexes = ref(new Set<number>())
-const staticImageStates = ref(
-  new Map<number, 'loading' | 'loaded' | 'failed'>(),
-)
-const staticImageFailed = ref(false)
+const rootElement = ref<HTMLElement | null>(null)
+const spriteSheetUrl = ref<string>()
+const animationActive = computed(() => spriteSheetUrl.value !== undefined)
+const staticImageState = ref<'loading' | 'loaded' | 'failed'>('loading')
 const showTextFallback = computed(
-  () => staticImageFailed.value && animatedIndexes.value.size === 0,
+  () => staticImageState.value === 'failed' && !animationActive.value,
 )
 const starIndexes = computed(() =>
   Array.from({ length: props.vertical ? props.count : 1 }, (_, index) => index),
 )
 
-useCardRarityAnimation(canvasElements, (index, active) => {
-  const indexes = new Set(animatedIndexes.value)
-  if (active) indexes.add(index)
-  else indexes.delete(index)
-  animatedIndexes.value = indexes
+useCardRarityAnimation(rootElement, (url) => {
+  spriteSheetUrl.value = url
 })
 
 onMounted(async () => {
   await nextTick()
-  staticImages.value.forEach((image, index) => {
-    if (!image.complete) return
-    setStaticImageState(index, image.naturalWidth > 0 ? 'loaded' : 'failed')
-  })
+  const image = rootElement.value?.querySelector('img')
+  if (image?.complete) {
+    setStaticImageState(image.naturalWidth > 0 ? 'loaded' : 'failed')
+  }
 })
 
-function setStaticImageState(index: number, state: 'loaded' | 'failed') {
-  const states = new Map(staticImageStates.value)
-  states.set(index, state)
-  staticImageStates.value = states
-  if (state === 'failed') staticImageFailed.value = true
+function setStaticImageState(state: 'loaded' | 'failed') {
+  staticImageState.value = state
 }
 
-function onStaticImageLoad(index: number, event: Event) {
+function onStaticImageLoad(event: Event) {
   const image = event.currentTarget as HTMLImageElement
   if (image.getAttribute('src') === cardRarityStaticUrl) {
-    setStaticImageState(index, 'loaded')
+    setStaticImageState('loaded')
   }
 }
 
-function onStaticImageError(index: number, event: Event) {
+function onStaticImageError(event: Event) {
   const image = event.currentTarget as HTMLImageElement
   if (image.getAttribute('src') === cardRarityStaticUrl) {
-    setStaticImageState(index, 'failed')
+    setStaticImageState('failed')
   }
 }
 </script>
 
 <template>
   <span
+    ref="rootElement"
     class="inline-flex min-w-0 items-center"
     :class="
       vertical ? 'relative h-full w-max flex-col justify-end gap-0.5' : 'gap-1'
@@ -90,13 +82,12 @@ function onStaticImageError(index: number, event: Event) {
         showTextFallback && 'invisible',
       ]"
     >
-      <span class="relative aspect-square h-full max-w-full">
+      <span class="relative aspect-square h-full max-w-full overflow-hidden">
         <Skeleton
           v-if="
             loadingSkeleton &&
-            !animatedIndexes.has(index) &&
-            staticImageStates.get(index) !== 'failed' &&
-            staticImageStates.get(index) !== 'loaded'
+            !animationActive &&
+            staticImageState === 'loading'
           "
           class="image-skeleton !absolute inset-0"
           width="100%"
@@ -104,12 +95,11 @@ function onStaticImageError(index: number, event: Event) {
           border-radius="50%"
         />
         <img
-          ref="staticImages"
           :src="cardRarityStaticUrl"
           alt=""
           aria-hidden="true"
           class="absolute object-fill"
-          :class="animatedIndexes.has(index) && 'invisible'"
+          :class="animationActive && 'invisible'"
           :style="{
             left: '0.5%',
             top: '2.5%',
@@ -117,16 +107,14 @@ function onStaticImageError(index: number, event: Event) {
             height: '94.5%',
           }"
           draggable="false"
-          @load="onStaticImageLoad(index, $event)"
-          @error="onStaticImageError(index, $event)"
+          @load="onStaticImageLoad"
+          @error="onStaticImageError"
         />
-        <canvas
-          ref="canvasElements"
-          width="56"
-          height="56"
+        <span
+          v-if="spriteSheetUrl"
           aria-hidden="true"
-          class="invisible absolute inset-0 size-full"
-          :class="animatedIndexes.has(index) && 'visible'"
+          class="card-rarity-sprite absolute inset-0"
+          :style="{ backgroundImage: `url(${spriteSheetUrl})` }"
         />
       </span>
     </span>
