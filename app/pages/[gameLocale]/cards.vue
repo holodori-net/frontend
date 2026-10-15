@@ -138,12 +138,30 @@ const layoutOptions = computed<{ value: CardListLayout; label: string }[]>(() =>
     <SiteHeader />
     <main class="mx-auto w-[min(calc(100%-2rem),100rem)] py-8 pb-20 sm:py-12">
       <div class="mb-7">
-        <h1 class="mb-2 text-2xl font-bold sm:text-3xl">
-          {{ t('cards') }}
-        </h1>
-        <p class="mb-0 text-sm text-muted-color">
-          {{ t('cardList.statsDescription') }}
-        </p>
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0 flex-1">
+            <h1 class="mb-2 text-2xl font-bold sm:text-3xl">
+              {{ t('cards') }}
+            </h1>
+            <p class="mb-0 text-sm text-muted-color">
+              {{ t('cardList.statsDescription') }}
+            </p>
+          </div>
+          <div v-if="ready" class="w-40 shrink-0 sm:w-52">
+            <label for="card-layout" class="mb-1.5 block text-sm font-medium">
+              {{ t('cardList.layoutLabel') }}
+            </label>
+            <Select
+              v-model="layout"
+              input-id="card-layout"
+              class="w-full"
+              :options="layoutOptions"
+              option-label="label"
+              option-value="value"
+              :aria-label="t('cardList.layoutLabel')"
+            />
+          </div>
+        </div>
       </div>
 
       <noscript>{{ t('cardList.requiresJavaScript') }}</noscript>
@@ -338,19 +356,6 @@ const layoutOptions = computed<{ value: CardListLayout; label: string }[]>(() =>
                   <span v-else>{{ placeholder }}</span>
                 </template>
               </Select>
-            </label>
-            <label class="min-w-48 flex-1 sm:flex-none">
-              <span class="mb-1.5 block text-sm font-medium">{{
-                t('cardList.layoutLabel')
-              }}</span>
-              <Select
-                v-model="layout"
-                class="w-full sm:min-w-52"
-                :options="layoutOptions"
-                option-label="label"
-                option-value="value"
-                :aria-label="t('cardList.layoutLabel')"
-              />
             </label>
             <Button
               type="button"

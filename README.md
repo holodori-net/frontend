@@ -12,7 +12,7 @@ Changing either language keeps the current page, query parameters, and fragment.
 
 ## Cards
 
-Open **Cards** to browse full or vertical card art, names, rarity, attribute, and stats. Choose the layout beside sorting. Card and character names follow the game content language; labels follow the site language. Rarity uses a vertical stack of animated stars matching the star count. Attributes and specializations use game icons with translated names in tooltips. Specialization icons indicate the card's highest source weight. Stats compare each card at maximum level, special training, and blooming, using only the card's own stats.
+Open **Cards** to browse full or vertical card art, names, rarity, attribute, and stats. Choose the layout to the right of the page title, above the filters. Card and character names follow the game content language; labels follow the site language. Rarity uses a vertical stack of animated stars matching the star count. Attributes and specializations use game icons with translated names in tooltips. Specialization icons indicate the card's highest source weight. Stats compare each card at maximum level, special training, and blooming, using only the card's own stats.
 
 The gallery wraps to fit the window. Full card art uses a 16:9 image and a horizontal stat addition expression. Vertical card art uses its 256:366 ratio on the left, with names at the top right and vertically listed stats plus a labeled total at the bottom right. Specialized stat values use the theme's primary text color.
 

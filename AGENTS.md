@@ -26,7 +26,7 @@
 - CSS 與 PWA manifest 直接使用同一 reader；主題資料沿用 Nuxt payload。選單名稱跟隨遊戲語言並支援六語搜尋；離線切換保留配色並提供遠端素材 fallback。
 - 角色列表的 production 分區與 `icon` 素材用途集中在 `shared/game-data/character-list.ts`；圖示缺失時保留角色名稱與占位。
 - 遊戲資料層位於 `server/data/`，共用資料型別位於 `shared/game-data/`。卡片與角色頁於 prerender 時直接唯讀讀取 `.data/master.sqlite`；converter 回傳完整資料，reader 選取列表欄位交由 Nuxt 保存為頁面 payload。生成失敗時須保留來源錯誤。
-- 卡片列表採滿等、滿特訓、滿綻放的自身三圍，以 float32 逐項計算並向上取整；特化依來源權重最高項判定。搜尋、複選篩選與排序保存於 query；`full`／`vertical` 版型由獨立 composable 保存於 `localStorage` 的 `holodori-card-layout`，預設 `full` 並跨語言共用。切換版型時保留網址、瀏覽紀錄及篩選；Reset 重設篩選與排序並保留版型。舊 query 的 `layout` 忽略，下次寫入篩選網址時移除。靜態 HTML 與首次 hydration 保留頁首、標題及可存取的中性 loading，讀取偏好並套用網址條件後一次顯示控制項與列表，不等待圖片；停用 JavaScript 時顯示提示。偏好缺失、無效或讀取失敗使用 `full`；讀寫例外記錄警告，寫入失敗保留當次記憶體選擇。
+- 卡片列表採滿等、滿特訓、滿綻放的自身三圍，以 float32 逐項計算並向上取整；特化依來源權重最高項判定。搜尋、複選篩選與排序保存於 query；`full`／`vertical` 版型由獨立 composable 保存於 `localStorage` 的 `holodori-card-layout`，預設 `full` 並跨語言共用。版型選擇器位於標題右側、篩選區右上方，切換時保留網址、瀏覽紀錄及篩選；Reset 重設篩選與排序並保留版型。舊 query 的 `layout` 忽略，下次寫入篩選網址時移除。靜態 HTML 與首次 hydration 保留頁首、標題及可存取的中性 loading，讀取偏好並套用網址條件後一次顯示控制項與列表，不等待圖片；停用 JavaScript 時顯示提示。偏好缺失、無效或讀取失敗使用 `full`；讀寫例外記錄警告，寫入失敗保留當次記憶體選擇。
 - 卡片屬性與三圍圖示的 APK 素材網址集中於 `shared/game-data/card-icons.ts`；卡片與選單共用 `CardListIcon`，三圍圖示使用透明背景，亮模式顯示黑色、暗模式顯示白色，圖示載入失敗時保留文字名稱。
 - 卡片與稀有度選項共用 `CardListRarity`，先顯示遠端靜態星星，再以共用 sprite 圖集與時鐘播放動畫；離開畫面或頁面隱藏時暫停，圖集載入失敗或減少動態效果時保留靜態星星，圖片也無法載入時顯示文字。
 - 卡片網格以 350px 最小欄寬自動換行，較窄螢幕縮至容器寬度。完整卡圖版型以 16:9 卡圖呈現並使用水平三圍加總算式；直式版型以 256:366 卡圖置左，卡名與角色名置右上，垂直三圍及標籤合計靠右側底部，不顯示加號與等號。屬性與垂直星星列位於卡圖左側。合計以一般文字色及粗體呈現，特化數值使用主題文字色；窄螢幕與缺圖文字按數值項目換行，須保持亮暗主題可讀及 fallback 不溢出。
