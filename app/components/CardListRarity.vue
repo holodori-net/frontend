@@ -17,7 +17,10 @@ const showTextFallback = computed(
   () => staticImageState.value === 'failed' && !animationActive.value,
 )
 const starIndexes = computed(() =>
-  Array.from({ length: props.vertical ? props.count : 1 }, (_, index) => index),
+  Array.from(
+    { length: props.vertical || props.showLabel ? props.count : 1 },
+    (_, index) => index,
+  ),
 )
 
 useCardRarityAnimation(rootElement, (url) => {
