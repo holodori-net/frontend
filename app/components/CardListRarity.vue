@@ -57,7 +57,7 @@ function onStaticImageError(event: Event) {
     class="inline-flex min-w-0 items-center"
     :class="
       vertical
-        ? 'relative h-full w-max flex-col justify-end gap-0.5'
+        ? 'relative h-full w-max flex-col justify-end'
         : showLabel
           ? 'gap-2'
           : 'gap-1'
@@ -82,7 +82,9 @@ function onStaticImageError(event: Event) {
       :key="index"
       class="relative inline-flex items-center justify-center"
       :class="[
-        vertical ? 'h-7 max-h-7 min-h-0 w-7 shrink' : 'size-5 shrink-0',
+        vertical
+          ? 'h-7 max-h-7 min-h-0 w-7 shrink -mt-1.5 first:mt-0'
+          : 'size-5 shrink-0',
         showTextFallback && 'invisible',
       ]"
     >
