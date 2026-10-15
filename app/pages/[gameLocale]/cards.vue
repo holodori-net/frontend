@@ -21,6 +21,7 @@ import {
   type CardListSort,
 } from '#shared/game-data/card-list'
 import { useCardListConditions } from '~/composables/useCardListConditions'
+import { useCardLayout } from '~/composables/useCardLayout'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -57,7 +58,13 @@ if (cards.value === null || cards.value === undefined) {
 
 const cardItems = computed(() => cards.value!)
 const filterOptions = computed(() => getCardFilterOptions(cardItems.value))
-const { conditions, reset } = useCardListConditions(filterOptions)
+const {
+  conditions,
+  reset,
+  ready: conditionsReady,
+} = useCardListConditions(filterOptions)
+const { layout, initialized: layoutInitialized } = useCardLayout()
+const ready = computed(() => conditionsReady.value && layoutInitialized.value)
 const visibleCards = computed(() =>
   filterAndSortCards(cardItems.value, conditions.value),
 )
@@ -139,258 +146,272 @@ const layoutOptions = computed<{ value: CardListLayout; label: string }[]>(() =>
         </p>
       </div>
 
-      <section
-        class="mb-7 space-y-4 rounded-xl border border-surface-200 bg-surface-0 p-4 dark:border-surface-700 dark:bg-surface-900 sm:p-5"
-        :aria-label="t('cardList.filters')"
-      >
-        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <label class="block min-w-0 sm:col-span-2">
-            <span class="mb-1.5 block text-sm font-medium">{{
-              t('cardList.search')
-            }}</span>
-            <InputText
-              v-model="conditions.q"
-              class="w-full"
-              :placeholder="t('cardList.searchPlaceholder')"
-              :aria-label="t('cardList.search')"
-            />
-          </label>
-          <label class="block min-w-0">
-            <span class="mb-1.5 block text-sm font-medium">{{
-              t('cardList.character')
-            }}</span>
-            <MultiSelect
-              v-model="conditions.character"
-              class="w-full"
-              :options="characterOptions"
-              option-label="label"
-              option-value="value"
-              :placeholder="t('cardList.allCharacters')"
-              :aria-label="t('cardList.character')"
-              filter
-              display="chip"
-            >
-              <template #option="{ option }">
-                <div class="flex items-center gap-2">
-                  <CardListIcon
-                    :src="option.icon"
-                    label=""
-                    size="large"
-                    loading-skeleton
-                  />
-                  <span class="game-text" :lang="option.lang">{{
-                    option.text
-                  }}</span>
-                </div>
-              </template>
-              <template #chip="{ value, removeCallback }">
-                <Chip
-                  class="game-text p-multiselect-chip"
-                  :label="
-                    characterOptions.find((option) => option.value === value)
-                      ?.text ?? value
-                  "
-                  :lang="
-                    characterOptions.find((option) => option.value === value)
-                      ?.lang
-                  "
-                  removable
-                  @remove="removeCallback($event, value)"
-                />
-              </template>
-            </MultiSelect>
-          </label>
-          <label class="block min-w-0">
-            <span class="mb-1.5 block text-sm font-medium">{{
-              t('cardList.rarity')
-            }}</span>
-            <MultiSelect
-              v-model="conditions.rarity"
-              class="w-full"
-              :options="rarityOptions"
-              option-label="label"
-              option-value="value"
-              :placeholder="t('cardList.allRarities')"
-              :aria-label="t('cardList.rarity')"
-              display="chip"
-            >
-              <template #option="{ option }">
-                <CardListRarity
-                  :count="option.value"
-                  :label="option.label"
-                  show-label
-                  loading-skeleton
-                />
-              </template>
-            </MultiSelect>
-          </label>
-          <label class="block min-w-0">
-            <span class="mb-1.5 block text-sm font-medium">{{
-              t('cardList.attribute')
-            }}</span>
-            <MultiSelect
-              v-model="conditions.attribute"
-              class="w-full"
-              :options="attributeOptions"
-              option-label="label"
-              option-value="value"
-              :placeholder="t('cardList.allAttributes')"
-              :aria-label="t('cardList.attribute')"
-              display="chip"
-            >
-              <template #option="{ option }">
-                <div class="flex items-center gap-2">
-                  <CardListIcon
-                    :src="getCardAttributeIconUrl(option.value)"
-                    label=""
-                    loading-skeleton
-                  />
-                  <span>{{ option.label }}</span>
-                </div>
-              </template>
-            </MultiSelect>
-          </label>
-          <label class="block min-w-0">
-            <span class="mb-1.5 block text-sm font-medium">{{
-              t('cardList.specialization')
-            }}</span>
-            <MultiSelect
-              v-model="conditions.specialization"
-              class="w-full"
-              :options="specializationOptions"
-              option-label="label"
-              option-value="value"
-              :placeholder="t('cardList.allSpecializations')"
-              :aria-label="t('cardList.specialization')"
-              display="chip"
-            >
-              <template #option="{ option }">
-                <div class="flex items-center gap-2">
-                  <CardListIcon
-                    :src="getCardStatIconUrl(option.value)"
-                    label=""
-                    monochrome
-                    loading-skeleton
-                  />
-                  <span>{{ option.label }}</span>
-                </div>
-              </template>
-            </MultiSelect>
-          </label>
-        </div>
-
-        <div class="flex flex-wrap items-end gap-3">
-          <label class="min-w-48 flex-1 sm:flex-none">
-            <span class="mb-1.5 block text-sm font-medium">{{
-              t('cardList.sortLabel')
-            }}</span>
-            <Select
-              v-model="conditions.sort"
-              class="w-full sm:min-w-52"
-              :options="sortOptions"
-              option-label="label"
-              option-value="value"
-              :aria-label="t('cardList.sortLabel')"
-            >
-              <template #option="{ option }">
-                <div class="flex items-center gap-2">
-                  <CardListIcon
-                    v-if="isStatSortKey(option.value)"
-                    :src="getCardStatIconUrl(option.value)"
-                    label=""
-                    monochrome
-                    loading-skeleton
-                  />
-                  <span>{{ option.label }}</span>
-                </div>
-              </template>
-              <template #value="{ placeholder }">
-                <div v-if="selectedSortOption" class="flex items-center gap-2">
-                  <CardListIcon
-                    v-if="isStatSortKey(selectedSortOption.value)"
-                    :src="getCardStatIconUrl(selectedSortOption.value)"
-                    label=""
-                    monochrome
-                    loading-skeleton
-                  />
-                  <span>{{ selectedSortOption.label }}</span>
-                </div>
-                <span v-else>{{ placeholder }}</span>
-              </template>
-            </Select>
-          </label>
-          <label class="min-w-48 flex-1 sm:flex-none">
-            <span class="mb-1.5 block text-sm font-medium">{{
-              t('cardList.layoutLabel')
-            }}</span>
-            <Select
-              v-model="conditions.layout"
-              class="w-full sm:min-w-52"
-              :options="layoutOptions"
-              option-label="label"
-              option-value="value"
-              :aria-label="t('cardList.layoutLabel')"
-            />
-          </label>
-          <Button
-            type="button"
-            severity="secondary"
-            outlined
-            :aria-label="
-              t(
-                conditions.direction === 'desc'
-                  ? 'cardList.descending'
-                  : 'cardList.ascending',
-              )
-            "
-            @click="
-              conditions.direction =
-                conditions.direction === 'desc' ? 'asc' : 'desc'
-            "
-          >
-            {{
-              t(
-                conditions.direction === 'desc'
-                  ? 'cardList.descending'
-                  : 'cardList.ascending',
-              )
-            }}
-          </Button>
-          <Button type="button" severity="secondary" text @click="reset">
-            {{ t('cardList.reset') }}
-          </Button>
-          <p class="mb-2 ml-auto text-sm text-muted-color" aria-live="polite">
-            {{
-              t('cardList.resultCount', {
-                visible: visibleCards.length,
-                total: cardItems.length,
-              })
-            }}
-          </p>
-        </div>
-      </section>
-
+      <noscript>{{ t('cardList.requiresJavaScript') }}</noscript>
       <p
-        v-if="visibleCards.length === 0"
+        v-if="!ready"
         class="py-16 text-center text-sm text-muted-color"
         role="status"
       >
-        {{ t('cardList.noResults') }}
+        {{ t('cardList.loading') }}
       </p>
-      <ul
-        v-else
-        class="grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,350px),1fr))] gap-5 p-0"
-        :aria-label="t('cards')"
-      >
-        <CardListItem
-          v-for="card in visibleCards"
-          :key="card.id"
-          :card="card"
-          :game-locale="gameLocale"
-          :stat-keys="statKeys"
-          :layout="conditions.layout"
-        />
-      </ul>
+
+      <template v-else>
+        <section
+          class="mb-7 space-y-4 rounded-xl border border-surface-200 bg-surface-0 p-4 dark:border-surface-700 dark:bg-surface-900 sm:p-5"
+          :aria-label="t('cardList.filters')"
+        >
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <label class="block min-w-0 sm:col-span-2">
+              <span class="mb-1.5 block text-sm font-medium">{{
+                t('cardList.search')
+              }}</span>
+              <InputText
+                v-model="conditions.q"
+                class="w-full"
+                :placeholder="t('cardList.searchPlaceholder')"
+                :aria-label="t('cardList.search')"
+              />
+            </label>
+            <label class="block min-w-0">
+              <span class="mb-1.5 block text-sm font-medium">{{
+                t('cardList.character')
+              }}</span>
+              <MultiSelect
+                v-model="conditions.character"
+                class="w-full"
+                :options="characterOptions"
+                option-label="label"
+                option-value="value"
+                :placeholder="t('cardList.allCharacters')"
+                :aria-label="t('cardList.character')"
+                filter
+                display="chip"
+              >
+                <template #option="{ option }">
+                  <div class="flex items-center gap-2">
+                    <CardListIcon
+                      :src="option.icon"
+                      label=""
+                      size="large"
+                      loading-skeleton
+                    />
+                    <span class="game-text" :lang="option.lang">{{
+                      option.text
+                    }}</span>
+                  </div>
+                </template>
+                <template #chip="{ value, removeCallback }">
+                  <Chip
+                    class="game-text p-multiselect-chip"
+                    :label="
+                      characterOptions.find((option) => option.value === value)
+                        ?.text ?? value
+                    "
+                    :lang="
+                      characterOptions.find((option) => option.value === value)
+                        ?.lang
+                    "
+                    removable
+                    @remove="removeCallback($event, value)"
+                  />
+                </template>
+              </MultiSelect>
+            </label>
+            <label class="block min-w-0">
+              <span class="mb-1.5 block text-sm font-medium">{{
+                t('cardList.rarity')
+              }}</span>
+              <MultiSelect
+                v-model="conditions.rarity"
+                class="w-full"
+                :options="rarityOptions"
+                option-label="label"
+                option-value="value"
+                :placeholder="t('cardList.allRarities')"
+                :aria-label="t('cardList.rarity')"
+                display="chip"
+              >
+                <template #option="{ option }">
+                  <CardListRarity
+                    :count="option.value"
+                    :label="option.label"
+                    show-label
+                    loading-skeleton
+                  />
+                </template>
+              </MultiSelect>
+            </label>
+            <label class="block min-w-0">
+              <span class="mb-1.5 block text-sm font-medium">{{
+                t('cardList.attribute')
+              }}</span>
+              <MultiSelect
+                v-model="conditions.attribute"
+                class="w-full"
+                :options="attributeOptions"
+                option-label="label"
+                option-value="value"
+                :placeholder="t('cardList.allAttributes')"
+                :aria-label="t('cardList.attribute')"
+                display="chip"
+              >
+                <template #option="{ option }">
+                  <div class="flex items-center gap-2">
+                    <CardListIcon
+                      :src="getCardAttributeIconUrl(option.value)"
+                      label=""
+                      loading-skeleton
+                    />
+                    <span>{{ option.label }}</span>
+                  </div>
+                </template>
+              </MultiSelect>
+            </label>
+            <label class="block min-w-0">
+              <span class="mb-1.5 block text-sm font-medium">{{
+                t('cardList.specialization')
+              }}</span>
+              <MultiSelect
+                v-model="conditions.specialization"
+                class="w-full"
+                :options="specializationOptions"
+                option-label="label"
+                option-value="value"
+                :placeholder="t('cardList.allSpecializations')"
+                :aria-label="t('cardList.specialization')"
+                display="chip"
+              >
+                <template #option="{ option }">
+                  <div class="flex items-center gap-2">
+                    <CardListIcon
+                      :src="getCardStatIconUrl(option.value)"
+                      label=""
+                      monochrome
+                      loading-skeleton
+                    />
+                    <span>{{ option.label }}</span>
+                  </div>
+                </template>
+              </MultiSelect>
+            </label>
+          </div>
+
+          <div class="flex flex-wrap items-end gap-3">
+            <label class="min-w-48 flex-1 sm:flex-none">
+              <span class="mb-1.5 block text-sm font-medium">{{
+                t('cardList.sortLabel')
+              }}</span>
+              <Select
+                v-model="conditions.sort"
+                class="w-full sm:min-w-52"
+                :options="sortOptions"
+                option-label="label"
+                option-value="value"
+                :aria-label="t('cardList.sortLabel')"
+              >
+                <template #option="{ option }">
+                  <div class="flex items-center gap-2">
+                    <CardListIcon
+                      v-if="isStatSortKey(option.value)"
+                      :src="getCardStatIconUrl(option.value)"
+                      label=""
+                      monochrome
+                      loading-skeleton
+                    />
+                    <span>{{ option.label }}</span>
+                  </div>
+                </template>
+                <template #value="{ placeholder }">
+                  <div
+                    v-if="selectedSortOption"
+                    class="flex items-center gap-2"
+                  >
+                    <CardListIcon
+                      v-if="isStatSortKey(selectedSortOption.value)"
+                      :src="getCardStatIconUrl(selectedSortOption.value)"
+                      label=""
+                      monochrome
+                      loading-skeleton
+                    />
+                    <span>{{ selectedSortOption.label }}</span>
+                  </div>
+                  <span v-else>{{ placeholder }}</span>
+                </template>
+              </Select>
+            </label>
+            <label class="min-w-48 flex-1 sm:flex-none">
+              <span class="mb-1.5 block text-sm font-medium">{{
+                t('cardList.layoutLabel')
+              }}</span>
+              <Select
+                v-model="layout"
+                class="w-full sm:min-w-52"
+                :options="layoutOptions"
+                option-label="label"
+                option-value="value"
+                :aria-label="t('cardList.layoutLabel')"
+              />
+            </label>
+            <Button
+              type="button"
+              severity="secondary"
+              outlined
+              :aria-label="
+                t(
+                  conditions.direction === 'desc'
+                    ? 'cardList.descending'
+                    : 'cardList.ascending',
+                )
+              "
+              @click="
+                conditions.direction =
+                  conditions.direction === 'desc' ? 'asc' : 'desc'
+              "
+            >
+              {{
+                t(
+                  conditions.direction === 'desc'
+                    ? 'cardList.descending'
+                    : 'cardList.ascending',
+                )
+              }}
+            </Button>
+            <Button type="button" severity="secondary" text @click="reset">
+              {{ t('cardList.reset') }}
+            </Button>
+            <p class="mb-2 ml-auto text-sm text-muted-color" aria-live="polite">
+              {{
+                t('cardList.resultCount', {
+                  visible: visibleCards.length,
+                  total: cardItems.length,
+                })
+              }}
+            </p>
+          </div>
+        </section>
+
+        <p
+          v-if="visibleCards.length === 0"
+          class="py-16 text-center text-sm text-muted-color"
+          role="status"
+        >
+          {{ t('cardList.noResults') }}
+        </p>
+        <ul
+          v-else
+          class="grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,350px),1fr))] gap-5 p-0"
+          :aria-label="t('cards')"
+        >
+          <CardListItem
+            v-for="card in visibleCards"
+            :key="card.id"
+            :card="card"
+            :game-locale="gameLocale"
+            :stat-keys="statKeys"
+            :layout="layout"
+          />
+        </ul>
+      </template>
     </main>
   </div>
 </template>

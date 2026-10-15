@@ -1,4 +1,4 @@
-import type { ComputedRef } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch, type ComputedRef } from 'vue'
 import {
   createCardListConditions,
   parseCardListQuery,
@@ -11,7 +11,7 @@ export function useCardListConditions(options: ComputedRef<CardFilterOptions>) {
   const route = useRoute()
   const router = useRouter()
   const conditions = ref<CardListConditions>(createCardListConditions())
-  let ready = false
+  const ready = ref(false)
   let applyingRoute = false
   let suppressConditionWatch = false
   let searchTimer: ReturnType<typeof setTimeout> | undefined
@@ -37,13 +37,13 @@ export function useCardListConditions(options: ComputedRef<CardFilterOptions>) {
 
   onMounted(() => {
     updateFromRoute()
-    ready = true
+    ready.value = true
   })
 
   watch(
     () => route.fullPath,
     () => {
-      if (ready) updateFromRoute()
+      if (ready.value) updateFromRoute()
     },
   )
 
@@ -56,7 +56,7 @@ export function useCardListConditions(options: ComputedRef<CardFilterOptions>) {
       specialization: [...conditions.value.specialization],
     }),
     (next, previous) => {
-      if (!ready || applyingRoute || suppressConditionWatch) return
+      if (!ready.value || applyingRoute || suppressConditionWatch) return
 
       const searchOnly =
         next.q !== previous.q &&
@@ -64,7 +64,6 @@ export function useCardListConditions(options: ComputedRef<CardFilterOptions>) {
         next.rarity.join('\0') === previous.rarity.join('\0') &&
         next.attribute.join('\0') === previous.attribute.join('\0') &&
         next.specialization.join('\0') === previous.specialization.join('\0') &&
-        next.layout === previous.layout &&
         next.sort === previous.sort &&
         next.direction === previous.direction
 
@@ -83,13 +82,10 @@ export function useCardListConditions(options: ComputedRef<CardFilterOptions>) {
   const reset = () => {
     clearSearchTimer()
     suppressConditionWatch = true
-    conditions.value = {
-      ...createCardListConditions(),
-      layout: conditions.value.layout,
-    }
+    conditions.value = createCardListConditions()
     suppressConditionWatch = false
     writeRoute(false)
   }
 
-  return { conditions, reset }
+  return { conditions, reset, ready }
 }

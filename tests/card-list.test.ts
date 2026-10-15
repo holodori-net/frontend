@@ -100,7 +100,6 @@ describe('card list', () => {
       rarity: [],
       attribute: [],
       specialization: [],
-      layout: 'full',
       sort: 'order',
       direction: 'desc',
     })
@@ -239,7 +238,6 @@ describe('card list', () => {
       attribute: [2],
       specialization: ['sense'],
       sort: 'total',
-      layout: 'vertical',
       direction: 'asc',
     })
     const serialized = toCardListQuery(parsed, { unrelated: 'keep', page: '2' })
@@ -251,7 +249,6 @@ describe('card list', () => {
       rarity: ['5'],
       attribute: ['2'],
       specialization: ['sense'],
-      layout: 'vertical',
       sort: 'total',
       direction: 'asc',
     })

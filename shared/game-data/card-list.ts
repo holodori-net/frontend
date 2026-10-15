@@ -18,7 +18,6 @@ export interface CardListConditions {
   rarity: number[]
   attribute: number[]
   specialization: CardStatKey[]
-  layout: CardListLayout
   sort: CardListSort
   direction: 'asc' | 'desc'
 }
@@ -44,6 +43,7 @@ const queryKeys = new Set<string>([
   'rarity',
   'attribute',
   'specialization',
+  // Remove layout from legacy URLs when the conditions are next serialized.
   'layout',
   'sort',
   'direction',
@@ -56,7 +56,6 @@ export function createCardListConditions(): CardListConditions {
     rarity: [],
     attribute: [],
     specialization: [],
-    layout: 'full',
     sort: 'order',
     direction: 'desc',
   }
@@ -150,10 +149,6 @@ export function parseCardListQuery(
   if (sort && sortKeys.includes(sort as CardListSort)) {
     conditions.sort = sort as CardListSort
   }
-  const layout = queryValues(query.layout)[0]
-  if (layout === 'full' || layout === 'vertical') {
-    conditions.layout = layout
-  }
   const direction = queryValues(query.direction)[0]
   if (direction === 'asc' || direction === 'desc') {
     conditions.direction = direction
@@ -182,7 +177,6 @@ export function toCardListQuery(
   if (conditions.specialization.length) {
     query.specialization = [...new Set(conditions.specialization)]
   }
-  if (conditions.layout !== 'full') query.layout = conditions.layout
   if (conditions.sort !== 'order') query.sort = conditions.sort
   if (conditions.direction !== 'desc') query.direction = conditions.direction
   return query

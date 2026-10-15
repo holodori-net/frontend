@@ -20,6 +20,8 @@
   "gameLanguage": "遊戲內容語言",
   "siteLanguage": "網站語言",
   "cardList": {
+    "loading": "正在載入卡片列表…",
+    "requiresJavaScript": "請啟用 JavaScript 以瀏覽、搜尋及篩選卡片。",
     "statsDescription": "三圍為卡片自身在滿等、滿特訓、滿綻放時的數值。",
     "filters": "卡片篩選",
     "search": "搜尋",

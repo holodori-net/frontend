@@ -20,6 +20,8 @@
   "gameLanguage": "Game content",
   "siteLanguage": "Site language",
   "cardList": {
+    "loading": "Loading cards…",
+    "requiresJavaScript": "Enable JavaScript to browse, search, and filter cards.",
     "statsDescription": "Stats show the card at maximum level, training, and Bloom, based on the card alone.",
     "filters": "Card filters",
     "search": "Search",

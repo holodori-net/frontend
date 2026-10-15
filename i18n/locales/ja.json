@@ -20,6 +20,8 @@
   "gameLanguage": "ゲーム内コンテンツ",
   "siteLanguage": "サイトの言語",
   "cardList": {
+    "loading": "カード一覧を読み込み中…",
+    "requiresJavaScript": "カードの閲覧・検索・絞り込みには JavaScript を有効にしてください。",
     "statsDescription": "ステータスはカード単体の最大レベル・最大特訓・最大ブルーム時の値です。",
     "filters": "カードの絞り込み",
     "search": "検索",
