@@ -8,19 +8,28 @@ import {
   getCardAttributeIconUrl,
   getCardStatIconUrl,
 } from '#shared/game-data/card-icons'
-import { getCardImageUrl } from '#shared/game-data/card-list'
+import {
+  getCardImageUrl,
+  type CardListLayout,
+} from '#shared/game-data/card-list'
 
-const props = defineProps<{
-  card: CardListItemData
-  gameLocale: GameLocale
-  statKeys: CardStatKey[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    card: CardListItemData
+    gameLocale: GameLocale
+    statKeys: CardStatKey[]
+    layout?: CardListLayout
+  }>(),
+  { layout: 'full' },
+)
 
 const { t, locale } = useI18n()
 const imageFailed = ref(false)
 const imageLoaded = ref(false)
 const imageElement = ref<HTMLImageElement | null>(null)
-const imageUrl = computed(() => getCardImageUrl(props.card.assetId))
+const imageUrl = computed(() =>
+  getCardImageUrl(props.card.assetId, props.layout),
+)
 const numberFormatter = computed(() => new Intl.NumberFormat(locale.value))
 const hasImage = computed(() => Boolean(imageUrl.value) && !imageFailed.value)
 const cardName = computed(() =>
@@ -52,10 +61,20 @@ onMounted(() => {
 <template>
   <li class="card-list-container block min-w-0">
     <article
-      class="card-list-content flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-surface-200 bg-surface-0 shadow-sm dark:border-surface-700 dark:bg-surface-900"
+      class="card-list-content flex h-full min-w-0 overflow-hidden rounded-2xl border border-surface-200 bg-surface-0 shadow-sm dark:border-surface-700 dark:bg-surface-900"
+      :class="
+        layout === 'vertical'
+          ? 'flex-row items-start card-list-content--vertical'
+          : 'flex-col'
+      "
     >
       <div
-        class="relative aspect-video w-full overflow-hidden bg-surface-100 dark:bg-surface-800"
+        class="relative overflow-hidden bg-surface-100 dark:bg-surface-800"
+        :class="
+          layout === 'vertical'
+            ? 'aspect-[256/366] w-[40%] min-w-28 max-w-40 shrink-0'
+            : 'aspect-video w-full'
+        "
       >
         <Skeleton
           v-if="hasImage && !imageLoaded"
@@ -100,7 +119,12 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="flex flex-1 flex-col gap-4 p-4">
+      <div
+        class="flex flex-1 flex-col"
+        :class="
+          layout === 'vertical' ? 'min-w-0 self-stretch gap-2 p-3' : 'gap-4 p-4'
+        "
+      >
         <div class="min-w-0 flex-1">
           <p
             class="game-text mb-0 min-w-0 text-base font-semibold leading-snug wrap-anywhere"
@@ -117,21 +141,30 @@ onMounted(() => {
         </div>
 
         <dl
-          class="mt-auto flex min-w-0 flex-wrap items-center justify-center gap-x-1 gap-y-1 text-base"
+          class="mt-auto min-w-0 text-base"
+          :class="
+            layout === 'vertical'
+              ? 'grid grid-cols-1 gap-y-1'
+              : 'flex flex-wrap items-center justify-center gap-x-1 gap-y-1'
+          "
         >
           <div
             v-for="stat in statKeys"
             :key="stat"
-            class="inline-flex min-w-0 max-w-full flex-[0_1_auto] items-center gap-1 py-1"
+            class="min-w-0 max-w-full items-center gap-1 py-1"
+            :class="
+              layout === 'vertical' ? 'flex' : 'inline-flex flex-[0_1_auto]'
+            "
           >
             <dt class="sr-only">
               {{ t(`cardList.stat.${stat}`) }}
             </dt>
             <dd
               class="m-0 inline-flex min-w-0 items-center gap-1 font-medium tabular-nums"
+              :class="layout === 'vertical' && 'flex-wrap'"
             >
               <span
-                v-if="stat !== statKeys[0]"
+                v-if="layout !== 'vertical' && stat !== statKeys[0]"
                 aria-hidden="true"
                 class="mx-1 shrink-0"
                 >+</span
@@ -152,15 +185,30 @@ onMounted(() => {
             </dd>
           </div>
           <div
-            class="inline-flex min-w-0 max-w-full flex-[0_1_auto] items-center gap-1 py-1"
+            class="min-w-0 max-w-full items-center gap-1 py-1"
+            :class="
+              layout === 'vertical'
+                ? 'flex border-t border-surface-200 pt-1 dark:border-surface-700'
+                : 'inline-flex flex-[0_1_auto]'
+            "
           >
-            <dt class="sr-only">
+            <dt
+              :class="
+                layout === 'vertical' ? 'text-xs text-muted-color' : 'sr-only'
+              "
+            >
               {{ t('cardList.total') }}
             </dt>
             <dd
               class="m-0 inline-flex min-w-0 items-center gap-1 font-bold tabular-nums"
+              :class="layout === 'vertical' && 'flex-wrap'"
             >
-              <span aria-hidden="true" class="mx-1 shrink-0">=</span>
+              <span
+                v-if="layout !== 'vertical'"
+                aria-hidden="true"
+                class="mx-1 shrink-0"
+                >=</span
+              >
               <span>
                 {{ numberFormatter.format(card.total) }}
               </span>
@@ -181,6 +229,10 @@ onMounted(() => {
   content-visibility: auto;
   contain-intrinsic-block-size: auto 24rem;
   contain-intrinsic-block-size: auto calc(56.25cqw + 12rem);
+}
+
+.card-list-content--vertical {
+  contain-intrinsic-block-size: auto max(57.19cqw, 12rem);
 }
 
 @media (prefers-reduced-motion: reduce) {

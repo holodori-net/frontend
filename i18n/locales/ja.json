@@ -51,6 +51,11 @@
       "total": "合計ステータス"
     },
     "sortLabel": "並び替え",
+    "layoutLabel": "カードの表示形式",
+    "layout": {
+      "full": "カード全体",
+      "vertical": "縦型カード"
+    },
     "descending": "降順",
     "ascending": "昇順",
     "reset": "絞り込みをリセット",

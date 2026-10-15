@@ -10,12 +10,15 @@ export type CardListSort =
   | 'sense'
   | 'total'
 
+export type CardListLayout = 'full' | 'vertical'
+
 export interface CardListConditions {
   q: string
   character: string[]
   rarity: number[]
   attribute: number[]
   specialization: CardStatKey[]
+  layout: CardListLayout
   sort: CardListSort
   direction: 'asc' | 'desc'
 }
@@ -41,6 +44,7 @@ const queryKeys = new Set<string>([
   'rarity',
   'attribute',
   'specialization',
+  'layout',
   'sort',
   'direction',
 ])
@@ -52,6 +56,7 @@ export function createCardListConditions(): CardListConditions {
     rarity: [],
     attribute: [],
     specialization: [],
+    layout: 'full',
     sort: 'order',
     direction: 'desc',
   }
@@ -145,6 +150,10 @@ export function parseCardListQuery(
   if (sort && sortKeys.includes(sort as CardListSort)) {
     conditions.sort = sort as CardListSort
   }
+  const layout = queryValues(query.layout)[0]
+  if (layout === 'full' || layout === 'vertical') {
+    conditions.layout = layout
+  }
   const direction = queryValues(query.direction)[0]
   if (direction === 'asc' || direction === 'desc') {
     conditions.direction = direction
@@ -173,6 +182,7 @@ export function toCardListQuery(
   if (conditions.specialization.length) {
     query.specialization = [...new Set(conditions.specialization)]
   }
+  if (conditions.layout !== 'full') query.layout = conditions.layout
   if (conditions.sort !== 'order') query.sort = conditions.sort
   if (conditions.direction !== 'desc') query.direction = conditions.direction
   return query
@@ -250,8 +260,11 @@ export function filterAndSortCards(
     })
 }
 
-export function getCardImageUrl(assetId: string | null): string | null {
+export function getCardImageUrl(
+  assetId: string | null,
+  layout: CardListLayout = 'full',
+): string | null {
   if (!assetId) return null
-  const name = `img_card_full_${assetId}`
+  const name = `img_card_${layout === 'vertical' ? 'vert' : 'full'}_${assetId}`
   return `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.png`
 }

@@ -17,6 +17,7 @@ import { getCharacterIconUrl } from '#shared/game-data/character-list'
 import {
   filterAndSortCards,
   getCardFilterOptions,
+  type CardListLayout,
   type CardListSort,
 } from '#shared/game-data/card-list'
 import { useCardListConditions } from '~/composables/useCardListConditions'
@@ -116,6 +117,12 @@ const sortOptions = computed<{ value: CardListSort; label: string }[]>(() =>
 )
 const selectedSortOption = computed(() =>
   sortOptions.value.find((option) => option.value === conditions.value.sort),
+)
+const layoutOptions = computed<{ value: CardListLayout; label: string }[]>(() =>
+  (['full', 'vertical'] as const).map((value) => ({
+    value,
+    label: t(`cardList.layout.${value}`),
+  })),
 )
 </script>
 
@@ -312,6 +319,19 @@ const selectedSortOption = computed(() =>
               </template>
             </Select>
           </label>
+          <label class="min-w-48 flex-1 sm:flex-none">
+            <span class="mb-1.5 block text-sm font-medium">{{
+              t('cardList.layoutLabel')
+            }}</span>
+            <Select
+              v-model="conditions.layout"
+              class="w-full sm:min-w-52"
+              :options="layoutOptions"
+              option-label="label"
+              option-value="value"
+              :aria-label="t('cardList.layoutLabel')"
+            />
+          </label>
           <Button
             type="button"
             severity="secondary"
@@ -368,6 +388,7 @@ const selectedSortOption = computed(() =>
           :card="card"
           :game-locale="gameLocale"
           :stat-keys="statKeys"
+          :layout="conditions.layout"
         />
       </ul>
     </main>

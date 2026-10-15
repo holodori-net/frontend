@@ -51,6 +51,11 @@
       "total": "三圍合計"
     },
     "sortLabel": "排序方式",
+    "layoutLabel": "卡片版型",
+    "layout": {
+      "full": "完整卡圖",
+      "vertical": "直式卡圖"
+    },
     "descending": "降冪",
     "ascending": "升冪",
     "reset": "重設篩選",

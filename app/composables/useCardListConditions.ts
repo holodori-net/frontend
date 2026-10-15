@@ -64,6 +64,7 @@ export function useCardListConditions(options: ComputedRef<CardFilterOptions>) {
         next.rarity.join('\0') === previous.rarity.join('\0') &&
         next.attribute.join('\0') === previous.attribute.join('\0') &&
         next.specialization.join('\0') === previous.specialization.join('\0') &&
+        next.layout === previous.layout &&
         next.sort === previous.sort &&
         next.direction === previous.direction
 
@@ -82,7 +83,10 @@ export function useCardListConditions(options: ComputedRef<CardFilterOptions>) {
   const reset = () => {
     clearSearchTimer()
     suppressConditionWatch = true
-    conditions.value = createCardListConditions()
+    conditions.value = {
+      ...createCardListConditions(),
+      layout: conditions.value.layout,
+    }
     suppressConditionWatch = false
     writeRoute(false)
   }

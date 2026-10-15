@@ -75,7 +75,7 @@
 
 素材 ID 保存來源識別碼，與其他資料表的外鍵不同。
 
-### 列表文字與完整卡圖
+### 列表文字與卡圖版型
 
 **CONFIRMED**：`LangClientKeyConst.Card` 的 `CardAttributeType1`／`2`／`3` 初始化常數對應 `LangClientCommon.client_id`，正式文字如下：
 
@@ -95,7 +95,9 @@
 
 來源：`.data/master.sqlite` 的 `LangClientCommon(language, client_id, text)`；`../extraction/work/decompile/05-annotate-decompiled-code/annotated-csharp/Vision.Common.Core/Vision/Common/Localization/LangClientKeyConst.cs` 的 `Card` 靜態初始化及對應 `libil2cpp.so` 常數；`methods.json` 記錄其 RVA `0xE7AA9E8`（file offset `0xE7A69E8`）。介面依網站語言顯示，卡名與角色名依遊戲語言顯示。
 
-完整卡圖使用 `https://assets.holodori.net/cdn/img_card_full_{assetId}/Texture2D/img_card_full_{assetId}.png`，以 16:9 完整顯示。載入期間顯示 skeleton，偏好減少動態效果時停止其動畫；載入完成後移除，失敗時保留文字及占位。素材用途與 URL 由 `shared/game-data/card-list.ts` 管理。
+完整卡圖使用 `https://assets.holodori.net/cdn/img_card_full_{assetId}/Texture2D/img_card_full_{assetId}.png`，以 16:9 完整顯示。直式卡圖使用 `https://assets.holodori.net/cdn/img_card_vert_{assetId}/Texture2D/img_card_vert_{assetId}.png`，以 256:366 顯示。素材用途與 URL 由 `shared/game-data/card-list.ts` 管理，兩種 URL 均保留素材 ID。
+
+**CONFIRMED**：`06003-5-uniq-0091-00` 直式卡圖為 256×366 PNG。直式版型將圖片置左，卡名與角色名置右上，垂直三圍及標籤合計靠右側底部；完整版型維持圖片在上、資訊在下與水平加總算式。兩種版型載入時均顯示 skeleton，偏好減少動態效果時停止其動畫；載入完成後移除，失敗時保留文字及占位。完整卡圖尺寸案例見下方素材記錄。
 
 **CONFIRMED**：`06003-5-uniq-0091-00`、`00034-5-uniq-0090-00` 與 `00001-3-nrml-0000-00` 的完整卡圖均為 2048×1152 PNG，檔案分別為 3,436,240、2,939,695 與 1,871,417 bytes。每張圖的 RGBA8 像素資料為 9 MiB。
 
@@ -116,7 +118,7 @@
 
 客戶端對應：`../extraction/work/decompile/05-annotate-decompiled-code/annotated-csharp/Vision.Common.Core/Vision/Common/AddressDefinition.cs` 的 `LocalSpriteAtlas`；屬性由 `Vision.Common/Vision/Common/CardAttributeTypeIcon.cs` 的 `Set` 選取。屬性 1／2／3 引用的靜態欄位 offset 分別為 8120／8168／8144，對應 `cute_cl`／`pure_cl`／`happy_cl`。觀察日期為 2026-10-14。
 
-前端 URL 對照集中於 `shared/game-data/card-icons.ts`。卡片上的屬性與底部三圍使用圖示；底部依表現力、技巧、品味順序呈現「圖示 數值 + 圖示 數值 + 圖示 數值 = 合計」，窄螢幕與缺圖文字按數值項目換行。篩選與三圍排序選項保留圖示及文字。`CardListIcon` 提供名稱、tooltip、尺寸選擇及載入失敗時的文字 fallback；三圍圖示使用透明背景，亮模式顯示黑色、暗模式顯示白色。
+前端 URL 對照集中於 `shared/game-data/card-icons.ts`。卡片上的屬性與三圍使用圖示；完整版型於圖片下方依序呈現「圖示 數值 + 圖示 數值 + 圖示 數值 = 合計」，直式版型於圖片右側垂直呈現三圍與標籤合計，不顯示加號與等號。窄螢幕與缺圖文字按數值項目換行。篩選與三圍排序選項保留圖示及文字。`CardListIcon` 提供名稱、tooltip、尺寸選擇及載入失敗時的文字 fallback；三圍圖示使用透明背景，亮模式顯示黑色、暗模式顯示白色。
 
 ### 星級動畫與星形圖示
 

@@ -100,6 +100,7 @@ describe('card list', () => {
       rarity: [],
       attribute: [],
       specialization: [],
+      layout: 'full',
       sort: 'order',
       direction: 'desc',
     })
@@ -224,6 +225,7 @@ describe('card list', () => {
         rarity: ['5', '5', '4.2', '999'],
         attribute: ['2', 'x'],
         specialization: ['sense', 'unknown', 'sense'],
+        layout: 'vertical',
         sort: 'total',
         direction: 'asc',
         unrelated: 'keep',
@@ -237,6 +239,7 @@ describe('card list', () => {
       attribute: [2],
       specialization: ['sense'],
       sort: 'total',
+      layout: 'vertical',
       direction: 'asc',
     })
     const serialized = toCardListQuery(parsed, { unrelated: 'keep', page: '2' })
@@ -248,12 +251,17 @@ describe('card list', () => {
       rarity: ['5'],
       attribute: ['2'],
       specialization: ['sense'],
+      layout: 'vertical',
       sort: 'total',
       direction: 'asc',
     })
     expect(parseCardListQuery(serialized, options)).toEqual(parsed)
     expect(
-      toCardListQuery(createCardListConditions(), { q: 'old', custom: 'x' }),
+      toCardListQuery(createCardListConditions(), {
+        q: 'old',
+        layout: 'vertical',
+        custom: 'x',
+      }),
     ).toEqual({
       custom: 'x',
     })
@@ -267,6 +275,7 @@ describe('card list', () => {
       rarity: [null],
       attribute: [],
       specialization: [null],
+      layout: 'poster',
       sort: 'unknown',
       direction: 'sideways',
       custom: ['keep', null],
@@ -287,11 +296,16 @@ describe('card list', () => {
     expect(existingQuery).toEqual(existingQueryBefore)
   })
 
-  it('uses the card image CDN path and returns null when the asset is absent', () => {
+  it('uses the selected card image CDN path and returns null when the asset is absent', () => {
     expect(getCardImageUrl('00015')).toBe(
       'https://assets.holodori.net/cdn/img_card_full_00015/Texture2D/img_card_full_00015.png',
     )
+    expect(getCardImageUrl('00015', 'vertical')).toBe(
+      'https://assets.holodori.net/cdn/img_card_vert_00015/Texture2D/img_card_vert_00015.png',
+    )
     expect(getCardImageUrl(null)).toBeNull()
     expect(getCardImageUrl('')).toBeNull()
+    expect(getCardImageUrl(null, 'vertical')).toBeNull()
+    expect(getCardImageUrl('', 'vertical')).toBeNull()
   })
 })

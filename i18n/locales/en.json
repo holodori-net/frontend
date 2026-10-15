@@ -51,6 +51,11 @@
       "total": "Total stats"
     },
     "sortLabel": "Sort by",
+    "layoutLabel": "Card layout",
+    "layout": {
+      "full": "Full card art",
+      "vertical": "Vertical card art"
+    },
     "descending": "Descending",
     "ascending": "Ascending",
     "reset": "Reset filters",
