@@ -156,6 +156,12 @@ onMounted(() => {
               layout === 'vertical' ? 'flex' : 'inline-flex flex-[0_1_auto]'
             "
           >
+            <span
+              v-if="layout !== 'vertical' && stat !== statKeys[0]"
+              aria-hidden="true"
+              class="mx-1 shrink-0"
+              >+</span
+            >
             <dt class="sr-only">
               {{ t(`cardList.stat.${stat}`) }}
             </dt>
@@ -163,12 +169,6 @@ onMounted(() => {
               class="m-0 inline-flex min-w-0 items-center gap-1 font-medium tabular-nums"
               :class="layout === 'vertical' && 'flex-wrap'"
             >
-              <span
-                v-if="layout !== 'vertical' && stat !== statKeys[0]"
-                aria-hidden="true"
-                class="mx-1 shrink-0"
-                >+</span
-              >
               <CardListIcon
                 :src="getCardStatIconUrl(stat)"
                 :label="t(`cardList.stat.${stat}`)"
@@ -192,6 +192,12 @@ onMounted(() => {
                 : 'inline-flex flex-[0_1_auto]'
             "
           >
+            <span
+              v-if="layout !== 'vertical'"
+              aria-hidden="true"
+              class="mx-1 shrink-0"
+              >=</span
+            >
             <dt
               :class="
                 layout === 'vertical' ? 'text-xs text-muted-color' : 'sr-only'
@@ -203,12 +209,6 @@ onMounted(() => {
               class="m-0 inline-flex min-w-0 items-center gap-1 font-bold tabular-nums"
               :class="layout === 'vertical' && 'flex-wrap'"
             >
-              <span
-                v-if="layout !== 'vertical'"
-                aria-hidden="true"
-                class="mx-1 shrink-0"
-                >=</span
-              >
               <span>
                 {{ numberFormatter.format(card.total) }}
               </span>
