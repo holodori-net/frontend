@@ -83,10 +83,10 @@ async function chooseGameLocale(value: GameLocale) {
 
 <template>
   <header
-    class="theme-site-header sticky top-0 z-20 flex flex-wrap items-center gap-x-4 gap-y-0 border-b px-5 sm:h-[4.75rem] sm:flex-nowrap sm:px-8 md:gap-x-10 lg:px-[max(2rem,calc((100vw-1160px)/2))]"
+    class="theme-site-header sticky top-0 z-20 flex flex-wrap items-center gap-x-3 gap-y-0 border-b px-4 sm:h-14 sm:flex-nowrap sm:px-6 md:gap-x-6"
   >
     <NuxtLink
-      class="inline-flex h-16 shrink-0 items-center gap-2.5 font-bold whitespace-nowrap text-primary sm:h-full"
+      class="inline-flex h-14 shrink-0 items-center gap-2.5 font-bold whitespace-nowrap text-primary sm:h-full"
       :to="buildLocalizedPath(locale as SiteLocale, activeGameLocale, 'home')"
     >
       <img
