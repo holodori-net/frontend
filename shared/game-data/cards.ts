@@ -14,6 +14,7 @@ export interface CardGrowth {
 export interface CardData {
   id: string
   characterId: string
+  rewardCostumeId: string | null
   name: LocalizedNames
   rarity: number
   attributeType: number

@@ -40,6 +40,7 @@ function createCard(overrides: Partial<CardData> = {}): CardData {
   return {
     id: 'card-1',
     characterId: 'chr-1',
+    rewardCostumeId: null,
     name: names,
     rarity: 5,
     attributeType: 2,

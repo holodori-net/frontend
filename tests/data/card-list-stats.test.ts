@@ -20,6 +20,7 @@ function card(
   return {
     id: `card-${rarity}`,
     characterId: 'chr-00015',
+    rewardCostumeId: null,
     name: names,
     rarity,
     attributeType: 1,

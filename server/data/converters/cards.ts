@@ -9,6 +9,7 @@ export function transformCards(database: GameDatabase): CardData[] {
     .select({
       id: card.id,
       characterId: card.characterId,
+      rewardCostumeId: card.rewardCostumeId,
       nameLangId: card.nameLangId,
       rarity: card.rarity,
       attributeType: card.attributeType,
@@ -36,6 +37,7 @@ export function transformCards(database: GameDatabase): CardData[] {
   return rows.map((row) => ({
     id: row.id,
     characterId: row.characterId,
+    rewardCostumeId: row.rewardCostumeId,
     name: localizedText(nameQuery.all({ id: row.nameLangId }), row.nameLangId, {
       languageTable: 'LangCard',
       table: 'Card',

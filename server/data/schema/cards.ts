@@ -3,6 +3,7 @@ import { primaryKey, snakeCase, text, integer } from 'drizzle-orm/sqlite-core'
 export const card = snakeCase.table('Card', {
   id: text().notNull().primaryKey(),
   characterId: text().notNull(),
+  rewardCostumeId: text(),
   nameLangId: text().notNull(),
   rarity: integer().notNull(),
   attributeType: integer().notNull(),

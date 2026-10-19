@@ -10,7 +10,7 @@ describe('card data transform', () => {
   beforeEach(() => {
     database = new DatabaseSync(':memory:')
     database.exec(`
-      CREATE TABLE Card (id TEXT, character_id TEXT, name_lang_id TEXT, rarity INTEGER,
+      CREATE TABLE Card (id TEXT, character_id TEXT, reward_costume_id TEXT, name_lang_id TEXT, rarity INTEGER,
         attribute_type INTEGER, asset_id TEXT, asset_type INTEGER, vertical_anchor_type INTEGER,
         horizontal_anchor_type INTEGER, "order" INTEGER, card_level_group_id TEXT,
         card_level_limit_group_id TEXT, card_potential_group_id TEXT,
@@ -18,8 +18,8 @@ describe('card data transform', () => {
         sense_permil_multiply INTEGER);
       CREATE TABLE LangCard (language TEXT, id TEXT, text TEXT);
       INSERT INTO Card VALUES
-        ('card-b', 'c2', 'name-b', 3, 4, NULL, 5, 6, 7, 1, 'levels', 'limits', 'potential', 1000, 900, 800),
-        ('card-a', 'c1', 'name-a', 2, 3, 'asset-card', 4, 5, 6, 1, 'levels', 'limits', 'potential', 700, 800, 900);
+        ('card-b', 'c2', NULL, 'name-b', 3, 4, NULL, 5, 6, 7, 1, 'levels', 'limits', 'potential', 1000, 900, 800),
+        ('card-a', 'c1', 'costume-a', 'name-a', 2, 3, 'asset-card', 4, 5, 6, 1, 'levels', 'limits', 'potential', 700, 800, 900);
     `)
     const insertTranslation = database.prepare(
       'INSERT INTO LangCard (language, id, text) VALUES (?, ?, ?)',
@@ -38,6 +38,7 @@ describe('card data transform', () => {
     expect(cards.map(({ id }) => id)).toEqual(['card-a', 'card-b'])
     expect(cards[0]).toMatchObject({
       characterId: 'c1',
+      rewardCostumeId: 'costume-a',
       name: {
         jpn: 'name-a-jpn',
         eng: 'name-a-eng',
@@ -55,6 +56,7 @@ describe('card data transform', () => {
       },
     })
     expect(cards[1]!.assetId).toBeNull()
+    expect(cards[1]!.rewardCostumeId).toBeNull()
     expect(cards[1]!).not.toHaveProperty('backgroundAssetId')
     expect(cards[1]!.growth.levelGroupId).toBe(cards[0]!.growth.levelGroupId)
     expect(cards[1]!.name.eng).toBe('name-b-eng')
