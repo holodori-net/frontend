@@ -4,11 +4,12 @@
 
 ## 文件索引
 
-- [卡片資料](data/cards.md)：Card 與 LangCard 的完整欄位、技能／語音／服裝關聯、正式屬性與三圍文字及圖示、星級動畫 WebP、來源 sprite 圖集與星形圖示、完整與直式卡圖、列表版型與顯示資訊、投影及轉換狀態。
+- [卡片資料](data/cards.md)：Card 與 LangCard 的完整欄位、技能／語音／服裝關聯、服裝技能的列表資料來源、預設服裝關聯、六語描述組合與參數模板、正式屬性與三圍文字及圖示、星級動畫 WebP、來源 sprite 圖集與星形圖示、完整與直式卡圖、列表版型與顯示資訊、投影及轉換狀態。
 - [角色資料](data/characters.md)：Character 與 LangCharacter 的完整欄位、多語角色資料、生日與出道日期、養成關聯、SD 動畫、群組文字、顏色用途、成員主題投影及轉換狀態。
 - [角色群組資料](data/character-groups.md)：CharacterGrouping 與 LangCharacterGrouping 的完整欄位、角色成員關聯、多語文字及轉換狀態。
 - [卡片成長資料](data/card-growth.md)：CardLevel、CardLevelLimit、CardPotential 的組別、養成階段、累積經驗門檻、特訓消耗、綻放累加、滿養成三圍公式與特化判定，以及 CardPotentialUpgradeItem 的綻放道具對應與轉換狀態。
 - [Live 技能效果目標資料](data/live-skill-effect-targets.md)：LiveSkillEffectTarget 的目標類型、人數、角色／群組／屬性關聯、六語描述與轉換對照。
+- [服裝與 Live 服裝技能](data/costume-live-skills.md)：Costume、LiveLeaderSkill、Effect、Trigger 的欄位與關聯、六語共用描述 catalog、模板確認流程、待確認警告及完整描述驗證。
 
 ## 來源與適用快照
 
@@ -22,6 +23,8 @@
 卡片成長文件觀察日期為 2026-10-12，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 1890 筆 CardLevel、45 筆 CardLevelLimit、15 筆 CardPotential 與 1 筆 CardPotentialUpgradeItem。
 
 Live 技能效果目標文件觀察日期為 2026-10-13，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 83 筆 LiveSkillEffectTarget 與 498 筆 LangGeneratedLiveSkillEffectTarget。
+
+卡片文件的服裝技能來源關聯觀察日期為 2026-10-20，master_version 為 `452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`；此快照包含 196 張卡片、204 筆 Costume、196 筆 LiveLeaderSkill 與 1176 筆 LangGeneratedLiveLeaderSkill。
 
 ## 信心與轉換狀態
 

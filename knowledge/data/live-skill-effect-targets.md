@@ -2,6 +2,8 @@
 
 `transformLiveSkillEffectTargets(database)` 回傳 `LiveSkillEffectTargetData[]`，保留全部目標資料並依 `id` 排序。角色與群組關聯見 [characters.md](characters.md) 及 [character-groups.md](character-groups.md)。來源與適用快照見[知識索引](../README.md)。
 
+`transformLiveSkillData(database)` 將相同來源的目標描述整理為共用模板參照，保留全部結構化欄位。catalog、參數及待確認流程見[服裝技能資料](costume-live-skills.md)；上述獨立 Target converter 的公開介面維持完整六語描述。
+
 欄位名稱、SQLite 型別、主鍵、schema 宣告的關聯與轉換對應均為 **CONFIRMED**。宣告的關聯不等同 SQLite 外鍵約束。`✓` 表示已直接轉換或經查表產生回傳值。
 
 ## LiveSkillEffectTarget

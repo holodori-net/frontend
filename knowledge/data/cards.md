@@ -147,3 +147,69 @@
 `readCardList()` 重用卡片、角色與成長 converter，將角色順序、角色素材 ID、名稱、卡圖素材、篩選欄位與已計算的滿養成三圍投影為 `CardListItemData`。`characterAssetId` 取自 `Character.assetId`；角色篩選選項以 `img_chr_icon_normal_${characterAssetId}` 素材顯示名稱旁圖示，保留素材 ID 前導零，缺圖時保留名稱。頁面 payload 保存角色順序與六語卡名及角色名；角色排序依 `Character.order`，角色篩選選項依其遞增排列。同順序時角色選項依 ID 遞增，卡片排序則依卡片 `order` 遞減及 ID 遞增排列。角色下拉選單可搜尋所有已設定遊戲語言的名稱，選項與已選標籤仍依目前遊戲語言顯示。六語名稱支援跨語搜尋，成長表保留於生成階段。三圍公式、特化判定與固定案例見 [卡片成長資料](card-growth.md#列表的滿養成三圍)。
 
 `potential_alternative_reward` 與 `acquire_reward` 的結構型別為 `common.Reward`，包含 resource_type、resource_id、quantity；資源種類決定 resource_id 的解讀，schema 未將此欄宣告為單一表的外鍵。獎勵發放條件尚未確認。
+
+### 服裝技能的列表資料來源
+
+**CONFIRMED**：`CardData.rewardCostumeId` 由 `transformCards()` 回傳並保留來源 null；`CharacterData.defaultCostumeId` 由角色 converter 回傳。`transformLiveSkillData()` 提供服裝與技能結構及共用描述 catalog，介面與轉換對照見[服裝技能資料](costume-live-skills.md)。`CardListItemData` 保留列表所需欄位，尚未加入服裝技能。來源關聯可由 `.data/master.sqlite` 的 `PRAGMA table_info`、`declared_foreign_keys` 與唯讀 JOIN 重現。
+
+直接讀取獎勵服裝的完整技能描述所用關聯：
+
+| 來源欄位                              | 目標欄位                          | 取得資料                                 |
+| ------------------------------------- | --------------------------------- | ---------------------------------------- |
+| `Card.reward_costume_id`              | `Costume.id`                      | 卡片附帶的 Live 服裝                     |
+| `Costume.live_leader_skill_id`        | `LiveLeaderSkill.id`              | 服裝技能                                 |
+| `LiveLeaderSkill.description_lang_id` | `LangGeneratedLiveLeaderSkill.id` | 技能完整描述；以 `language` 選擇遊戲語言 |
+| `Costume.name_lang_id`                | `LangCostume.id`                  | 服裝名稱；以 `language` 選擇遊戲語言     |
+
+**CONFIRMED**：2026-10-20 觀察的 master_version 為 `452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`，包含 196 張卡片、204 筆 Costume 與 196 筆 LiveLeaderSkill。54 張四星與 88 張五星的 `reward_costume_id` 皆有值且可連到技能；54 張三星皆為 null。三星可經 `Card.character_id → Character.id`、`Character.default_costume_id → Costume.id` 取得角色預設服裝，再沿相同路徑取得技能。此為 master data 的關聯觀察；列表目前尚未實作服裝選擇與技能顯示。
+
+`Costume.live_leader_skill_id` 可為 null；此快照有 8 件服裝無技能。`LangGeneratedLiveLeaderSkill` 有 1176 筆文字，每個技能皆具備六種設定語言的非 null 描述；`LangLiveLeaderSkill` 為空表。描述保留 `[attribute=...]` 等文字標記。
+
+若需結構化效果與條件，另沿以下關聯讀取：
+
+| 來源欄位                                                        | 目標欄位                                 | 用途                                                     |
+| --------------------------------------------------------------- | ---------------------------------------- | -------------------------------------------------------- |
+| `LiveLeaderSkill.live_passive_skill_effect_group_id`            | `LivePassiveSkillEffect.group_id`        | 主要效果的 `type`、`value` 與目標 ID                     |
+| `LiveLeaderSkill.live_skill_trigger_group_id`                   | `LiveSkillTrigger.group_id`              | 主要發動條件，可為 null                                  |
+| `LiveLeaderSkill.additional_live_passive_skill_effect_group_id` | `LivePassiveSkillEffect.group_id`        | 附加效果，可為 null                                      |
+| `LiveLeaderSkill.additional_live_skill_trigger_group_id`        | `LiveSkillTrigger.group_id`              | 附加條件，可為 null                                      |
+| `LivePassiveSkillEffect.live_skill_effect_target_id`            | `LiveSkillEffectTarget.id`               | [效果目標](live-skill-effect-targets.md)，已有 converter |
+| `LivePassiveSkillEffect.description_lang_id`                    | `LangGeneratedLivePassiveSkillEffect.id` | 各效果描述，另以 `language` 選擇語言                     |
+| `LiveSkillTrigger.description_lang_id`                          | `LangGeneratedLiveSkillTrigger.id`       | 各條件描述，另以 `language` 選擇語言                     |
+
+效果與條件表的主鍵均為 `(group_id, number)`，應依 `group_id` 取得整組並依 `number` 排序。此快照有 20 筆服裝技能同時包含附加條件與附加效果。
+
+### 服裝技能的描述組合與模板
+
+**CONFIRMED**：上述 2026-10-20 快照中，196 筆 LiveLeaderSkill 的六語完整描述可由對應 Trigger 與 Effect 描述重組；依下表組合主要與附加段落後，1176 個結果皆與 `LangGeneratedLiveLeaderSkill` 相符，僅忽略首尾空白。Effect 的來源描述已包含 Target 文字。
+
+| 語言         | 有條件的單一段落           | 主要與附加段落的分隔 |
+| ------------ | -------------------------- | -------------------- |
+| `jpn`        | `{trigger}{effect}`        | 換行                 |
+| `cht`、`chs` | `{trigger}{effect}`        | 空格                 |
+| `eng`、`kor` | `{trigger} {effect}`       | 空格                 |
+| `ind`        | `Saat {trigger}, {effect}` | 空格                 |
+
+沒有 Trigger 時，單一段落直接使用 Effect。主要與附加條件分別對應各自效果；目前快照的每組 Trigger 與 Effect 皆只有 `number=1` 一列，多列的文字連接規則為 **UNKNOWN**。
+
+**CONFIRMED**：將實體名稱、屬性標記與數值換成參數後，來源描述具備下列共用句型。`transformLiveSkillData()` 依此歸納模板，六語還原與待確認流程見[服裝技能資料](costume-live-skills.md#描述-catalog-與確認流程)。
+
+| 資料表                   | 來源筆數 | 實際使用的 type                       | 模板參數                                                                 |
+| ------------------------ | -------- | ------------------------------------- | ------------------------------------------------------------------------ |
+| `LivePassiveSkillEffect` | 192      | 4、5、6、8、10，共 5 種               | `target`、`percent`                                                      |
+| `LiveSkillTrigger`       | 215      | 1、2、4、7、8、9、10、11、12，共 9 種 | 依類型使用 `threshold`、`group`、`character`、`attribute`、`judgement`   |
+| `LiveSkillEffectTarget`  | 83       | 1、2、4、5，共 4 種                   | 依類型使用 `count`、`group`、`attribute`；群組人數 null 的來源例外見下文 |
+
+192 筆 Effect 的六語描述皆能整理為每個 `(type, language)` 一個模板；目前使用類型的 `percent` 等於來源 `value / 10`，例如 `value="150"` 對應 `15`。215 筆 Trigger 的六語描述亦皆能整理為每個 `(type, language)` 一個模板。群組及角色名稱分別使用 `LangCharacterGrouping` 與 `LangCharacter` 的 `name_lang_id` 對應文字；屬性保留 `[attribute=...]...[/attribute]`，判定標籤保留各語言大小寫。
+
+繁體中文句型範例：
+
+| 類型                                        | 模板                                       |
+| ------------------------------------------- | ------------------------------------------ |
+| Trigger `DECK_CARD_CHARACTER_GROUPING`（7） | `若編入{threshold}名以上{group}`           |
+| Trigger `DECK_CARD_ATTRIBUTE`（8）          | `若編入{threshold}名以上{attribute}的人物` |
+| Target `ALL`（2）                           | `全體成員的`                               |
+| Target `CHARACTER_GROUPING`（4），人數有值  | `{count}名{group}的`                       |
+| Effect `ALL_PARAMETER_UP_PERMIL_UP`（8）    | `{target}全能力提升{percent}%`             |
+
+**CONFIRMED**：`live_skill_effect_target-character_grouping-grp-indonesia` 的 `target_count=null`，六語來源描述皆含 0 人文字；目前沒有 LivePassiveSkillEffect 引用此目標。其生效人數語意為 **UNKNOWN**，來源 null 與數值 0 應保持區分。其餘目標可整理為每個 `(type, language)` 一個模板。此快照的服裝技能僅使用 Target `ALL`、Trigger 類型 7／8，以及上述 5 種 Effect。

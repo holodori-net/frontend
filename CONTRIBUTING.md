@@ -29,6 +29,12 @@ Maintain schema definitions by hand for the tables and columns used by queries. 
 
 Shared helpers live in `server/data/common/`. Each domain reuses a parameterized Drizzle prepared query for language lookups and passes `{ language, text }` rows, the text ID, and source context to the localization helper. Missing or null translations report their language and source field. Cross-domain references use source IDs and return types.
 
+`transformLiveSkillData(database)` converts costumes and leader skills, groups effects and triggers by source group ID and number, and returns targets, a shared six-language description catalog, and `pendingDescriptions`. It queries only the fields needed by this conversion. `CardData.rewardCostumeId` retains the source null; character defaults remain available through `CharacterData.defaultCostumeId`. The card list payload does not include skill data.
+
+Confirmed templates live in `server/data/live-skill-description-templates.ts`, grouped by domain and type. Conversion selects a confirmed template by its parameter names and uses its six-language wording directly. Each language must contain the declared placeholders. Edit the template text to maintain confirmed wording, then rerun the data tests. Multiple applicable confirmed templates or invalid placeholders produce pending entries and warnings. When no confirmed template applies, automatic inference protects complete entity labels before locating numeric parameters and verifies exact source restoration in every game language. Unresolved descriptions become null and produce pending entries and warnings with source table, key, type, language, and reason. Missing source references or translations fail conversion. See [costume skills](knowledge/data/costume-live-skills.md) for the mappings and confirmation workflow.
+
+`renderSkillDescription` and `composeCostumeSkillDescription` in `shared/game-data/live-skill-description.ts` render catalog references and compose the independent main and additional segments. Multiple rows in a trigger or effect group produce a pending entry and warning because their joining rule is unconfirmed.
+
 When assigning parallel work, keep each domain's transform, types, tests, and data dictionary under one owner. Coordinate changes to shared helpers, readers, and the knowledge index with the integration owner. Data typecheck includes all domain source and test files. Data modules use explicit `.ts` relative import paths and `import type` for types. Runtime imports from the shared directory use `#shared`; Nuxt and Vitest resolve the alias, and `package.json` maps it through Node's `imports` field for build scripts.
 
 ## Checks
@@ -42,6 +48,8 @@ pnpm format:check
 pnpm test
 pnpm generate
 ```
+
+With `.data/master.sqlite` available, `pnpm test -- tests/data/live-skills-master.test.ts` verifies automatic inference against every effect, trigger, target, and composed leader skill source description in all game languages. It also verifies that confirmed templates render and compose successfully, allowing their wording to differ from the source. It prints rendered counts, source match counts, template counts, and the complete pending list. Without the local database, this integration test is skipped; in-memory data tests still run.
 
 Build, generate, and typecheck regenerate Nuxt's type definitions after generating styles. Typecheck covers Nuxt, service worker, and data transformation sources. Vue Router is a direct dependency so Nuxt's Volar plugin can be resolved by the project. When validating in a container, use separate generated outputs or mount the repository at the same absolute path used by the host so generated TypeScript configuration resolves plugins consistently.
 
