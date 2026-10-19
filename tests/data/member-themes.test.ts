@@ -54,11 +54,11 @@ describe('member theme projection', () => {
       color4: '#FF5B70',
       assets: {
         avatar:
-          'https://assets.holodori.net/cdn/img_chr_icon_normal_00015/Texture2D/img_chr_icon_normal_00015.png',
+          'https://assets.holodori.net/cdn/img_chr_icon_normal_00015/Texture2D/img_chr_icon_normal_00015.webp',
         motifMain:
-          'https://assets.holodori.net/cdn/img_chr_motif_icon_default_main_00015/Texture2D/img_chr_motif_icon_default_main_00015.png',
+          'https://assets.holodori.net/cdn/img_chr_motif_icon_default_main_00015/Texture2D/img_chr_motif_icon_default_main_00015.webp',
         motifLight:
-          'https://assets.holodori.net/cdn/img_chr_motif_icon_light_main_00015/Texture2D/img_chr_motif_icon_light_main_00015.png',
+          'https://assets.holodori.net/cdn/img_chr_motif_icon_light_main_00015/Texture2D/img_chr_motif_icon_light_main_00015.webp',
       },
     })
     expect(Object.keys(theme!.name).sort()).toEqual([...gameLocales].sort())

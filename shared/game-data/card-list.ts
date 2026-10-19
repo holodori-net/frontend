@@ -282,5 +282,5 @@ export function getCardImageUrl(
 ): string | null {
   if (!assetId) return null
   const name = `img_card_${layout === 'vertical' ? 'vert' : 'full'}_${assetId}`
-  return `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.png`
+  return `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.webp`
 }

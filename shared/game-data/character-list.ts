@@ -14,7 +14,7 @@ const characterAssetRoles = {
 export function getCharacterIconUrl(assetId: string | null) {
   if (!assetId) return null
   const name = `${characterAssetRoles.icon}_${assetId}`
-  return `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.png`
+  return `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.webp`
 }
 
 export function getCharacterSections<

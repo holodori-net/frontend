@@ -30,7 +30,7 @@ export function getMemberThemeAssets(
   const url = (role: keyof typeof memberAssetRoles) => {
     if (!assetId) return null
     const name = `${memberAssetRoles[role]}_${assetId}`
-    return `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.png`
+    return `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.webp`
   }
   return {
     avatar: url('avatar'),

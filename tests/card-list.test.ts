@@ -395,10 +395,10 @@ describe('card list', () => {
 
   it('uses the selected card image CDN path and returns null when the asset is absent', () => {
     expect(getCardImageUrl('00015')).toBe(
-      'https://assets.holodori.net/cdn/img_card_full_00015/Texture2D/img_card_full_00015.png',
+      'https://assets.holodori.net/cdn/img_card_full_00015/Texture2D/img_card_full_00015.webp',
     )
     expect(getCardImageUrl('00015', 'vertical')).toBe(
-      'https://assets.holodori.net/cdn/img_card_vert_00015/Texture2D/img_card_vert_00015.png',
+      'https://assets.holodori.net/cdn/img_card_vert_00015/Texture2D/img_card_vert_00015.webp',
     )
     expect(getCardImageUrl(null)).toBeNull()
     expect(getCardImageUrl('')).toBeNull()

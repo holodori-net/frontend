@@ -95,15 +95,15 @@
 
 來源：`.data/master.sqlite` 的 `LangClientCommon(language, client_id, text)`；`../extraction/work/decompile/05-annotate-decompiled-code/annotated-csharp/Vision.Common.Core/Vision/Common/Localization/LangClientKeyConst.cs` 的 `Card` 靜態初始化及對應 `libil2cpp.so` 常數；`methods.json` 記錄其 RVA `0xE7AA9E8`（file offset `0xE7A69E8`）。介面依網站語言顯示，卡名與角色名依遊戲語言顯示。
 
-完整卡圖使用 `https://assets.holodori.net/cdn/img_card_full_{assetId}/Texture2D/img_card_full_{assetId}.png`，以 16:9 完整顯示。直式卡圖使用 `https://assets.holodori.net/cdn/img_card_vert_{assetId}/Texture2D/img_card_vert_{assetId}.png`，以 256:366 顯示。素材用途與 URL 由 `shared/game-data/card-list.ts` 管理，兩種 URL 均保留素材 ID。
+完整卡圖使用 `https://assets.holodori.net/cdn/img_card_full_{assetId}/Texture2D/img_card_full_{assetId}.webp`，以 16:9 完整顯示。直式卡圖使用 `https://assets.holodori.net/cdn/img_card_vert_{assetId}/Texture2D/img_card_vert_{assetId}.webp`，以 256:366 顯示。素材用途與 URL 由 `shared/game-data/card-list.ts` 管理，兩種 URL 均保留素材 ID。
 
-**CONFIRMED**：`06003-5-uniq-0091-00` 直式卡圖為 256×366 PNG。直式版型將圖片置左，卡名與角色名置右上，垂直三圍及標籤合計靠右側底部；完整版型維持圖片在上、資訊在下與水平加總算式。兩種版型載入時均顯示 skeleton，偏好減少動態效果時停止其動畫；載入完成後移除，失敗時保留文字及占位。完整卡圖尺寸案例見下方素材記錄。
+**CONFIRMED**：`06003-5-uniq-0091-00` 來源直式卡圖尺寸為 256×366。直式版型將圖片置左，卡名與角色名置右上，垂直三圍及標籤合計靠右側底部；完整版型維持圖片在上、資訊在下與水平加總算式。兩種版型載入時均顯示 skeleton，偏好減少動態效果時停止其動畫；載入完成後移除，失敗時保留文字及占位。完整卡圖尺寸案例見下方素材記錄。
 
-**CONFIRMED**：`06003-5-uniq-0091-00`、`00034-5-uniq-0090-00` 與 `00001-3-nrml-0000-00` 的完整卡圖均為 2048×1152 PNG，檔案分別為 3,436,240、2,939,695 與 1,871,417 bytes。每張圖的 RGBA8 像素資料為 9 MiB。
+**CONFIRMED**：`06003-5-uniq-0091-00`、`00034-5-uniq-0090-00` 與 `00001-3-nrml-0000-00` 的來源完整卡圖尺寸均為 2048×1152。每張圖的 RGBA8 像素資料為 9 MiB。
 
 ### 三圍與屬性圖示
 
-**CONFIRMED**：APK 圖集包含以下 Sprite；三圍為透明底白色字母，屬性使用彩色圓形圖示。尺寸為圖集中裁切後的 PNG 像素大小。
+**CONFIRMED**：APK 圖集包含以下 Sprite；三圍為透明底白色字母，屬性使用彩色圓形圖示。尺寸為圖集中裁切後的 WebP 像素大小。
 
 | 用途      | Sprite 名稱                   | 尺寸    | 圖案           |
 | --------- | ----------------------------- | ------- | -------------- |
@@ -114,7 +114,7 @@
 | 清純（2） | `ui_999_ico_element_pure_cl`  | 128×128 | 綠色葉形       |
 | 快樂（3） | `ui_999_ico_element_happy_cl` | 128×128 | 黃橙色旋轉圖案 |
 
-素材來源：[APK 索引](https://assets.holodori.net/apk/index.json) 的 [主要圖示圖集](https://assets.holodori.net/apk/bundle/71a80fc31d22653f28db3f211e30ddde.bundle/index.json)。`files[].objectName` 對應 Sprite 名稱，`files[].path` 相對於該圖集目錄；來源 PNG 位於 `/srv/docker/holodori/public/apk/bundle/71a80fc31d22653f28db3f211e30ddde.bundle/images/`。另有 [陰影圖集](https://assets.holodori.net/apk/bundle/77297a5b58f9376da1f0bb5542e322c2.bundle/index.json)，名稱後綴為 `_shadow`。
+素材來源：[APK 索引](https://assets.holodori.net/apk/index.json) 的 [主要圖示圖集](https://assets.holodori.net/apk/bundle/71a80fc31d22653f28db3f211e30ddde.bundle/index.json)。`files[].objectName` 對應 Sprite 名稱，`files[].path` 相對於該圖集目錄；來源 WebP 位於 `/srv/docker/holodori/public/apk/bundle/71a80fc31d22653f28db3f211e30ddde.bundle/images/`，保留 Sprite 的 object ID 檔名。另有 [陰影圖集](https://assets.holodori.net/apk/bundle/77297a5b58f9376da1f0bb5542e322c2.bundle/index.json)，名稱後綴為 `_shadow`。
 
 客戶端對應：`../extraction/work/decompile/05-annotate-decompiled-code/annotated-csharp/Vision.Common.Core/Vision/Common/AddressDefinition.cs` 的 `LocalSpriteAtlas`；屬性由 `Vision.Common/Vision/Common/CardAttributeTypeIcon.cs` 的 `Set` 選取。屬性 1／2／3 引用的靜態欄位 offset 分別為 8120／8168／8144，對應 `cute_cl`／`pure_cl`／`happy_cl`。觀察日期為 2026-10-14。
 
@@ -122,21 +122,23 @@
 
 ### 星級動畫與星形圖示
 
-**CONFIRMED**：星級動畫素材為 [ef_ui_999_rare_anim_001 圖集](https://assets.holodori.net/cdn/tln_gacha-001/Texture2D/ef_ui_999_rare_anim_001.png)，PNG 尺寸 1600×1600、2,311,747 bytes。`bcb23cb8379398fe524f8a993147f492.bundle` 的 Sprite `m_Rect` 確認每格 200×200，依 PNG 左上至右下排列為 8×8。公開 PNG 與原始 Texture2D 的像素比對一致。
+星級動畫使用 [ef_ui_999_rare_anim_001 WebP 圖集](https://assets.holodori.net/cdn/tln_gacha-001/Texture2D/ef_ui_999_rare_anim_001.webp)。**CONFIRMED**：`bcb23cb8379398fe524f8a993147f492.bundle` 的來源 Texture2D 尺寸為 1600×1600；Sprite `m_Rect` 確認每格 200×200，依圖集左上至右下排列為 8×8。
 
 [動畫 manifest](https://assets.holodori.net/apk/generated/animations/manifest.json) 的 `frameCount=64`、`rate=60/1`、`loopCount=-1`；`e862167f3e9852ec53f92360e8283a6a.bundle` 的 `SpriteAnimationClip` 引用上述 Sprite，循環長度為 64/60 秒。原始圖集包含 Sprite mesh 外的 texture extrusion；繪製時依來源 mesh 輪廓裁切，保留透明背景。
 
-**CONFIRMED**：[靜態第一格](https://assets.holodori.net/cdn/tln_gacha-001/Sprite/ef_ui_999_rare_anim_001_0.png) 為 198×189、38,735 bytes，與來源 Sprite 匯出像素一致；在 200×200 影格中的位置為 x=1、y=5。
+**CONFIRMED**：manifest 的 [生成動畫 WebP](https://assets.holodori.net/apk/generated/animations/ef_ui_999_rare_anim_001--da09250dd35035f2.webp) 為 200×200、64 格、1,592,332 bytes，含透明背景。WebP 影格時間以 16／17 ms 表示，總時長 1067 ms，無限循環。
+
+[靜態第一格](https://assets.holodori.net/cdn/tln_gacha-001/Sprite/ef_ui_999_rare_anim_001_0.webp) 使用 WebP。**CONFIRMED**：來源 Sprite 裁切尺寸為 198×189；在 200×200 影格中的位置為 x=1、y=5。
 
 前端 URL 集中於 `shared/game-data/card-icons.ts`。`CardListRarity` 在卡片依星級垂直排列三／四／五顆星星，在稀有度選項依星級橫向顯示三／四／五顆星星及完整文字。列表初始化後先提供第一格圖片；圖集載入後由 canvas 依來源 Sprite mesh 一次裁切 64 格，建立共用透明 atlas Blob URL。CSS keyframes 只以 transform 播放 64 格動畫。每個星級群組使用一個 IntersectionObserver 訂閱；共享時鐘累積可播放時間，群組進入畫面時同步 CSS 動畫。離開畫面、頁面隱藏或偏好減少動態效果時停止動畫；圖集載入或處理失敗時保留靜態星星，最後一位訂閱者離開時撤銷 atlas URL，靜態圖片也無法載入時保留星級文字。
 
-**CONFIRMED**：主要圖示圖集包含以下透明底星形 Sprite，名稱、尺寸及 PNG 路徑由圖集索引確認，外觀由來源 PNG 確認。
+**CONFIRMED**：主要圖示圖集包含以下透明底星形 Sprite，名稱、尺寸及 WebP 路徑由圖集索引確認。
 
-| Sprite 名稱              | 尺寸    | 外觀             | PNG                                                                                                                                                                |
-| ------------------------ | ------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `ui_999_ico_star`        | 111×106 | 白色實心星形     | [圖示](https://assets.holodori.net/apk/bundle/71a80fc31d22653f28db3f211e30ddde.bundle/images/a9a15ec147b71fd3099830685f6f0e0d134b70c3826d7df9399c16a31bb64371.png) |
-| `ui_999_ico_star_rare_s` | 40×40   | 帶外框的白色星形 | [圖示](https://assets.holodori.net/apk/bundle/71a80fc31d22653f28db3f211e30ddde.bundle/images/3efce9fbc4f1f6babf723fd628720386cfc0122bff9b09105a913142a5b71c63.png) |
-| `ui_999_ico_star_rare_l` | 64×62   | 帶外框的白色星形 | [圖示](https://assets.holodori.net/apk/bundle/71a80fc31d22653f28db3f211e30ddde.bundle/images/0abd927ed012c7cfeffcd66eaebf85897bf54be8d46152430ecd00431d105261.png) |
+| Sprite 名稱              | 尺寸    | 外觀             | WebP                                                                                                                                                                |
+| ------------------------ | ------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ui_999_ico_star`        | 111×106 | 白色實心星形     | [圖示](https://assets.holodori.net/apk/bundle/71a80fc31d22653f28db3f211e30ddde.bundle/images/a9a15ec147b71fd3099830685f6f0e0d134b70c3826d7df9399c16a31bb64371.webp) |
+| `ui_999_ico_star_rare_s` | 40×40   | 帶外框的白色星形 | [圖示](https://assets.holodori.net/apk/bundle/71a80fc31d22653f28db3f211e30ddde.bundle/images/3efce9fbc4f1f6babf723fd628720386cfc0122bff9b09105a913142a5b71c63.webp) |
+| `ui_999_ico_star_rare_l` | 64×62   | 帶外框的白色星形 | [圖示](https://assets.holodori.net/apk/bundle/71a80fc31d22653f28db3f211e30ddde.bundle/images/0abd927ed012c7cfeffcd66eaebf85897bf54be8d46152430ecd00431d105261.webp) |
 
 ### 列表 payload
 

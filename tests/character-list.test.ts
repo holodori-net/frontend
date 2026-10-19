@@ -51,7 +51,7 @@ describe('character list', () => {
 
   it('uses the normal icon CDN path and supports an absent asset ID', () => {
     expect(getCharacterIconUrl('00015')).toBe(
-      'https://assets.holodori.net/cdn/img_chr_icon_normal_00015/Texture2D/img_chr_icon_normal_00015.png',
+      'https://assets.holodori.net/cdn/img_chr_icon_normal_00015/Texture2D/img_chr_icon_normal_00015.webp',
     )
     expect(getCharacterIconUrl(null)).toBeNull()
   })
