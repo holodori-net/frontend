@@ -24,6 +24,16 @@
     "requiresJavaScript": "カードの閲覧・検索・絞り込みには JavaScript を有効にしてください。",
     "statsDescription": "ステータスはカード単体の最大レベル・最大特訓・最大ブルーム時の値です。",
     "filters": "カードの絞り込み",
+    "controls": "カード一覧の操作",
+    "filtersAndSort": "絞り込みと並び替え",
+    "displaySettings": "カード表示",
+    "fieldsLabel": "表示情報",
+    "fieldsCount": "{count} 項目",
+    "field": {
+      "name": "カード名",
+      "characterName": "キャラクター名",
+      "parameters": "ステータス・合計"
+    },
     "search": "検索",
     "searchPlaceholder": "ゲーム内のすべての言語でカード名・キャラクター名を検索",
     "character": "キャラクター",

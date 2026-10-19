@@ -24,6 +24,16 @@
     "requiresJavaScript": "請啟用 JavaScript 以瀏覽、搜尋及篩選卡片。",
     "statsDescription": "三圍為卡片自身在滿等、滿特訓、滿綻放時的數值。",
     "filters": "卡片篩選",
+    "controls": "卡片列表控制項",
+    "filtersAndSort": "篩選與排序",
+    "displaySettings": "卡片顯示",
+    "fieldsLabel": "顯示資訊",
+    "fieldsCount": "{count} 項資訊",
+    "field": {
+      "name": "卡名",
+      "characterName": "角色名",
+      "parameters": "三圍與合計"
+    },
     "search": "搜尋",
     "searchPlaceholder": "以任一遊戲語言搜尋卡片名稱或角色名稱",
     "character": "角色",

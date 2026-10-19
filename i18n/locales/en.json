@@ -24,6 +24,16 @@
     "requiresJavaScript": "Enable JavaScript to browse, search, and filter cards.",
     "statsDescription": "Stats show the card at maximum level, training, and Bloom, based on the card alone.",
     "filters": "Card filters",
+    "controls": "Card list controls",
+    "filtersAndSort": "Filters and sorting",
+    "displaySettings": "Card display",
+    "fieldsLabel": "Information",
+    "fieldsCount": "{count} item | {count} items",
+    "field": {
+      "name": "Card name",
+      "characterName": "Character name",
+      "parameters": "Parameters and total"
+    },
     "search": "Search",
     "searchPlaceholder": "Search card or character names in any game language",
     "character": "Character",

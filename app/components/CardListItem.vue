@@ -10,6 +10,8 @@ import {
 } from '#shared/game-data/card-icons'
 import {
   getCardImageUrl,
+  CARD_LIST_FIELDS,
+  type CardListField,
   type CardListLayout,
 } from '#shared/game-data/card-list'
 
@@ -18,9 +20,10 @@ const props = withDefaults(
     card: CardListItemData
     gameLocale: GameLocale
     statKeys: CardStatKey[]
+    fields?: readonly CardListField[]
     layout?: CardListLayout
   }>(),
-  { layout: 'full' },
+  { fields: () => CARD_LIST_FIELDS, layout: 'full' },
 )
 
 const { t, locale } = useI18n()
@@ -35,6 +38,28 @@ const hasImage = computed(() => Boolean(imageUrl.value) && !imageFailed.value)
 const cardName = computed(() =>
   resolveLocalizedName(props.card.name, props.gameLocale),
 )
+const showCardName = computed(() => props.fields.includes('name'))
+const showCharacterName = computed(() => props.fields.includes('characterName'))
+const showParameters = computed(() => props.fields.includes('parameters'))
+const hasInformation = computed(
+  () => showCardName.value || showCharacterName.value || showParameters.value,
+)
+const informationHeight = computed(() => {
+  if (!hasInformation.value) return '0rem'
+  if (showCardName.value && showCharacterName.value && showParameters.value)
+    return '12rem'
+
+  let height = 2
+  if (showCardName.value) height += 2.5
+  if (showCharacterName.value) height += 2
+  if (showParameters.value) height += 5
+  if (showParameters.value && (showCardName.value || showCharacterName.value))
+    height += 1
+  return `${height}rem`
+})
+const articleStyle = computed(() => ({
+  '--card-list-info-height': informationHeight.value,
+}))
 const characterName = computed(() =>
   resolveLocalizedName(props.card.characterName, props.gameLocale),
 )
@@ -62,18 +87,32 @@ onMounted(() => {
   <li class="card-list-container block min-w-0">
     <article
       class="card-list-content flex h-full min-w-0 overflow-hidden rounded-2xl border border-surface-200 bg-surface-0 shadow-sm dark:border-surface-700 dark:bg-surface-900"
-      :class="
-        layout === 'vertical'
-          ? 'flex-row items-start card-list-content--vertical'
-          : 'flex-col'
-      "
+      :class="[
+        layout === 'vertical' &&
+          hasInformation &&
+          'flex-row items-start card-list-content--vertical',
+        layout === 'vertical' &&
+          !hasInformation &&
+          'flex-col card-list-content--art-only-vertical',
+        layout === 'full' && 'flex-col',
+        !hasInformation &&
+          layout === 'full' &&
+          'card-list-content--art-only-full',
+      ]"
+      :style="articleStyle"
+      :aria-labelledby="`card-name-${card.id}`"
     >
+      <span :id="`card-name-${card.id}`" class="sr-only" :lang="cardName.lang">
+        {{ cardName.text }}
+      </span>
       <div
         class="relative overflow-hidden bg-surface-100 dark:bg-surface-800"
         :class="
-          layout === 'vertical'
+          layout === 'vertical' && hasInformation
             ? 'aspect-[256/366] w-[40%] min-w-28 max-w-40 shrink-0'
-            : 'aspect-video w-full'
+            : layout === 'vertical'
+              ? 'aspect-[256/366] w-full'
+              : 'aspect-video w-full'
         "
       >
         <Skeleton
@@ -120,20 +159,24 @@ onMounted(() => {
       </div>
 
       <div
+        v-if="hasInformation"
         class="flex flex-1 flex-col"
         :class="
           layout === 'vertical' ? 'min-w-0 self-stretch gap-2 p-3' : 'gap-4 p-4'
         "
       >
-        <div class="min-w-0 flex-1">
+        <div v-if="showCardName || showCharacterName" class="min-w-0 flex-1">
           <p
+            v-if="showCardName"
             class="game-text mb-0 min-w-0 text-base font-semibold leading-snug wrap-anywhere"
             :lang="cardName.lang"
           >
             {{ cardName.text }}
           </p>
           <p
-            class="game-text mb-0 mt-1 text-sm text-muted-color wrap-anywhere"
+            v-if="showCharacterName"
+            class="game-text mb-0 text-sm text-muted-color wrap-anywhere"
+            :class="showCardName && 'mt-1'"
             :lang="characterName.lang"
           >
             {{ characterName.text }}
@@ -141,6 +184,7 @@ onMounted(() => {
         </div>
 
         <dl
+          v-if="showParameters"
           class="mt-auto min-w-0 text-base"
           :class="
             layout === 'vertical'
@@ -228,11 +272,20 @@ onMounted(() => {
 .card-list-content {
   content-visibility: auto;
   contain-intrinsic-block-size: auto 24rem;
-  contain-intrinsic-block-size: auto calc(56.25cqw + 12rem);
+  contain-intrinsic-block-size: auto
+    calc(56.25cqw + var(--card-list-info-height, 12rem));
 }
 
 .card-list-content--vertical {
   contain-intrinsic-block-size: auto max(57.19cqw, 12rem);
+}
+
+.card-list-content--art-only-full {
+  contain-intrinsic-block-size: auto 56.25cqw;
+}
+
+.card-list-content--art-only-vertical {
+  contain-intrinsic-block-size: auto 142.97cqw;
 }
 
 @media (prefers-reduced-motion: reduce) {

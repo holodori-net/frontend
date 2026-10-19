@@ -4,7 +4,7 @@
 
 ## 文件索引
 
-- [卡片資料](data/cards.md)：Card 與 LangCard 的完整欄位、技能／語音／服裝關聯、正式屬性與三圍文字及圖示、星級動畫 WebP、來源 sprite 圖集與星形圖示、完整與直式卡圖、列表版型與投影及轉換狀態。
+- [卡片資料](data/cards.md)：Card 與 LangCard 的完整欄位、技能／語音／服裝關聯、正式屬性與三圍文字及圖示、星級動畫 WebP、來源 sprite 圖集與星形圖示、完整與直式卡圖、列表版型與顯示資訊、投影及轉換狀態。
 - [角色資料](data/characters.md)：Character 與 LangCharacter 的完整欄位、多語角色資料、生日與出道日期、養成關聯、SD 動畫、群組文字、顏色用途、成員主題投影及轉換狀態。
 - [角色群組資料](data/character-groups.md)：CharacterGrouping 與 LangCharacterGrouping 的完整欄位、角色成員關聯、多語文字及轉換狀態。
 - [卡片成長資料](data/card-growth.md)：CardLevel、CardLevelLimit、CardPotential 的組別、養成階段、累積經驗門檻、特訓消耗、綻放累加、滿養成三圍公式與特化判定，以及 CardPotentialUpgradeItem 的綻放道具對應與轉換狀態。

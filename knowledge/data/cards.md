@@ -97,7 +97,9 @@
 
 完整卡圖使用 `https://assets.holodori.net/cdn/img_card_full_{assetId}/Texture2D/img_card_full_{assetId}.webp`，以 16:9 完整顯示。直式卡圖使用 `https://assets.holodori.net/cdn/img_card_vert_{assetId}/Texture2D/img_card_vert_{assetId}.webp`，以 256:366 顯示。素材用途與 URL 由 `shared/game-data/card-list.ts` 管理，兩種 URL 均保留素材 ID。
 
-**CONFIRMED**：`06003-5-uniq-0091-00` 來源直式卡圖尺寸為 256×366。直式版型將圖片置左，卡名與角色名置右上，垂直三圍及標籤合計靠右側底部；完整版型維持圖片在上、資訊在下與水平加總算式。兩種版型載入時均顯示 skeleton，偏好減少動態效果時停止其動畫；載入完成後移除，失敗時保留文字及占位。完整卡圖尺寸案例見下方素材記錄。
+**CONFIRMED**：`06003-5-uniq-0091-00` 來源直式卡圖尺寸為 256×366。預設顯示全部資訊時，直式版型將圖片置左，卡名與角色名置右上，垂直三圍及標籤合計靠右側底部；完整版型維持圖片在上、資訊在下與水平加總算式。兩種版型載入時均顯示 skeleton，偏好減少動態效果時停止其動畫；載入完成後移除，失敗時保留文字及占位。完整卡圖尺寸案例見下方素材記錄。
+
+**CONFIRMED**：列表的「卡片顯示」提供版型及卡名、角色名、三圍與合計三項資訊開關。預設全部顯示；關閉時移除對應內容與間距。全部關閉時只顯示填滿卡片寬度的卡圖、屬性與星級，保留所選版型比例及可存取卡名。資訊項目定義由 `shared/game-data/card-list.ts` 的 `CARD_LIST_FIELDS` 管理；`useCardFields` 以 `holodori-card-fields` 保存 JSON 陣列，空陣列表示純卡圖。顯示偏好跨語言共用，搜尋與排序仍使用完整列表資料。
 
 **CONFIRMED**：`06003-5-uniq-0091-00`、`00034-5-uniq-0090-00` 與 `00001-3-nrml-0000-00` 的來源完整卡圖尺寸均為 2048×1152。每張圖的 RGBA8 像素資料為 9 MiB。
 
