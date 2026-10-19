@@ -12,6 +12,7 @@ type StyleDefinition = {
 }
 
 type StyleApi = {
+  style?: unknown
   getStyleSheet?: (css?: string, props?: Record<string, string>) => string
   getCommonThemeStyleSheet?: (
     params?: undefined,
@@ -205,7 +206,8 @@ export async function generatePrimeVueStyles(
       ...extractPrimeVueStyleSheets(
         callStyleApi(api, 'getThemeStyleSheet', name),
         `${name}.getThemeStyleSheet`,
-        { allowEmpty: name === 'BaseComponentStyle' },
+        // Some child components share their theme CSS with a parent style API.
+        { allowEmpty: !api.style },
       ),
     )
   }

@@ -9,14 +9,24 @@ import { primeVueComponents } from '../shared/primevue.ts'
 describe('PrimeVue shared styles', () => {
   it('generates styles for every allowlisted component in module order', async () => {
     const result = await generatePrimeVueStyles(theme)
+    const componentsWithParentStyles = [
+      'accordionpanel',
+      'accordionheader',
+      'accordioncontent',
+    ]
+    const expectedComponentStyles = primeVueComponents
+      .map((component) => `${component.toLowerCase()}-style`)
+      .filter(
+        (styleId) =>
+          !componentsWithParentStyles.includes(styleId.replace('-style', '')),
+      )
 
     expect(result.styleIds).toEqual(
-      expect.arrayContaining(
-        primeVueComponents.map(
-          (component) => `${component.toLowerCase()}-style`,
-        ),
-      ),
+      expect.arrayContaining(expectedComponentStyles),
     )
+    expect(result.css).toContain('.p-accordionpanel')
+    expect(result.css).toContain('.p-accordionheader')
+    expect(result.css).toContain('.p-accordioncontent')
     expect(new Set(result.styleIds).size).toBe(result.styleIds.length)
     expect(result.styleIds.indexOf('checkbox-style')).toBeLessThan(
       result.styleIds.indexOf('button-style'),
@@ -53,6 +63,12 @@ describe('PrimeVue shared styles', () => {
         'test',
       ),
     ).toThrow(/Unexpected PrimeVue style output/)
+  })
+
+  it('rejects empty output when a required style is missing', () => {
+    expect(() => extractPrimeVueStyleSheets('', 'required style')).toThrow(
+      'PrimeVue generated no styles for required style',
+    )
   })
 
   it('preserves PrimeVue CSS variable references', async () => {

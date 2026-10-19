@@ -1,5 +1,9 @@
 export const primeVueComponents = [
   'Button',
+  'Accordion',
+  'AccordionPanel',
+  'AccordionHeader',
+  'AccordionContent',
   'Checkbox',
   'Chip',
   'Dialog',
@@ -19,6 +23,7 @@ export const primeVueStyleDependencies: Partial<
     { components?: readonly string[]; directives?: readonly string[] }
   >
 > = {
+  AccordionHeader: { directives: ['ripple'] },
   Button: { components: ['Badge'], directives: ['ripple'] },
   Dialog: { directives: ['ripple'] },
   Message: { directives: ['ripple'] },
