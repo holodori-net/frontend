@@ -122,15 +122,15 @@
 
 ### 星級動畫與星形圖示
 
-星級動畫使用 [ef_ui_999_rare_anim_001 WebP 圖集](https://assets.holodori.net/cdn/tln_gacha-001/Texture2D/ef_ui_999_rare_anim_001.webp)。**CONFIRMED**：`bcb23cb8379398fe524f8a993147f492.bundle` 的來源 Texture2D 尺寸為 1600×1600；Sprite `m_Rect` 確認每格 200×200，依圖集左上至右下排列為 8×8。
+**CONFIRMED**：`bcb23cb8379398fe524f8a993147f492.bundle` 的來源 Texture2D 尺寸為 1600×1600；Sprite `m_Rect` 確認每格 200×200，依圖集左上至右下排列為 8×8。
 
-[動畫 manifest](https://assets.holodori.net/apk/generated/animations/manifest.json) 的 `frameCount=64`、`rate=60/1`、`loopCount=-1`；`e862167f3e9852ec53f92360e8283a6a.bundle` 的 `SpriteAnimationClip` 引用上述 Sprite，循環長度為 64/60 秒。原始圖集包含 Sprite mesh 外的 texture extrusion；繪製時依來源 mesh 輪廓裁切，保留透明背景。
+[動畫 manifest](https://assets.holodori.net/apk/generated/animations/manifest.json) 的 `frameCount=64`、`rate=60/1`、`loopCount=-1`；`e862167f3e9852ec53f92360e8283a6a.bundle` 的 `SpriteAnimationClip` 引用上述 Sprite，循環長度為 64/60 秒。來源圖集包含 Sprite mesh 外的 texture extrusion；生成動畫依來源 mesh 輪廓裁切，保留透明背景。
 
 **CONFIRMED**：manifest 的 [生成動畫 WebP](https://assets.holodori.net/apk/generated/animations/ef_ui_999_rare_anim_001--da09250dd35035f2.webp) 為 200×200、64 格、1,592,332 bytes，含透明背景。WebP 影格時間以 16／17 ms 表示，總時長 1067 ms，無限循環。
 
-[靜態第一格](https://assets.holodori.net/cdn/tln_gacha-001/Sprite/ef_ui_999_rare_anim_001_0.webp) 使用 WebP。**CONFIRMED**：來源 Sprite 裁切尺寸為 198×189；在 200×200 影格中的位置為 x=1、y=5。
+**CONFIRMED**：來源第一格 Sprite 裁切尺寸為 198×189；在 200×200 影格中的位置為 x=1、y=5。
 
-前端 URL 集中於 `shared/game-data/card-icons.ts`。`CardListRarity` 在卡片依星級垂直排列三／四／五顆星星，在稀有度選項依星級橫向顯示三／四／五顆星星及完整文字。列表初始化後先提供第一格圖片；圖集載入後由 canvas 依來源 Sprite mesh 一次裁切 64 格，建立共用透明 atlas Blob URL。CSS keyframes 只以 transform 播放 64 格動畫。每個星級群組使用一個 IntersectionObserver 訂閱；共享時鐘累積可播放時間，群組進入畫面時同步 CSS 動畫。離開畫面、頁面隱藏或偏好減少動態效果時停止動畫；圖集載入或處理失敗時保留靜態星星，最後一位訂閱者離開時撤銷 atlas URL，靜態圖片也無法載入時保留星級文字。
+前端動畫 URL 集中於 `shared/game-data/card-icons.ts`。`CardListRarity` 在卡片依星級垂直排列三／四／五顆星星，在稀有度選項依星級橫向顯示三／四／五顆星星及完整文字。每顆星使用單一 `<img>` 顯示完整 200×200 動畫 WebP，播放交由瀏覽器管理。稀有度選項載入時顯示 Skeleton，成功載入後移除；快取圖片於 mount 時確認載入狀態，載入失敗時保留星級文字。
 
 **CONFIRMED**：主要圖示圖集包含以下透明底星形 Sprite，名稱、尺寸及 WebP 路徑由圖集索引確認。
 

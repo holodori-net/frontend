@@ -1,9 +1,7 @@
 import type { CardStatKey } from './card-list-data.ts'
 
-export const cardRaritySpriteSheetUrl =
-  'https://assets.holodori.net/cdn/tln_gacha-001/Texture2D/ef_ui_999_rare_anim_001.webp'
-export const cardRarityStaticUrl =
-  'https://assets.holodori.net/cdn/tln_gacha-001/Sprite/ef_ui_999_rare_anim_001_0.webp'
+export const cardRarityAnimationUrl =
+  'https://assets.holodori.net/apk/generated/animations/ef_ui_999_rare_anim_001--da09250dd35035f2.webp'
 
 const cardIconBaseUrl =
   'https://assets.holodori.net/apk/bundle/71a80fc31d22653f28db3f211e30ddde.bundle/images/'

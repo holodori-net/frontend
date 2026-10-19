@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { cardRarityStaticUrl } from '#shared/game-data/card-icons'
+import { cardRarityAnimationUrl } from '#shared/game-data/card-icons'
 
 const props = defineProps<{
   count: number
@@ -10,12 +10,8 @@ const props = defineProps<{
 }>()
 
 const rootElement = ref<HTMLElement | null>(null)
-const spriteSheetUrl = ref<string>()
-const animationActive = computed(() => spriteSheetUrl.value !== undefined)
-const staticImageState = ref<'loading' | 'loaded' | 'failed'>('loading')
-const showTextFallback = computed(
-  () => staticImageState.value === 'failed' && !animationActive.value,
-)
+const imageState = ref<'loading' | 'loaded' | 'failed'>('loading')
+const showTextFallback = computed(() => imageState.value === 'failed')
 const starIndexes = computed(() =>
   Array.from(
     { length: props.vertical || props.showLabel ? props.count : 1 },
@@ -23,34 +19,27 @@ const starIndexes = computed(() =>
   ),
 )
 
-useCardRarityAnimation(rootElement, (url) => {
-  spriteSheetUrl.value = url
-})
-
 onMounted(async () => {
   await nextTick()
-  const image = rootElement.value?.querySelector('img')
-  if (image?.complete) {
-    setStaticImageState(image.naturalWidth > 0 ? 'loaded' : 'failed')
-  }
+  reconcileImageState()
 })
 
-function setStaticImageState(state: 'loaded' | 'failed') {
-  staticImageState.value = state
+function reconcileImageState() {
+  if (imageState.value === 'failed') return
+  const images = rootElement.value?.querySelectorAll('img')
+  if (!images?.length || ![...images].every((image) => image.complete)) return
+
+  imageState.value = [...images].every((image) => image.naturalWidth > 0)
+    ? 'loaded'
+    : 'failed'
 }
 
-function onStaticImageLoad(event: Event) {
-  const image = event.currentTarget as HTMLImageElement
-  if (image.getAttribute('src') === cardRarityStaticUrl) {
-    setStaticImageState('loaded')
-  }
+function onImageLoad() {
+  reconcileImageState()
 }
 
-function onStaticImageError(event: Event) {
-  const image = event.currentTarget as HTMLImageElement
-  if (image.getAttribute('src') === cardRarityStaticUrl) {
-    setStaticImageState('failed')
-  }
+function onImageError() {
+  imageState.value = 'failed'
 }
 </script>
 
@@ -94,37 +83,20 @@ function onStaticImageError(event: Event) {
     >
       <span class="relative aspect-square h-full max-w-full overflow-hidden">
         <Skeleton
-          v-if="
-            loadingSkeleton &&
-            !animationActive &&
-            staticImageState === 'loading'
-          "
+          v-if="loadingSkeleton && imageState === 'loading'"
           class="image-skeleton !absolute inset-0"
           width="100%"
           height="100%"
           border-radius="50%"
         />
         <img
-          :src="cardRarityStaticUrl"
+          :src="cardRarityAnimationUrl"
           alt=""
           aria-hidden="true"
-          class="absolute object-fill"
-          :class="animationActive && 'invisible'"
-          :style="{
-            left: '0.5%',
-            top: '2.5%',
-            width: '99%',
-            height: '94.5%',
-          }"
+          class="absolute inset-0 size-full object-fill"
           draggable="false"
-          @load="onStaticImageLoad"
-          @error="onStaticImageError"
-        />
-        <span
-          v-if="spriteSheetUrl"
-          aria-hidden="true"
-          class="card-rarity-sprite absolute inset-0"
-          :style="{ backgroundImage: `url(${spriteSheetUrl})` }"
+          @load="onImageLoad"
+          @error="onImageError"
         />
       </span>
     </span>

@@ -20,7 +20,7 @@ Search matches card and character names in every game language. Combine characte
 
 Search, filters, and sorting are saved in the URL and restored when reloading, changing languages, or using browser history. Layout is saved in this browser for this site and shared across languages, including offline use. It defaults to full card art. Changing layout keeps the current URL and filters; Reset keeps the selected layout.
 
-The page shows a loading message until it restores the layout and URL conditions, then displays the controls and list together. JavaScript is required to browse cards. Card art and icons load from `assets.holodori.net`. Loading card art shows a skeleton placeholder; reduced motion disables its shimmer. Unavailable card art shows a text placeholder while retaining card details; unavailable attribute and stat icons show their names. Stars appear as static images while their animation loads or reduced motion is enabled. Animations play while visible; if star images are unavailable, rarity text appears.
+The page shows a loading message until it restores the layout and URL conditions, then displays the controls and list together. JavaScript is required to browse cards. Card art and icons load from `assets.holodori.net`. Loading card art shows a skeleton placeholder; reduced motion disables its shimmer. Unavailable card art shows a text placeholder while retaining card details; unavailable attribute and stat icons show their names. Stars play as animated WebP images managed by the browser; if star images are unavailable, rarity text appears.
 
 ## Characters
 
