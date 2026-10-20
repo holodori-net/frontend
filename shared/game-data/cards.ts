@@ -15,6 +15,9 @@ export interface CardData {
   id: string
   characterId: string
   rewardCostumeId: string | null
+  livePassiveSkillId: string
+  liveActiveSkillId: string
+  liveSpecialSkillId: string
   name: LocalizedNames
   rarity: number
   attributeType: number

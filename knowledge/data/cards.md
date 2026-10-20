@@ -8,7 +8,7 @@
 
 每筆代表一張卡片。角色 ID 指向角色表；名稱依文字 ID 與遊戲語言查找。成長組別指向一組等級或養成階段資料。
 
-**CONFIRMED**：主鍵為 `id`，目前快照 192 筆。
+**CONFIRMED**：主鍵為 `id`，目前快照 196 筆。
 
 | 轉換 | 來源欄位                                | 型別                      | 意義                                                          | 關聯                                                       | 回傳對應                                   | 備註／未轉換原因                                                                                |
 | ---- | --------------------------------------- | ------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
@@ -22,12 +22,12 @@
 | ✓    | `technique_permil_multiply`             | INTEGER                   | Technique 三圍權重，千分比整數                                | —                                                          | `cards[].growth.weightsPermil.technique`   | —                                                                                               |
 | ✓    | `sense_permil_multiply`                 | INTEGER                   | Sense 三圍權重，千分比整數                                    | —                                                          | `cards[].growth.weightsPermil.sense`       | —                                                                                               |
 | ✓    | `card_level_limit_group_id`             | TEXT                      | 特訓等級上限組別                                              | [`CardLevelLimit.group_id`](card-growth.md#cardlevellimit) | `cards[].growth.levelLimitGroupId`         | —                                                                                               |
-|      | `live_passive_skill_id`                 | TEXT                      | 被動技能 ID                                                   | `LivePassiveSkill.id`                                      | —                                          | 未回傳此技能關聯                                                                                |
-|      | `live_active_skill_id`                  | TEXT                      | 主動技能 ID                                                   | `LiveActiveSkill.id`                                       | —                                          | 未回傳此技能關聯                                                                                |
-|      | `live_special_skill_id`                 | TEXT                      | 特殊技能 ID                                                   | `LiveSpecialSkill.id`                                      | —                                          | 未回傳此技能關聯                                                                                |
+| ✓    | `live_passive_skill_id`                 | TEXT                      | 被動技能 ID                                                   | `LivePassiveSkill.id`                                      | `cards[].livePassiveSkillId`               | 保留來源非 nullable 關聯                                                                        |
+| ✓    | `live_active_skill_id`                  | TEXT                      | 主動技能 ID                                                   | `LiveActiveSkill.id`                                       | `cards[].liveActiveSkillId`                | 保留來源非 nullable 關聯                                                                        |
+| ✓    | `live_special_skill_id`                 | TEXT                      | 特殊技能 ID                                                   | `LiveSpecialSkill.id`                                      | `cards[].liveSpecialSkillId`               | 保留來源非 nullable 關聯                                                                        |
 | ✓    | `card_potential_group_id`               | TEXT                      | 綻放效果組別                                                  | [`CardPotential.group_id`](card-growth.md#cardpotential)   | `cards[].growth.potentialGroupId`          | —                                                                                               |
 | ✓    | `asset_id`                              | TEXT / null               | 卡面素材識別碼                                                | —                                                          | `cards[].assetId`                          | —                                                                                               |
-|      | `background_asset_id`                   | TEXT / null               | 背景素材識別欄位；實際用途 **UNKNOWN**                        | —                                                          | —                                          | 用途未確認；目前 192 筆皆為 null                                                                |
+|      | `background_asset_id`                   | TEXT / null               | 背景素材識別欄位；實際用途 **UNKNOWN**                        | —                                                          | —                                          | 用途未確認；目前 196 筆皆為 null                                                                |
 |      | `live_skill_character_voice_id`         | TEXT / null               | Live 技能啟動時的候選語音 ID                                  | `CharacterVoice.id`                                        | —                                          | 未回傳語音；用途 **CONFIRMED**，完整抽選機率 **UNKNOWN**                                        |
 |      | `skill_tree_connect_effect_id`          | TEXT / null               | 技能樹連結效果 ID                                             | `SkillTreeConnectEffect.id`                                | —                                          | 未回傳此技能關聯                                                                                |
 | ✓    | `reward_costume_id`                     | TEXT / null               | 附帶的 Live 服裝獎勵 ID；抽卡精選詳情顯示服裝縮圖             | `Costume.id`                                               | `cards[].rewardCostumeId`                  | 保留 null；顯示用途 **CONFIRMED**，發放條件及首次／重複取得差異 **UNKNOWN**                     |
@@ -51,7 +51,7 @@
 
 每筆代表一個文字 ID 在一種遊戲語言的卡片名稱。轉換時以 Card.name_lang_id 和 language 查找 text。
 
-**CONFIRMED**：主鍵為 `language, id`，目前快照 1152 筆。
+**CONFIRMED**：主鍵為 `language, id`，目前快照 1176 筆。
 
 | 轉換 | 來源欄位   | 型別        | 意義             | 關聯                         | 回傳對應                    | 備註／未轉換原因     |
 | ---- | ---------- | ----------- | ---------------- | ---------------------------- | --------------------------- | -------------------- |

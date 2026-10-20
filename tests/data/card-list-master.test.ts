@@ -33,6 +33,9 @@ describe.skipIf(!existsSync(sourcePath))(
           fullSkills.costumes.map((costume) => [costume.id, costume]),
         )
         for (const card of payload.cards) {
+          expect(card).not.toHaveProperty('livePassiveSkillId')
+          expect(card).not.toHaveProperty('liveActiveSkillId')
+          expect(card).not.toHaveProperty('liveSpecialSkillId')
           const costume = payload.costumes[card.costumeId!]
           expect(costume).toBeDefined()
           expect(sourceCostumes.get(card.costumeId!)?.characterId).toBe(

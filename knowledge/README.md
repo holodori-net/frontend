@@ -18,7 +18,7 @@
 - 欄位與關聯的可重現來源：SQLite 的 `PRAGMA table_info`、`logical_fields` 與 `declared_foreign_keys`。
 - 轉換依據：[Drizzle schema](../server/data/schema/)、[轉換模組](../server/data/converters/)、[資料型別](../shared/game-data/)。Schema 手動維護查詢所需欄位，透過 `snakeCase.table` 將 camelCase 屬性自動映射為 SQLite 的 snake_case 欄位名稱。Converter 接收 `GameDatabase`，[卡片 reader](../server/data/card-list.ts)、[角色 reader](../server/data/character-list.ts) 與 [主題 reader](../server/data/member-themes.ts) 管理唯讀連線並選取所需欄位，交由 Nuxt 保存為 payload。
 
-卡片文件觀察日期為 2026-10-14，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 192 張卡片與 1152 筆 LangCard。角色文件觀察日期為 2026-10-12，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 62 位角色與 2412 筆 LangCharacter。角色群組文件觀察日期為 2026-10-11，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 16 個 CharacterGrouping 與 192 筆 LangCharacterGrouping。來源更新後，重新驗證受影響的欄位、枚舉與結論。
+卡片文件觀察日期為 2026-10-20，master_version 為 `452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`，此快照包含 196 張卡片與 1176 筆 LangCard。角色文件觀察日期為 2026-10-12，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 62 位角色與 2412 筆 LangCharacter。角色群組文件觀察日期為 2026-10-11，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 16 個 CharacterGrouping 與 192 筆 LangCharacterGrouping。來源更新後，重新驗證受影響的欄位、枚舉與結論。
 
 卡片成長文件觀察日期為 2026-10-12，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 1890 筆 CardLevel、45 筆 CardLevelLimit、15 筆 CardPotential 與 1 筆 CardPotentialUpgradeItem。
 

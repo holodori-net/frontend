@@ -15,11 +15,12 @@ describe('card data transform', () => {
         horizontal_anchor_type INTEGER, "order" INTEGER, card_level_group_id TEXT,
         card_level_limit_group_id TEXT, card_potential_group_id TEXT,
         performance_permil_multiply INTEGER, technique_permil_multiply INTEGER,
-        sense_permil_multiply INTEGER);
+        sense_permil_multiply INTEGER, live_passive_skill_id TEXT NOT NULL,
+        live_active_skill_id TEXT NOT NULL, live_special_skill_id TEXT NOT NULL);
       CREATE TABLE LangCard (language TEXT, id TEXT, text TEXT);
       INSERT INTO Card VALUES
-        ('card-b', 'c2', NULL, 'name-b', 3, 4, NULL, 5, 6, 7, 1, 'levels', 'limits', 'potential', 1000, 900, 800),
-        ('card-a', 'c1', 'costume-a', 'name-a', 2, 3, 'asset-card', 4, 5, 6, 1, 'levels', 'limits', 'potential', 700, 800, 900);
+        ('card-b', 'c2', NULL, 'name-b', 3, 4, NULL, 5, 6, 7, 1, 'levels', 'limits', 'potential', 1000, 900, 800, 'passive-b', 'active-b', 'special-b'),
+        ('card-a', 'c1', 'costume-a', 'name-a', 2, 3, 'asset-card', 4, 5, 6, 1, 'levels', 'limits', 'potential', 700, 800, 900, 'passive-a', 'active-a', 'special-a');
     `)
     const insertTranslation = database.prepare(
       'INSERT INTO LangCard (language, id, text) VALUES (?, ?, ?)',
@@ -39,6 +40,9 @@ describe('card data transform', () => {
     expect(cards[0]).toMatchObject({
       characterId: 'c1',
       rewardCostumeId: 'costume-a',
+      livePassiveSkillId: 'passive-a',
+      liveActiveSkillId: 'active-a',
+      liveSpecialSkillId: 'special-a',
       name: {
         jpn: 'name-a-jpn',
         eng: 'name-a-eng',
