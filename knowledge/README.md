@@ -10,6 +10,7 @@
 - [卡片成長資料](data/card-growth.md)：CardLevel、CardLevelLimit、CardPotential 的組別、養成階段、累積經驗門檻、特訓消耗、綻放累加、滿養成三圍公式與特化判定，以及 CardPotentialUpgradeItem 的綻放道具對應與轉換狀態。
 - [Live 技能效果目標資料](data/live-skill-effect-targets.md)：LiveSkillEffectTarget 的目標類型、人數、角色／群組／屬性關聯、六語描述與轉換對照。
 - [服裝與 Live 服裝技能](data/costume-live-skills.md)：Costume、LiveLeaderSkill、Effect、Trigger 的欄位與關聯、六語共用描述 catalog、模板確認流程、待確認警告及完整描述驗證。
+- [卡片被動、主動與特殊技能](data/card-skills.md)：三類卡片技能關聯、全部等級、主動效果、原始單位、機率標籤、六語描述組合與完整來源比對。
 
 ## 來源與適用快照
 
@@ -25,6 +26,8 @@
 Live 技能效果目標文件觀察日期為 2026-10-13，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 83 筆 LiveSkillEffectTarget 與 498 筆 LangGeneratedLiveSkillEffectTarget。
 
 卡片文件的服裝技能來源關聯觀察日期為 2026-10-20，master_version 為 `452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`；此快照包含 196 張卡片、204 筆 Costume、196 筆 LiveLeaderSkill 與 1176 筆 LangGeneratedLiveLeaderSkill。
+
+卡片技能文件使用同一份 2026-10-20 快照，包含 392 筆 LivePassiveSkillLevel、395 筆 LiveActiveSkillLevel、392 筆 LiveSpecialSkillLevel 與 55 筆 LiveActiveSkillEffect。
 
 ## 信心與轉換狀態
 

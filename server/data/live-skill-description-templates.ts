@@ -1,6 +1,73 @@
 import type { ConfirmedDescriptionTemplates } from '#shared/game-data/live-skills'
 
 export const confirmedDescriptionTemplates: ConfirmedDescriptionTemplates = {
+  activeEffect: {
+    '1': [
+      {
+        parameters: ['percent'],
+        text: {
+          jpn: 'スコアが{percent}%UP',
+          eng: 'Score UP {percent}%.',
+          ind: 'Skor Naik {percent}%',
+          kor: '스코어가 {percent}% UP',
+          cht: '分數提升{percent}%',
+          chs: '得分提升{percent}%',
+        },
+      },
+    ],
+    '5': [
+      {
+        parameters: ['percent'],
+        text: {
+          jpn: 'スコアサポート効果{percent}%',
+          eng: 'Grants Score Support Effect of {percent}%.',
+          ind: 'Efek Score Support meningkat {percent}%',
+          kor: '스코어 서포트 효과 {percent}%',
+          cht: '分數加成效果{percent}%',
+          chs: '得分辅助效果{percent}%',
+        },
+      },
+    ],
+    '6': [
+      {
+        parameters: ['percent'],
+        text: {
+          jpn: 'スキル発動率が{percent}%UP',
+          eng: 'Skill Activation Rate UP {percent}%.',
+          ind: 'Peluang Aktivasi Skill Naik {percent}%',
+          kor: '스킬 발동률이 {percent}% UP',
+          cht: '技能發動機率提升{percent}%',
+          chs: '技能发动概率提升{percent}%',
+        },
+      },
+    ],
+    '8': [
+      {
+        parameters: ['amount'],
+        text: {
+          jpn: 'ライフが{amount}回復',
+          eng: 'Restores {amount} LIFE.',
+          ind: 'Pemulihan LIFE {amount}',
+          kor: '라이프가 {amount} 회복',
+          cht: '生命值回復{amount}',
+          chs: '生命值恢复{amount}点',
+        },
+      },
+    ],
+    '9': [
+      {
+        parameters: [],
+        text: {
+          jpn: 'GOOD以上がPERFECTになる',
+          eng: 'GOOD or higher becomes PERFECT.',
+          ind: 'Diatas GOOD menjadi PERFECT',
+          kor: 'GOOD 이상이 PERFECT가 된다',
+          cht: 'GOOD以上判定為PERFECT',
+          chs: 'GOOD以上变为PERFECT',
+        },
+      },
+    ],
+  },
   effect: {
     '4': [
       {

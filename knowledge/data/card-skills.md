@@ -1,0 +1,106 @@
+# 卡片被動、主動與特殊技能資料字典
+
+`transformCardSkillData(database, confirmedTemplates?)` 回傳 `CardSkillData`，包含依技能 ID 分組的 `passiveSkills`、`activeSkills`、`specialSkills`，以及共用 `effects`、`activeEffects`、`triggers`、`targets`、`catalog`、`pendingDescriptions`。技能等級依來源 `level` 排序；效果與條件依 `number` 排序。型別見 [card-skills.ts](../../shared/game-data/card-skills.ts)，轉換見 [card-skills.ts](../../server/data/converters/card-skills.ts)。
+
+以下欄位、型別、主鍵與資料關聯為 **CONFIRMED**，由本機 SQLite `PRAGMA table_info`、唯讀查詢及轉換程式確認。`✓` 表示已轉換；關聯不等同 SQLite 外鍵約束。
+
+## 卡片關聯與技能 ID
+
+`Card.live_passive_skill_id`、`live_active_skill_id`、`live_special_skill_id` 均為非 nullable 的 TEXT，由 `transformCards()` 分別回傳 `livePassiveSkillId`、`liveActiveSkillId`、`liveSpecialSkillId`。各自關聯 `LivePassiveSkill.id`、`LiveActiveSkill.id`、`LiveSpecialSkill.id`；這三張 ID 表皆只有非 nullable TEXT 主鍵 `id`。
+
+各類技能的全部等級來自對應 `*SkillLevel` 表，包含未直接被卡片引用的主動技能。轉換保留來源等級，不選取最高等級。列表仍只投影服裝技能；卡片技能 ID、等級與主動效果保留於 server 資料層。
+
+## LivePassiveSkillLevel
+
+主鍵為 `(live_passive_skill_id, level)`。
+
+| 轉換 | 來源欄位                                        | 型別        | 回傳對應／關聯                                        |
+| ---- | ----------------------------------------------- | ----------- | ----------------------------------------------------- |
+| ✓    | `live_passive_skill_id`                         | TEXT        | `passiveSkills[id][].livePassiveSkillId`              |
+| ✓    | `level`                                         | INTEGER     | `level`，來源等級                                     |
+| ✓    | `live_skill_trigger_group_id`                   | TEXT / null | `liveSkillTriggerGroupId` → `triggers`                |
+| ✓    | `live_passive_skill_effect_group_id`            | TEXT        | `livePassiveSkillEffectGroupId` → `effects`           |
+| ✓    | `additional_live_skill_trigger_group_id`        | TEXT / null | `additionalLiveSkillTriggerGroupId` → `triggers`      |
+| ✓    | `additional_live_passive_skill_effect_group_id` | TEXT / null | `additionalLivePassiveSkillEffectGroupId` → `effects` |
+|      | `description_lang_id`                           | TEXT        | 完整描述來源驗證使用，不重複放入轉換結果              |
+
+## LiveActiveSkillLevel
+
+主鍵為 `(live_active_skill_id, level)`。毫秒、千分比與次數保留來源數值及 null。
+
+| 轉換 | 來源欄位                                       | 型別           | 回傳對應／關聯                                             |
+| ---- | ---------------------------------------------- | -------------- | ---------------------------------------------------------- |
+| ✓    | `live_active_skill_id`                         | TEXT           | `activeSkills[id][].liveActiveSkillId`                     |
+| ✓    | `level`                                        | INTEGER        | `level`                                                    |
+| ✓    | `live_skill_trigger_group_id`                  | TEXT / null    | `liveSkillTriggerGroupId` → `triggers`                     |
+| ✓    | `live_active_skill_effect_group_id`            | TEXT           | `liveActiveSkillEffectGroupId` → `activeEffects`           |
+| ✓    | `additional_live_skill_trigger_group_id`       | TEXT / null    | `additionalLiveSkillTriggerGroupId` → `triggers`           |
+| ✓    | `additional_live_active_skill_effect_group_id` | TEXT / null    | `additionalLiveActiveSkillEffectGroupId` → `activeEffects` |
+| ✓    | `cool_time_millisecond`                        | INTEGER / null | `coolTimeMillisecond`，發動間隔                            |
+| ✓    | `activation_probability_permil_multiply`       | INTEGER / null | `activationProbabilityPermilMultiply`，原始機率            |
+| ✓    | `limit_count`                                  | INTEGER / null | `limitCount`，來源次數限制                                 |
+| ✓    | `effect_duration_millisecond`                  | INTEGER / null | `effectDurationMillisecond`，效果持續時間                  |
+|      | `description_lang_id`                          | TEXT           | 完整描述來源驗證使用                                       |
+
+## LiveSpecialSkillLevel
+
+主鍵為 `(live_special_skill_id, level)`。特殊技能與主動技能共用 `LiveActiveSkillEffect`。
+
+| 轉換 | 來源欄位                                       | 型別           | 回傳對應／關聯                                             |
+| ---- | ---------------------------------------------- | -------------- | ---------------------------------------------------------- |
+| ✓    | `live_special_skill_id`                        | TEXT           | `specialSkills[id][].liveSpecialSkillId`                   |
+| ✓    | `level`                                        | INTEGER        | `level`                                                    |
+| ✓    | `live_active_skill_effect_group_id`            | TEXT           | `liveActiveSkillEffectGroupId` → `activeEffects`           |
+| ✓    | `additional_live_skill_trigger_group_id`       | TEXT / null    | `additionalLiveSkillTriggerGroupId` → `triggers`           |
+| ✓    | `additional_live_active_skill_effect_group_id` | TEXT / null    | `additionalLiveActiveSkillEffectGroupId` → `activeEffects` |
+| ✓    | `effect_duration_millisecond`                  | INTEGER / null | `effectDurationMillisecond`                                |
+|      | `description_lang_id`                          | TEXT           | 完整描述來源驗證使用                                       |
+
+## LiveActiveSkillEffect
+
+主鍵為 `(group_id, number)`。
+
+| 轉換 | 來源欄位                                      | 型別           | 回傳對應／用途                                                |
+| ---- | --------------------------------------------- | -------------- | ------------------------------------------------------------- |
+| ✓    | `group_id`                                    | TEXT           | `activeEffects[groupId][].groupId`                            |
+| ✓    | `number`                                      | INTEGER        | `number`，組內排序                                            |
+| ✓    | `type`                                        | INTEGER        | `type`，保留來源類型                                          |
+| ✓    | `value`                                       | TEXT / null    | `value`，保留原始字串及 null                                  |
+| ✓    | `score_up_based_on_parameter_permil_multiply` | INTEGER / null | `scoreUpBasedOnParameterPermilMultiply`                       |
+| ✓    | `description_lang_id`                         | TEXT           | 查 `LangGeneratedLiveActiveSkillEffect.id` 產生 `description` |
+
+目前使用的主動效果類型及模板參數：
+
+| type | 來源枚舉名稱後綴                                        | 參數                            |
+| ---- | ------------------------------------------------------- | ------------------------------- |
+| 1    | `SCORE_UP_PERMIL_UP`                                    | `percent = Number(value) / 10`  |
+| 5    | `SCORE_UP_EFFECT_UP_PERMIL_UP`                          | `percent = Number(value) / 10`  |
+| 6    | `LIVE_ACTIVE_SKILL_ACTIVATION_PROBABILITY_UP_PERMIL_UP` | `percent = Number(value) / 10`  |
+| 8    | `LIFE_RECOVERY`                                         | `amount = value`，直接回復量    |
+| 9    | `JUDGEMENT_ENHANCE`                                     | 固定判定文案；來源 `value=null` |
+
+`activeEffect` 與被動效果的 `effect` 為不同模板領域；相同 type 數值不共用其語意。被動效果、條件與目標的欄位及模板流程見 [服裝技能](costume-live-skills.md)。兩個轉換入口共用必要查詢與模板轉換，各自讀取其技能關聯。
+
+## 六語描述組合
+
+`composePassiveSkillDescription`、`composeActiveSkillDescription`、`composeSpecialSkillDescription` 位於 [live-skill-description.ts](../../shared/game-data/live-skill-description.ts)。函式接收指定等級列、唯讀描述資料、遊戲語言與可選的 `onFailure(reason)`，回傳 `string | null`。組合不修改資料，時間僅在組合時由毫秒除以 1,000 換算為秒。
+
+被動技能分別組合主要與附加條件／效果：日文與中文直接相接，英文及韓文以空格相接，印尼文使用 `Saat {trigger}, {effect}`。主要與附加段落在日文以換行相隔，其餘語言以空格相隔。主動技能保留各語言的時間、機率、效果順序；特殊技能共用持續時間與主動效果描述。屬性標記、描述內部空白、標點與日文換行保留。
+
+主動技能 `catalog.labels.probability` 保存以下已確認來源值的六語標籤，原始機率不變：
+
+| 值  | jpn    | eng                | ind            | kor       | cht    | chs      |
+| --- | ------ | ------------------ | -------------- | --------- | ------ | -------- |
+| 370 | 低確率 | Low Probability    | Peluang Rendah | 낮은 확률 | 低機率 | 低概率   |
+| 460 | 中確率 | Medium Probability | Peluang Sedang | 중간 확률 | 中機率 | 中等概率 |
+| 550 | 高確率 | High Probability   | Peluang Tinggi | 높은 확률 | 高機率 | 高概率   |
+
+已確認模板依領域、type 與參數名稱直接採用六語設定文案；來源文案變動不取代設定。沒有適用模板時才自動歸納。模板與組合結果移除升級標示 `[highlight]`，不保存升級標示狀態。
+
+未知類型、機率、條件組合、未確認的多列連接或無法解析的描述回傳 null；server 記錄來源、等級、語言及原因，結構資料仍保留。缺少必要來源參照或翻譯使轉換失敗。多列連接規則與其他機率值的分類為 **UNKNOWN**。
+
+## 觀察與驗證
+
+2026-10-20 本機快照 `master_version=452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`：196 個被動技能／392 列等級、198 個主動技能／395 列等級、196 個特殊技能／392 列等級；有 2 個主動技能未被卡片直接引用。主動效果共 55 筆（type 1：22、5：22、6：6、8：3、9：2）。
+
+`tests/data/card-skills-master.test.ts` 驗證全部 330 個主動效果六語描述與 7,074 個完整技能描述。自動歸納比對只移除來源 `[highlight]` 標記及首尾空白；已確認模板另驗證完整組合，允許獨立文案。共用的 Indonesia Target 因人數為 null 保持待確認，詳見 [服裝技能](costume-live-skills.md#描述-catalog-與確認流程)。記憶體 SQLite 測試涵蓋欄位保留、排序、錯誤與轉換入口的資料表邊界；列表投影及頁面測試驗證既有使用方式。指令見 [CONTRIBUTING.md](../../CONTRIBUTING.md)。

@@ -2,7 +2,7 @@ import type { LocalizedText } from './localized-text.ts'
 import type { LiveSkillEffectTargetData } from './live-skill-effect-targets.ts'
 import type { GameLocale } from '../language.ts'
 
-export type DescriptionDomain = 'effect' | 'trigger' | 'target'
+export type DescriptionDomain = 'effect' | 'activeEffect' | 'trigger' | 'target'
 export type DescriptionEntity =
   'target' | 'character' | 'group' | 'attribute' | 'judgement'
 export type DescriptionParam =
@@ -28,7 +28,7 @@ export interface DescriptionCatalog {
   labels: Record<
     Exclude<DescriptionEntity, 'target'>,
     Record<string, LocalizedText>
-  >
+  > & { probability?: Record<string, LocalizedText> }
 }
 export interface PendingDescription {
   table: string

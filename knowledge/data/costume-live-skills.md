@@ -2,6 +2,8 @@
 
 `transformLiveSkillData(database)` 回傳 `LiveSkillData`，包含 `costumes`、`leaderSkills`、依 `groupId` 分組的 `effects` 與 `triggers`、`targets`、共用 `catalog` 與 `pendingDescriptions`。各組依來源 `number` 排序。型別位於 [live-skills.ts](../../shared/game-data/live-skills.ts)，轉換位於 [live-skills.ts](../../server/data/converters/live-skills.ts)。
 
+服裝與[卡片技能](card-skills.md)共用 [live-skill-descriptions.ts](../../server/data/converters/live-skill-descriptions.ts) 的效果、條件、目標與 catalog 轉換，各入口分別查詢自己的技能關聯。角色與群組僅查詢 ID 及名稱所需欄位。
+
 以下欄位型別、主鍵與轉換為 **CONFIRMED**，由本機 SQLite `PRAGMA table_info` 及轉換程式確認。`✓` 表示已轉換。關聯不等同 SQLite 外鍵約束。卡片保留 `rewardCostumeId: string | null`，角色預設服裝仍由 `Character.defaultCostumeId` 關聯。
 
 ## Costume
@@ -75,7 +77,7 @@
 
 `description` 為 `{ templateId, params } | null`。`catalog.templates` 保存六語模板及具名參數；`catalog.labels` 保存角色、群組、含完整標記的屬性及判定文字。參數保存數值，或 `{ kind, id }` 實體參照。效果的 `target` 參照 `targets` 中的模板描述。完整來源描述僅供歸納與比對，不另存於輸出。
 
-歸納先以完整實體文字保護 Target、角色、群組、屬性標記及判定，再依原文位置辨識完整數值。各參數須有唯一位置，六語插值後皆須精確還原來源；同領域、type、參數意義與六語句型才共用模板。同 type 可有多個句型。
+歸納先移除來源的升級 `[highlight]` 標記，再以完整實體文字保護 Target、角色、群組、屬性標記及判定，依原文位置辨識完整數值。各參數須有唯一位置，六語插值後皆須精確還原去標記的來源；同領域、type、參數意義與六語句型才共用模板。同 type 可有多個句型。模板不保存升級標記與標示狀態；主動效果使用獨立的 `activeEffect` 領域。
 
 已確認模板保存於 [live-skill-description-templates.ts](../../server/data/live-skill-description-templates.ts)，依領域與 type 分組，維護六語模板文字及具名參數。轉換依參數名稱集合選取唯一適用的已確認模板，檢查六語 placeholder 後直接採用設定文案。人工維護時依來源欄位確認參數意義，修改模板文字後重跑資料測試與本機 master 驗證。沒有適用的已確認模板時才自動歸納；多個已確認模板適用或 placeholder 無效時，保留結構資料並將描述列為待確認。
 

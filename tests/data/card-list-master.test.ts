@@ -76,6 +76,11 @@ describe.skipIf(!existsSync(sourcePath))(
 
         expect(payload.skills).not.toHaveProperty('pendingDescriptions')
         expect(payload.skills).not.toHaveProperty('costumes')
+        expect(payload.skills).not.toHaveProperty('passiveSkills')
+        expect(payload.skills).not.toHaveProperty('activeSkills')
+        expect(payload.skills).not.toHaveProperty('specialSkills')
+        expect(payload.skills).not.toHaveProperty('activeEffects')
+        expect(payload.skills.catalog.labels).not.toHaveProperty('probability')
         for (const skill of Object.values(payload.skills.leaderSkills)) {
           expect(Object.keys(skill).sort()).toEqual([
             'additionalLivePassiveSkillEffectGroupId',

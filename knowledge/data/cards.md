@@ -1,6 +1,6 @@
 # 卡片資料字典與轉換對照
 
-`transformCards(database)` 回傳 `CardData[]`。角色資料見 [characters.md](characters.md)，成長資料見 [card-growth.md](card-growth.md)。來源與適用快照見 [知識索引](../README.md)。
+`transformCards(database)` 回傳 `CardData[]`。角色資料見 [characters.md](characters.md)，成長資料見 [card-growth.md](card-growth.md)，卡片技能見 [card-skills.md](card-skills.md)。來源與適用快照見 [知識索引](../README.md)。
 
 欄位名稱、SQLite 型別、主鍵、schema 宣告的關聯與轉換對應均為 **CONFIRMED**。用途尚未完整追蹤者另以信心標籤標示；宣告的關聯不等同 SQLite 外鍵約束。`✓` 表示已直接轉換或經查表產生回傳值，空白表示尚未轉換。
 

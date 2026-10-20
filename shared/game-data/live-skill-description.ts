@@ -6,6 +6,11 @@ import type {
   LiveLeaderSkillData,
   SkillDescription,
 } from './live-skills.ts'
+import type {
+  LiveActiveSkillLevelData,
+  LivePassiveSkillLevelData,
+  LiveSpecialSkillLevelData,
+} from './card-skills.ts'
 
 export interface SkillDescriptionData {
   catalog: {
@@ -22,6 +27,12 @@ export interface CostumeSkillDescriptionData extends SkillDescriptionData {
     Record<string, readonly { description: SkillDescription | null }[]>
   >
   triggers: Readonly<
+    Record<string, readonly { description: SkillDescription | null }[]>
+  >
+}
+
+export interface CardSkillDescriptionData extends CostumeSkillDescriptionData {
+  activeEffects: Readonly<
     Record<string, readonly { description: SkillDescription | null }[]>
   >
 }
@@ -200,4 +211,391 @@ export function composeCostumeSkillDescription(
       text === '' ? segment.trim() : joinSkillText(text, segment, separator),
     '',
   )
+}
+
+type SkillGroupRow = { description: SkillDescription | null }
+
+function getSingleSkillRow<T>(
+  groups: Readonly<Record<string, readonly T[]>>,
+  groupId: string | null,
+  required: boolean,
+): T | null | undefined {
+  if (groupId === null) return required ? undefined : null
+  const rows = groups[groupId]
+  if (!rows?.length || rows.length !== 1) return undefined
+  return rows[0]
+}
+
+function stripHighlight(text: string): string {
+  return text.replace(/\[\/?highlight\]/gu, '').trim()
+}
+
+function renderCardSkillRow(
+  row: SkillGroupRow | null | undefined,
+  data: CardSkillDescriptionData,
+  locale: GameLocale,
+): string | null {
+  if (!row) return null
+  const rendered = renderSkillDescription(row.description, data, locale)
+  return rendered === null ? null : stripHighlight(rendered)
+}
+
+function passiveSegment(
+  triggerText: string | null,
+  effectText: string,
+  locale: GameLocale,
+): string {
+  if (!triggerText) return effectText
+  switch (locale) {
+    case 'jpn':
+    case 'cht':
+    case 'chs':
+      return `${triggerText}${effectText}`
+    case 'ind':
+      return `Saat ${triggerText}, ${effectText}`
+    case 'eng':
+    case 'kor':
+      return `${triggerText} ${effectText}`
+  }
+}
+
+function failCardSkill(
+  onFailure: ((reason: string) => void) | undefined,
+  reason: string,
+): null {
+  onFailure?.(reason)
+  return null
+}
+
+/** Compose a card passive skill from its structured trigger and effect rows. */
+export function composePassiveSkillDescription(
+  skill: LivePassiveSkillLevelData,
+  data: CardSkillDescriptionData,
+  locale: GameLocale,
+  onFailure?: (reason: string) => void,
+): string | null {
+  const fail = (reason: string) => failCardSkill(onFailure, reason)
+  if (
+    skill.additionalLiveSkillTriggerGroupId !== null &&
+    skill.additionalLivePassiveSkillEffectGroupId === null
+  ) {
+    return fail('卡片被動技能存在附加條件但沒有附加效果')
+  }
+
+  const effect = getSingleSkillRow(
+    data.effects,
+    skill.livePassiveSkillEffectGroupId,
+    true,
+  )
+  if (!effect) return fail('卡片被動技能主要效果缺少資料或不是單列')
+  const trigger = getSingleSkillRow(
+    data.triggers,
+    skill.liveSkillTriggerGroupId,
+    false,
+  )
+  if (trigger === undefined) return fail('卡片被動技能條件缺少資料或不是單列')
+
+  const effectText = renderCardSkillRow(effect, data, locale)
+  if (effectText === null) return fail('卡片被動技能效果描述無法解析')
+  const triggerText = trigger ? renderCardSkillRow(trigger, data, locale) : null
+  if (trigger && triggerText === null) {
+    return fail('卡片被動技能條件描述無法解析')
+  }
+  const segments = [passiveSegment(triggerText, effectText, locale)]
+  if (skill.additionalLivePassiveSkillEffectGroupId !== null) {
+    const additionalEffect = getSingleSkillRow(
+      data.effects,
+      skill.additionalLivePassiveSkillEffectGroupId,
+      true,
+    )
+    if (!additionalEffect) {
+      return fail('卡片被動技能附加效果缺少資料或不是單列')
+    }
+    const additionalTrigger = getSingleSkillRow(
+      data.triggers,
+      skill.additionalLiveSkillTriggerGroupId,
+      false,
+    )
+    if (additionalTrigger === undefined) {
+      return fail('卡片被動技能附加條件缺少資料或不是單列')
+    }
+    const additionalEffectText = renderCardSkillRow(
+      additionalEffect,
+      data,
+      locale,
+    )
+    const additionalTriggerText = additionalTrigger
+      ? renderCardSkillRow(additionalTrigger, data, locale)
+      : null
+    if (
+      additionalEffectText === null ||
+      (additionalTrigger && additionalTriggerText === null)
+    ) {
+      return fail('卡片被動技能附加條件或效果描述無法解析')
+    }
+    segments.push(
+      passiveSegment(additionalTriggerText, additionalEffectText, locale),
+    )
+  }
+  const separator = locale === 'jpn' ? '\n' : ' '
+  return segments.join(separator).trim()
+}
+
+function durationSeconds(milliseconds: number | null): string | null {
+  if (
+    milliseconds === null ||
+    !Number.isFinite(milliseconds) ||
+    milliseconds < 0
+  ) {
+    return null
+  }
+  return String(milliseconds / 1000)
+}
+
+function probabilityLabel(
+  skill: LiveActiveSkillLevelData,
+  data: CardSkillDescriptionData,
+  locale: GameLocale,
+): string | null {
+  const probability = skill.activationProbabilityPermilMultiply
+  if (probability !== 370 && probability !== 460 && probability !== 550) {
+    return null
+  }
+  const label =
+    data.catalog.labels.probability?.[String(probability)]?.[locale] ?? null
+  return label === null ? null : stripHighlight(label)
+}
+
+function activeMainSegment(
+  effectText: string,
+  skill: LiveActiveSkillLevelData,
+  duration: string | null,
+  probability: string,
+  locale: GameLocale,
+): string {
+  const coolTime = durationSeconds(skill.coolTimeMillisecond)!
+  const chance = probability
+  switch (locale) {
+    case 'jpn':
+      return `${coolTime}秒毎に${chance}で${duration ? `${duration}秒間` : ''}${effectText}`
+    case 'eng':
+      return `${duration ? `For ${duration}s, ` : ''}${effectText} Every ${coolTime}s with a ${chance} chance.`
+    case 'ind':
+      return `${duration ? `Selama ${duration} dtk, ` : ''}${effectText} setiap ${coolTime} dtk dengan ${chance}`
+    case 'kor':
+      return `${coolTime}초마다 ${chance}로${duration ? '  ' : ' '}${duration ? `${duration}초 동안 ` : ''}${effectText}`
+    case 'cht':
+      return `每 ${coolTime} 秒以${chance}${duration ? `在 ${duration} 秒內` : ''}${effectText}`
+    case 'chs':
+      return `每 ${coolTime} 秒以${chance}${duration ? `在 ${duration} 秒内` : ''}${effectText}`
+  }
+}
+
+function activeAdditionalSegment(
+  triggerText: string | null,
+  effectText: string,
+  locale: GameLocale,
+): string {
+  switch (locale) {
+    case 'jpn':
+      return `${triggerText ?? ''}${effectText}`
+    case 'eng':
+      return `${triggerText ? `${triggerText} ` : ''}${effectText}`
+    case 'ind':
+      return `${triggerText ? `${triggerText} ` : ''}${effectText}`
+    case 'kor':
+      return `${triggerText ? `${triggerText} ` : ''}${effectText}`
+    case 'cht':
+    case 'chs':
+      return `${triggerText ?? ''}${effectText}`
+  }
+}
+
+/** Compose a card active skill with its source cooldown and probability wording. */
+export function composeActiveSkillDescription(
+  skill: LiveActiveSkillLevelData,
+  data: CardSkillDescriptionData,
+  locale: GameLocale,
+  onFailure?: (reason: string) => void,
+): string | null {
+  const fail = (reason: string) => failCardSkill(onFailure, reason)
+  if (skill.liveSkillTriggerGroupId !== null) {
+    return fail('卡片主動技能主要條件組合尚未確認')
+  }
+  if (
+    (skill.additionalLiveSkillTriggerGroupId === null) !==
+    (skill.additionalLiveActiveSkillEffectGroupId === null)
+  ) {
+    return fail('卡片主動技能附加條件與效果組合不完整')
+  }
+  if (skill.limitCount !== null) {
+    return fail('卡片主動技能使用次數限制組合尚未確認')
+  }
+
+  const effect = getSingleSkillRow(
+    data.activeEffects,
+    skill.liveActiveSkillEffectGroupId,
+    true,
+  )
+  if (!effect) return fail('卡片主動技能主要效果缺少資料或不是單列')
+  const duration =
+    skill.effectDurationMillisecond === null
+      ? null
+      : durationSeconds(skill.effectDurationMillisecond)
+  if (skill.effectDurationMillisecond !== null && duration === null) {
+    return fail('卡片主動技能效果時間無法解析')
+  }
+  const coolTime = durationSeconds(skill.coolTimeMillisecond)
+  if (coolTime === null) return fail('卡片主動技能冷卻時間無法解析')
+  const probability = probabilityLabel(skill, data, locale)
+  if (probability === null) return fail('卡片主動技能發動機率尚未確認')
+  const effectText = renderCardSkillRow(effect, data, locale)
+  if (effectText === null) return fail('卡片主動技能效果描述無法解析')
+  const main = activeMainSegment(
+    effectText,
+    skill,
+    duration,
+    probability,
+    locale,
+  )
+
+  if (skill.additionalLiveActiveSkillEffectGroupId === null) return main.trim()
+  const additionalEffect = getSingleSkillRow(
+    data.activeEffects,
+    skill.additionalLiveActiveSkillEffectGroupId,
+    true,
+  )
+  if (!additionalEffect) return fail('卡片主動技能附加效果缺少資料或不是單列')
+  const additionalTrigger = getSingleSkillRow(
+    data.triggers,
+    skill.additionalLiveSkillTriggerGroupId,
+    true,
+  )
+  if (!additionalTrigger) return fail('卡片主動技能附加條件缺少資料或不是單列')
+  const additionalEffectText = renderCardSkillRow(
+    additionalEffect,
+    data,
+    locale,
+  )
+  const additionalTriggerText = renderCardSkillRow(
+    additionalTrigger,
+    data,
+    locale,
+  )
+  if (additionalEffectText === null || additionalTriggerText === null) {
+    return fail('卡片主動技能附加條件或效果描述無法解析')
+  }
+  const additional = activeAdditionalSegment(
+    additionalTriggerText,
+    additionalEffectText,
+    locale,
+  )
+  return `${main}${locale === 'jpn' ? '\n' : ' '}${additional}`.trim()
+}
+
+function specialMainSegment(
+  effectText: string,
+  duration: string,
+  locale: GameLocale,
+): string {
+  switch (locale) {
+    case 'jpn':
+      return `${duration}秒間${effectText}`
+    case 'eng':
+      return `For ${duration}s, ${effectText}`
+    case 'ind':
+      return `Selama ${duration} dtk, ${effectText}`
+    case 'kor':
+      return `${duration}초 동안 ${effectText}`
+    case 'cht':
+      return `在 ${duration} 秒內${effectText}`
+    case 'chs':
+      return `在 ${duration} 秒内${effectText}`
+  }
+}
+
+function specialAdditionalSegment(
+  triggerText: string | null,
+  effectText: string,
+  locale: GameLocale,
+): string {
+  switch (locale) {
+    case 'jpn':
+      return `${triggerText ?? ''}${effectText}`
+    case 'eng':
+    case 'kor':
+      return `${triggerText ? `${triggerText} ` : ''}${effectText}`
+    case 'ind':
+      return triggerText ? `saat ${triggerText} ${effectText}` : effectText
+    case 'cht':
+    case 'chs':
+      return `${triggerText ? `且${triggerText}` : ''}${effectText}`
+  }
+}
+
+/** Compose a card special skill from its duration, main effect, and optional effect. */
+export function composeSpecialSkillDescription(
+  skill: LiveSpecialSkillLevelData,
+  data: CardSkillDescriptionData,
+  locale: GameLocale,
+  onFailure?: (reason: string) => void,
+): string | null {
+  const fail = (reason: string) => failCardSkill(onFailure, reason)
+  if (
+    skill.additionalLiveSkillTriggerGroupId !== null &&
+    skill.additionalLiveActiveSkillEffectGroupId === null
+  ) {
+    return fail('卡片特殊技能附加條件與效果組合不完整')
+  }
+  const effect = getSingleSkillRow(
+    data.activeEffects,
+    skill.liveActiveSkillEffectGroupId,
+    true,
+  )
+  if (!effect) return fail('卡片特殊技能主要效果缺少資料或不是單列')
+  const duration = durationSeconds(skill.effectDurationMillisecond)
+  if (duration === null) return fail('卡片特殊技能效果時間無法解析')
+  const effectText = renderCardSkillRow(effect, data, locale)
+  if (effectText === null) return fail('卡片特殊技能效果描述無法解析')
+  const main = specialMainSegment(effectText, duration, locale)
+
+  if (skill.additionalLiveActiveSkillEffectGroupId === null) {
+    return main.trim()
+  }
+  const additionalEffect = getSingleSkillRow(
+    data.activeEffects,
+    skill.additionalLiveActiveSkillEffectGroupId,
+    true,
+  )
+  if (!additionalEffect) return fail('卡片特殊技能附加效果缺少資料或不是單列')
+  const additionalTrigger = getSingleSkillRow(
+    data.triggers,
+    skill.additionalLiveSkillTriggerGroupId,
+    false,
+  )
+  if (additionalTrigger === undefined) {
+    return fail('卡片特殊技能附加條件缺少資料或不是單列')
+  }
+  const additionalEffectText = renderCardSkillRow(
+    additionalEffect,
+    data,
+    locale,
+  )
+  const additionalTriggerText = additionalTrigger
+    ? renderCardSkillRow(additionalTrigger, data, locale)
+    : null
+  if (
+    additionalEffectText === null ||
+    (additionalTrigger && additionalTriggerText === null)
+  ) {
+    return fail('卡片特殊技能附加條件或效果描述無法解析')
+  }
+  const additional = specialAdditionalSegment(
+    additionalTriggerText,
+    additionalEffectText,
+    locale,
+  )
+  const separator =
+    locale === 'jpn' ? '\n' : locale === 'cht' || locale === 'chs' ? '' : ' '
+  return `${main}${separator}${additional}`.trim()
 }

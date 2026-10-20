@@ -43,6 +43,15 @@ function parameterNames(text: string): string[] {
   )
 }
 
+function stripSourceMarkers(text: LocalizedText): LocalizedText {
+  return Object.fromEntries(
+    gameLocales.map((locale) => [
+      locale,
+      text[locale].replace(/\[\/?highlight\]/g, ''),
+    ]),
+  ) as LocalizedText
+}
+
 function restore(
   text: string,
   candidates: DescriptionCandidate[],
@@ -144,6 +153,7 @@ function addTemplate(
   input: DescriptionInput,
   catalog: DescriptionCatalog,
 ): SkillDescription {
+  template = { ...template, text: stripSourceMarkers(template.text) }
   const semantics = input.candidates
     .map(({ name, value }) => [
       name,
@@ -176,6 +186,7 @@ export function inferSkillDescription(
   pending: PendingDescription[],
   confirmed: ConfirmedDescriptionTemplates = confirmedDescriptionTemplates,
 ): SkillDescription | null {
+  input = { ...input, text: stripSourceMarkers(input.text) }
   if (
     new Set(input.candidates.map(({ name }) => name)).size !==
     input.candidates.length
