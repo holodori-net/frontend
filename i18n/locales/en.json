@@ -32,7 +32,8 @@
     "field": {
       "name": "Card name",
       "characterName": "Character name",
-      "parameters": "Parameters and total"
+      "parameters": "Parameters and total",
+      "costume": "Leader Outfit Skill"
     },
     "search": "Search",
     "searchPlaceholder": "Search card or character names in any game language",
@@ -74,6 +75,8 @@
     "resultCount": "Showing {visible} of {total} cards",
     "noResults": "No cards match these filters.",
     "imageUnavailable": "Card image unavailable",
+    "noLeaderSkill": "No leader outfit skill",
+    "skillUnavailable": "Skill information is unavailable",
     "total": "Total"
   },
   "languagePreferenceTitle": "Confirm language settings",

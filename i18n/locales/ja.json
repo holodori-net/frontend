@@ -32,7 +32,8 @@
     "field": {
       "name": "カード名",
       "characterName": "キャラクター名",
-      "parameters": "ステータス・合計"
+      "parameters": "ステータス・合計",
+      "costume": "リーダー衣装スキル"
     },
     "search": "検索",
     "searchPlaceholder": "ゲーム内のすべての言語でカード名・キャラクター名を検索",
@@ -74,6 +75,8 @@
     "resultCount": "{total}枚中{visible}枚を表示",
     "noResults": "条件に一致するカードはありません。",
     "imageUnavailable": "カード画像がありません",
+    "noLeaderSkill": "リーダー衣装スキルなし",
+    "skillUnavailable": "スキル情報を表示できません",
     "total": "合計"
   },
   "languagePreferenceTitle": "言語設定を確認",

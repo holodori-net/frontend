@@ -32,7 +32,8 @@
     "field": {
       "name": "卡名",
       "characterName": "角色名",
-      "parameters": "三圍與合計"
+      "parameters": "三圍與合計",
+      "costume": "隊長服裝技能"
     },
     "search": "搜尋",
     "searchPlaceholder": "以任一遊戲語言搜尋卡片名稱或角色名稱",
@@ -74,6 +75,8 @@
     "resultCount": "顯示 {visible} / {total} 張卡片",
     "noResults": "沒有符合條件的卡片。",
     "imageUnavailable": "暫無卡面圖片",
+    "noLeaderSkill": "無隊長服裝技能",
+    "skillUnavailable": "技能資訊暫無法顯示",
     "total": "合計"
   },
   "languagePreferenceTitle": "確認語言設定",

@@ -59,6 +59,8 @@ if (payload.value === null || payload.value === undefined) {
 }
 
 const cardItems = computed(() => payload.value!.cards)
+const costumes = computed(() => payload.value!.costumes)
+const skills = computed(() => payload.value!.skills)
 const filterOptions = computed(() => getCardFilterOptions(cardItems.value))
 const {
   conditions,
@@ -477,13 +479,16 @@ const fieldOptions = computed(() =>
         </p>
         <ul
           v-else
-          class="grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,350px),1fr))] gap-5 p-0"
+          class="grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,350px),1fr))] gap-x-5 p-0"
+          :class="layout === 'full' ? 'gap-y-0' : 'gap-y-5'"
           :aria-label="t('cards')"
         >
           <CardListItem
             v-for="card in visibleCards"
             :key="card.id"
             :card="card"
+            :costumes="costumes"
+            :skills="skills"
             :game-locale="gameLocale"
             :stat-keys="statKeys"
             :layout="layout"

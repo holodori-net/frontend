@@ -12,7 +12,12 @@ export type CardListSort =
 
 export type CardListLayout = 'full' | 'vertical'
 
-export const CARD_LIST_FIELDS = ['name', 'characterName', 'parameters'] as const
+export const CARD_LIST_FIELDS = [
+  'name',
+  'characterName',
+  'parameters',
+  'costume',
+] as const
 export type CardListField = (typeof CARD_LIST_FIELDS)[number]
 
 export interface CardListConditions {

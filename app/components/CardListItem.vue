@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import { resolveLocalizedName, type GameLocale } from '#shared/language'
+import {
+  gameLocaleLanguages,
+  resolveLocalizedName,
+  type GameLocale,
+} from '#shared/language'
 import type {
+  CardListCostumeData,
   CardListItemData,
+  CardListSkillData,
   CardStatKey,
 } from '#shared/game-data/card-list-data'
+import { composeCostumeSkillDescription } from '#shared/game-data/live-skill-description'
 import {
   getCardAttributeIconUrl,
   getCardStatIconUrl,
@@ -18,12 +25,17 @@ import {
 const props = withDefaults(
   defineProps<{
     card: CardListItemData
+    costumes: Record<string, CardListCostumeData>
+    skills: CardListSkillData
     gameLocale: GameLocale
     statKeys: CardStatKey[]
     fields?: readonly CardListField[]
     layout?: CardListLayout
   }>(),
-  { fields: () => CARD_LIST_FIELDS, layout: 'full' },
+  {
+    fields: () => CARD_LIST_FIELDS,
+    layout: 'full',
+  },
 )
 
 const { t, locale } = useI18n()
@@ -41,13 +53,61 @@ const cardName = computed(() =>
 const showCardName = computed(() => props.fields.includes('name'))
 const showCharacterName = computed(() => props.fields.includes('characterName'))
 const showParameters = computed(() => props.fields.includes('parameters'))
+const showCostume = computed(() => props.fields.includes('costume'))
+const showNames = computed(() => showCardName.value || showCharacterName.value)
+const fullSubgridStyle = computed(() => {
+  if (props.layout !== 'full') return {}
+
+  const style: Record<string, string> = {
+    '--card-list-row-span': String(
+      1 +
+        Number(showNames.value) +
+        Number(showParameters.value) +
+        Number(showCostume.value),
+    ),
+  }
+  let row = 1
+  if (showNames.value) style['--card-list-name-row'] = String(row++)
+  if (showParameters.value) style['--card-list-parameters-row'] = String(row++)
+  if (showCostume.value) style['--card-list-costume-row'] = String(row)
+  return style
+})
+const costume = computed(() =>
+  props.card.costumeId ? props.costumes[props.card.costumeId] : undefined,
+)
+const costumeName = computed(() =>
+  costume.value
+    ? resolveLocalizedName(costume.value.name, props.gameLocale)
+    : null,
+)
+const costumeDescription = computed(() => {
+  if (!costume.value) return null
+  if (!costume.value.leaderSkillId) {
+    return {
+      text: t('cardList.noLeaderSkill'),
+      lang: locale.value,
+    }
+  }
+  const skill = props.skills.leaderSkills[costume.value.leaderSkillId]
+  const text = skill
+    ? composeCostumeSkillDescription(skill, props.skills, props.gameLocale)
+    : null
+  return {
+    text: text ?? t('cardList.skillUnavailable'),
+    lang: text === null ? locale.value : gameLocaleLanguages[props.gameLocale],
+  }
+})
 const hasInformation = computed(
-  () => showCardName.value || showCharacterName.value || showParameters.value,
+  () =>
+    showCardName.value ||
+    showCharacterName.value ||
+    showParameters.value ||
+    (showCostume.value && Boolean(costume.value)),
 )
 const informationHeight = computed(() => {
   if (!hasInformation.value) return '0rem'
   if (showCardName.value && showCharacterName.value && showParameters.value)
-    return '12rem'
+    return showCostume.value && costume.value ? '20rem' : '12rem'
 
   let height = 2
   if (showCardName.value) height += 2.5
@@ -55,6 +115,7 @@ const informationHeight = computed(() => {
   if (showParameters.value) height += 5
   if (showParameters.value && (showCardName.value || showCharacterName.value))
     height += 1
+  if (showCostume.value && costume.value) height += 8
   return `${height}rem`
 })
 const articleStyle = computed(() => ({
@@ -63,7 +124,6 @@ const articleStyle = computed(() => ({
 const characterName = computed(() =>
   resolveLocalizedName(props.card.characterName, props.gameLocale),
 )
-
 function settleCompletedImage() {
   const image = imageElement.value
   if (!image?.complete) return
@@ -84,7 +144,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <li class="card-list-container block min-w-0">
+  <li
+    class="card-list-container block min-w-0"
+    :class="layout === 'full' && 'card-list-container--full-subgrid'"
+    :style="fullSubgridStyle"
+  >
     <article
       class="card-list-content flex h-full min-w-0 overflow-hidden rounded-2xl border border-surface-200 bg-surface-0 shadow-sm dark:border-surface-700 dark:bg-surface-900"
       :class="[
@@ -95,6 +159,7 @@ onMounted(() => {
           !hasInformation &&
           'flex-col card-list-content--art-only-vertical',
         layout === 'full' && 'flex-col',
+        layout === 'full' && 'card-list-content--full-subgrid',
         !hasInformation &&
           layout === 'full' &&
           'card-list-content--art-only-full',
@@ -106,7 +171,7 @@ onMounted(() => {
         {{ cardName.text }}
       </span>
       <div
-        class="relative overflow-hidden bg-surface-100 dark:bg-surface-800"
+        class="card-list-art relative overflow-hidden bg-surface-100 dark:bg-surface-800"
         :class="
           layout === 'vertical' && hasInformation
             ? 'aspect-[256/366] w-[40%] min-w-28 max-w-40 shrink-0'
@@ -160,12 +225,18 @@ onMounted(() => {
 
       <div
         v-if="hasInformation"
-        class="flex flex-1 flex-col"
+        class="min-w-0"
         :class="
-          layout === 'vertical' ? 'min-w-0 self-stretch gap-2 p-3' : 'gap-4 p-4'
+          layout === 'full'
+            ? 'card-list-info--full-subgrid'
+            : 'flex flex-1 flex-col self-stretch gap-2 p-3'
         "
       >
-        <div v-if="showCardName || showCharacterName" class="min-w-0 flex-1">
+        <div
+          v-if="showNames"
+          class="min-w-0"
+          :class="layout === 'full' && 'card-list-name-row'"
+        >
           <p
             v-if="showCardName"
             class="game-text mb-0 min-w-0 text-base font-semibold leading-snug wrap-anywhere"
@@ -185,11 +256,11 @@ onMounted(() => {
 
         <dl
           v-if="showParameters"
-          class="mt-auto min-w-0 text-base"
+          class="min-w-0 text-base"
           :class="
             layout === 'vertical'
-              ? 'grid grid-cols-1 gap-y-1'
-              : 'flex flex-wrap items-center justify-center gap-x-1 gap-y-1'
+              ? 'mt-auto grid grid-cols-1 gap-y-1'
+              : 'card-list-parameters-row flex flex-wrap items-center justify-center gap-x-1 gap-y-1'
           "
         >
           <div
@@ -259,6 +330,38 @@ onMounted(() => {
             </dd>
           </div>
         </dl>
+
+        <section
+          v-if="showCostume && costume && costumeName && costumeDescription"
+          class="min-w-0"
+          :class="layout === 'full' && 'card-list-costume-row'"
+        >
+          <Divider
+            align="left"
+            role="presentation"
+            :aria-orientation="null"
+            class="my-2 min-w-0"
+            :pt="{ content: { class: 'min-w-0 max-w-full' } }"
+          >
+            <h3
+              class="m-0 min-w-0 max-w-full text-sm font-semibold leading-snug wrap-anywhere"
+            >
+              <span>{{ t('cardList.field.costume') }}</span>
+              <span
+                class="game-text ml-1 text-xs font-normal text-muted-color wrap-anywhere"
+                :lang="costumeName.lang"
+              >
+                {{ costumeName.text }}
+              </span>
+            </h3>
+          </Divider>
+          <p class="game-text mb-0 text-sm leading-relaxed">
+            <CardListSkillText
+              :text="costumeDescription.text"
+              :lang="costumeDescription.lang"
+            />
+          </p>
+        </section>
       </div>
     </article>
   </li>
@@ -269,6 +372,14 @@ onMounted(() => {
   container-type: inline-size;
 }
 
+.card-list-container--full-subgrid {
+  display: grid;
+  grid-row: span var(--card-list-row-span);
+  grid-template-rows: subgrid;
+  container-type: normal;
+  margin-block-end: 1.25rem;
+}
+
 .card-list-content {
   content-visibility: auto;
   contain-intrinsic-block-size: auto 24rem;
@@ -277,7 +388,43 @@ onMounted(() => {
 }
 
 .card-list-content--vertical {
-  contain-intrinsic-block-size: auto max(57.19cqw, 12rem);
+  contain-intrinsic-block-size: auto
+    max(57.19cqw, var(--card-list-info-height, 12rem));
+}
+
+.card-list-content--full-subgrid {
+  display: grid;
+  grid-row: 1 / -1;
+  grid-template-rows: subgrid;
+  content-visibility: visible;
+  contain-intrinsic-block-size: none;
+}
+
+.card-list-art {
+  grid-row: 1;
+}
+
+.card-list-info--full-subgrid {
+  display: grid;
+  grid-row: 2 / -1;
+  grid-template-rows: subgrid;
+  row-gap: 1rem;
+  align-items: start;
+  min-width: 0;
+  padding: 1rem;
+}
+
+.card-list-name-row {
+  grid-row: var(--card-list-name-row);
+}
+
+.card-list-parameters-row {
+  grid-row: var(--card-list-parameters-row);
+  margin-top: 0;
+}
+
+.card-list-costume-row {
+  grid-row: var(--card-list-costume-row);
 }
 
 .card-list-content--art-only-full {
@@ -286,6 +433,10 @@ onMounted(() => {
 
 .card-list-content--art-only-vertical {
   contain-intrinsic-block-size: auto 142.97cqw;
+}
+
+.card-list-content--art-only-full.card-list-content--full-subgrid {
+  contain-intrinsic-block-size: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

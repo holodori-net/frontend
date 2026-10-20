@@ -48,6 +48,12 @@ describe('useCardFields', () => {
   it.each([
     ['missing preference', null, [...CARD_LIST_FIELDS]],
     ['all fields', JSON.stringify(CARD_LIST_FIELDS), [...CARD_LIST_FIELDS]],
+    [
+      'existing full preference',
+      '["name","characterName","parameters"]',
+      ['name', 'characterName', 'parameters'],
+    ],
+    ['costume only', '["costume"]', ['costume']],
     ['partial preference', '["parameters","name"]', ['name', 'parameters']],
     ['empty preference', '[]', []],
     [

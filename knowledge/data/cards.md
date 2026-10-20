@@ -97,9 +97,9 @@
 
 完整卡圖使用 `https://assets.holodori.net/cdn/img_card_full_{assetId}/Texture2D/img_card_full_{assetId}.webp`，以 16:9 完整顯示。直式卡圖使用 `https://assets.holodori.net/cdn/img_card_vert_{assetId}/Texture2D/img_card_vert_{assetId}.webp`，以 256:366 顯示。素材用途與 URL 由 `shared/game-data/card-list.ts` 管理，兩種 URL 均保留素材 ID。
 
-**CONFIRMED**：`06003-5-uniq-0091-00` 來源直式卡圖尺寸為 256×366。預設顯示全部資訊時，直式版型將圖片置左，卡名與角色名置右上，垂直三圍及標籤合計靠右側底部；完整版型維持圖片在上、資訊在下與水平加總算式。兩種版型載入時均顯示 skeleton，偏好減少動態效果時停止其動畫；載入完成後移除，失敗時保留文字及占位。完整卡圖尺寸案例見下方素材記錄。
+**CONFIRMED**：`06003-5-uniq-0091-00` 來源直式卡圖尺寸為 256×366。預設顯示全部資訊時，直式版型將圖片置左，卡名與角色名置右上，三圍垂直排列並以標籤顯示合計，隊長服裝技能置於數值下方的右側資訊欄；完整版型維持圖片在上、資訊在下與水平加總算式。兩種版型載入時均顯示 skeleton，偏好減少動態效果時停止其動畫；載入完成後移除，失敗時保留文字及占位。完整卡圖尺寸案例見下方素材記錄。
 
-**CONFIRMED**：列表的「卡片顯示」提供版型及卡名、角色名、三圍與合計三項資訊開關。預設全部顯示；關閉時移除對應內容與間距。全部關閉時只顯示填滿卡片寬度的卡圖、屬性與星級，保留所選版型比例及可存取卡名。資訊項目定義由 `shared/game-data/card-list.ts` 的 `CARD_LIST_FIELDS` 管理；`useCardFields` 以 `holodori-card-fields` 保存 JSON 陣列，空陣列表示純卡圖。顯示偏好跨語言共用，搜尋與排序仍使用完整列表資料。
+**CONFIRMED**：列表的「卡片顯示」提供版型及卡名、角色名、三圍與合計、隊長服裝技能四項資訊開關。預設全部顯示；關閉時移除對應內容與間距。全部關閉時只顯示填滿卡片寬度的卡圖、屬性與星級，保留所選版型比例及可存取卡名。資訊項目定義由 `shared/game-data/card-list.ts` 的 `CARD_LIST_FIELDS` 管理；`useCardFields` 以 `holodori-card-fields` 保存 JSON 陣列，空陣列表示純卡圖。顯示偏好跨語言共用，搜尋與排序仍使用完整列表資料。
 
 **CONFIRMED**：`06003-5-uniq-0091-00`、`00034-5-uniq-0090-00` 與 `00001-3-nrml-0000-00` 的來源完整卡圖尺寸均為 2048×1152。每張圖的 RGBA8 像素資料為 9 MiB。
 
@@ -161,7 +161,7 @@
 | `LiveLeaderSkill.description_lang_id` | `LangGeneratedLiveLeaderSkill.id` | 技能完整描述；以 `language` 選擇遊戲語言 |
 | `Costume.name_lang_id`                | `LangCostume.id`                  | 服裝名稱；以 `language` 選擇遊戲語言     |
 
-**CONFIRMED**：2026-10-20 觀察的 master_version 為 `452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`，包含 196 張卡片、204 筆 Costume 與 196 筆 LiveLeaderSkill。54 張四星與 88 張五星的 `reward_costume_id` 皆有值且可連到技能；54 張三星皆為 null。三星可經 `Card.character_id → Character.id`、`Character.default_costume_id → Costume.id` 取得角色預設服裝，再沿相同路徑取得技能。列表依上述優先序選擇服裝。
+**CONFIRMED**：2026-10-20 觀察的 master_version 為 `452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`，包含 196 張卡片、204 筆 Costume 與 196 筆 LiveLeaderSkill。54 張四星與 88 張五星的 `reward_costume_id` 皆有值且可連到技能；54 張三星皆為 null。三星可經 `Card.character_id → Character.id`、`Character.default_costume_id → Costume.id` 取得角色預設服裝，再沿相同路徑取得技能。列表依上述優先序選擇服裝，並提供隊長服裝技能顯示。
 
 `Costume.live_leader_skill_id` 可為 null；此快照有 8 件服裝無技能。`LangGeneratedLiveLeaderSkill` 有 1176 筆文字，每個技能皆具備六種設定語言的非 null 描述；`LangLiveLeaderSkill` 為空表。描述保留 `[attribute=...]` 等文字標記。
 
@@ -213,3 +213,13 @@
 | Effect `ALL_PARAMETER_UP_PERMIL_UP`（8）    | `{target}全能力提升{percent}%`             |
 
 **CONFIRMED**：`live_skill_effect_target-character_grouping-grp-indonesia` 的 `target_count=null`，六語來源描述皆含 0 人文字；目前沒有 LivePassiveSkillEffect 引用此目標。其生效人數語意為 **UNKNOWN**，來源 null 與數值 0 應保持區分。其餘目標可整理為每個 `(type, language)` 一個模板。此快照的服裝技能僅使用 Target `ALL`、Trigger 類型 7／8，以及上述 5 種 Effect。
+
+### 隊長服裝技能顯示
+
+**CONFIRMED**：`costume` 為單一「隊長服裝技能」資訊選項，控制區塊小標、服裝名稱與完整技能描述。首次使用預設開啟，既有顯示偏好陣列維持原選擇。服裝名稱以較小、較灰的一般字重副標置於小標旁，不加括號。區塊位於三圍下方。完整卡圖以 row subgrid 對齊同排的名稱、數值與技能，各區塊靠上排列，列高依該排最長內容決定；直式版型仍使用右側資訊欄，數值與其後技能靠底排列。粗體小標與服裝副標放在靠左的 PrimeVue `Divider` 內，技能描述置於其下方。關閉時移除區塊與間距。
+
+列表只輸出被選服裝可到達的技能、條件／效果描述、遞迴 Target、模板與標籤。原始數值及待確認診斷留在 server；前端以唯讀資料依遊戲語言組合文字。已知屬性標記以 CSS `::before` 背景圖顯示裝飾圖示，前後保留一致間距，文字只出現一次並可直接選取。隱藏圖片沿用 `useImageLoading` 偵測失敗，失敗時移除圖示及間距。無技能與描述待確認分別顯示對應提示，未知標記保留為純文字。
+
+頁面組合條件與效果時，繁簡中文使用 `，`、日文使用 `、`、英文／韓文／印尼文使用逗號加空格；主要與附加技能間，繁簡中文及日文使用 `、`，其餘語言使用分號加空格。組合時整理片段邊界的空白及分隔標點，保留描述內文與文字標記。
+
+完整卡圖依顯示選項計算共用列數，卡名與角色名共用名稱區塊。關閉選項時移除對應列及間距；個別卡片缺少服裝時保留其列位置，後續區塊維持對齊。`li`、`article` 與資訊容器使用巢狀 row subgrid；完整卡圖停用 layout containment，直式版型保留 `content-visibility: auto` 與容器尺寸估算。
