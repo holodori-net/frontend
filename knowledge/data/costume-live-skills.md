@@ -83,7 +83,7 @@
 
 **CONFIRMED**：`live_skill_effect_target-character_grouping-grp-indonesia` 的 `target_count=null`，來源六語含 0 人文字，目前無效果引用。其人數語意為 **UNKNOWN**，保留 null 並列為待確認。
 
-`renderSkillDescription(description, data, locale)` 展開模板與實體參照。`composeCostumeSkillDescription(skill, data, locale)` 分別組合主要與附加段落，語序、標點與日文換行見[卡片資料](cards.md#服裝技能的描述組合與模板)。多列條件或效果的連接規則為 **UNKNOWN**，組合函式回傳 null、記錄待確認及警告。
+`renderSkillDescription(description, data, locale)` 展開模板與實體參照。`composeCostumeSkillDescription(skill, data, locale)` 分別組合主要與附加段落，依遊戲語言加入條件與技能段落的分隔標點，見[開發說明](../../CONTRIBUTING.md)。兩個函式接受唯讀的精簡描述資料；多列條件或效果的連接規則為 **UNKNOWN**，組合函式回傳 null，並透過可選的 `onFailure(reason)` 回呼交由 server 記錄警告。前端呼叫不修改 payload。列表投影見[卡片資料](cards.md#列表-payload)。
 
 ## 觀察與驗證
 

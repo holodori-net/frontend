@@ -6,7 +6,7 @@ import {
   type GameLocale,
 } from '#shared/language'
 import type {
-  CardListItemData,
+  CardListPayload,
   CardStatKey,
 } from '#shared/game-data/card-list-data'
 import {
@@ -34,7 +34,7 @@ definePageMeta({
 })
 
 const gameLocale = computed(() => String(route.params.gameLocale) as GameLocale)
-const { data: cards, error } = await useAsyncData<CardListItemData[]>(
+const { data: payload, error } = await useAsyncData<CardListPayload>(
   'card-list',
   async () => {
     if (import.meta.server) {
@@ -50,7 +50,7 @@ const { data: cards, error } = await useAsyncData<CardListItemData[]>(
   },
 )
 if (error.value) throw error.value
-if (cards.value === null || cards.value === undefined) {
+if (payload.value === null || payload.value === undefined) {
   throw createError({
     statusCode: 500,
     statusMessage: 'Card data is unavailable',
@@ -58,7 +58,7 @@ if (cards.value === null || cards.value === undefined) {
   })
 }
 
-const cardItems = computed(() => cards.value!)
+const cardItems = computed(() => payload.value!.cards)
 const filterOptions = computed(() => getCardFilterOptions(cardItems.value))
 const {
   conditions,

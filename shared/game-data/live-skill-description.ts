@@ -1,14 +1,30 @@
 import type { GameLocale } from '../language.ts'
 import type {
   DescriptionEntity,
+  DescriptionCatalog,
+  DescriptionTemplate,
   LiveLeaderSkillData,
-  LiveSkillData,
-  LivePassiveSkillEffectData,
-  LiveSkillTriggerData,
   SkillDescription,
 } from './live-skills.ts'
 
-type DescriptionData = Pick<LiveSkillData, 'catalog' | 'targets'>
+export interface SkillDescriptionData {
+  catalog: {
+    templates: Readonly<
+      Record<string, Pick<DescriptionTemplate, 'parameters' | 'text'>>
+    >
+    labels: DescriptionCatalog['labels']
+  }
+  targets: readonly { id: string; description: SkillDescription | null }[]
+}
+
+export interface CostumeSkillDescriptionData extends SkillDescriptionData {
+  effects: Readonly<
+    Record<string, readonly { description: SkillDescription | null }[]>
+  >
+  triggers: Readonly<
+    Record<string, readonly { description: SkillDescription | null }[]>
+  >
+}
 
 const isEntityParam = (
   value: unknown,
@@ -20,7 +36,7 @@ const isEntityParam = (
 
 export function renderSkillDescription(
   description: SkillDescription | null,
-  data: DescriptionData,
+  data: SkillDescriptionData,
   locale: GameLocale,
 ): string | null {
   const render = (
@@ -81,36 +97,27 @@ export function renderSkillDescription(
   return render(description, new Set())
 }
 
+function joinSkillText(left: string, right: string, separator: string): string {
+  const normalizedLeft = left.trim().replace(/[\s,，、;；]+$/u, '')
+  const normalizedRight = right.trim().replace(/^[\s,，、;；]+/u, '')
+  if (!normalizedLeft) return normalizedRight
+  if (!normalizedRight) return normalizedLeft
+  return `${normalizedLeft}${separator}${normalizedRight}`
+}
+
 export function composeCostumeSkillDescription(
   skill: LiveLeaderSkillData,
-  data: LiveSkillData,
+  data: CostumeSkillDescriptionData,
   locale: GameLocale,
+  onFailure?: (reason: string) => void,
 ): string | null {
   const fail = (reason: string): null => {
-    if (
-      !data.pendingDescriptions.some(
-        (pending) =>
-          pending.table === 'LiveLeaderSkill' &&
-          pending.key === skill.id &&
-          pending.type === null &&
-          pending.language === locale &&
-          pending.reason === reason,
-      )
-    ) {
-      data.pendingDescriptions.push({
-        table: 'LiveLeaderSkill',
-        key: skill.id,
-        type: null,
-        language: locale,
-        reason,
-      })
-    }
-    console.warn(`LiveLeaderSkill ${skill.id} (${locale}): ${reason}`)
+    onFailure?.(reason)
     return null
   }
 
-  const findSingle = <T extends { groupId: string }>(
-    groups: Record<string, T[]>,
+  const findSingle = <T>(
+    groups: Readonly<Record<string, readonly T[]>>,
     groupId: string | null,
     required: boolean,
   ): T | null | undefined => {
@@ -151,8 +158,8 @@ export function composeCostumeSkillDescription(
   }
 
   const compose = (
-    trigger: LiveSkillTriggerData | null,
-    effect: LivePassiveSkillEffectData,
+    trigger: { description: SkillDescription | null } | null,
+    effect: { description: SkillDescription | null },
   ): string | null => {
     const effectText = renderSkillDescription(effect.description, data, locale)
     if (effectText === null) return null
@@ -165,18 +172,15 @@ export function composeCostumeSkillDescription(
     )
     if (triggerText === null) return null
 
-    switch (locale) {
-      case 'jpn':
-      case 'cht':
-      case 'chs':
-        return `${triggerText}${effectText}`
-      case 'eng':
-      case 'kor':
-        return `${triggerText} ${effectText}`
-      case 'ind':
-        return `Saat ${triggerText}, ${effectText}`
-    }
-    return null
+    const separator =
+      locale === 'cht' || locale === 'chs'
+        ? '，'
+        : locale === 'jpn'
+          ? '、'
+          : ', '
+    const condition =
+      locale === 'ind' ? `Saat ${triggerText.trim()}` : triggerText
+    return joinSkillText(condition, effectText, separator)
   }
 
   const main = compose(primaryTrigger, primaryEffect)
@@ -189,6 +193,11 @@ export function composeCostumeSkillDescription(
     segments.push(additional)
   }
 
-  const separator = locale === 'jpn' ? '\n' : ' '
-  return segments.join(separator).trim()
+  const separator =
+    locale === 'jpn' || locale === 'cht' || locale === 'chs' ? '、' : '; '
+  return segments.reduce(
+    (text, segment) =>
+      text === '' ? segment.trim() : joinSkillText(text, segment, separator),
+    '',
+  )
 }

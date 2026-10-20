@@ -235,12 +235,12 @@ describe('composeCostumeSkillDescription', () => {
   afterEach(() => vi.restoreAllMocks())
 
   it.each([
-    ['jpn', 'MAIN TRIGGERMAIN EFFECT\nADD TRIGGERADD EFFECT'],
-    ['cht', 'MAIN TRIGGERMAIN EFFECT ADD TRIGGERADD EFFECT'],
-    ['chs', 'MAIN TRIGGERMAIN EFFECT ADD TRIGGERADD EFFECT'],
-    ['eng', 'MAIN TRIGGER MAIN EFFECT ADD TRIGGER ADD EFFECT'],
-    ['kor', 'MAIN TRIGGER MAIN EFFECT ADD TRIGGER ADD EFFECT'],
-    ['ind', 'Saat MAIN TRIGGER, MAIN EFFECT Saat ADD TRIGGER, ADD EFFECT'],
+    ['jpn', 'MAIN TRIGGER、MAIN EFFECT、ADD TRIGGER、ADD EFFECT'],
+    ['cht', 'MAIN TRIGGER，MAIN EFFECT、ADD TRIGGER，ADD EFFECT'],
+    ['chs', 'MAIN TRIGGER，MAIN EFFECT、ADD TRIGGER，ADD EFFECT'],
+    ['eng', 'MAIN TRIGGER, MAIN EFFECT; ADD TRIGGER, ADD EFFECT'],
+    ['kor', 'MAIN TRIGGER, MAIN EFFECT; ADD TRIGGER, ADD EFFECT'],
+    ['ind', 'Saat MAIN TRIGGER, MAIN EFFECT; Saat ADD TRIGGER, ADD EFFECT'],
   ] as const)(
     'composes both independent segments in %s',
     (locale, expected) => {
@@ -262,6 +262,10 @@ describe('composeCostumeSkillDescription', () => {
   it.each(gameLocales)('composes an unconditional effect in %s', (locale) => {
     const data = createData()
     setDescriptions(data)
+    data.catalog.templates['effect-main-effect']!.text =
+      localized(' MAIN EFFECT ')
+    data.catalog.templates['effect-add-effect']!.text =
+      localized(' ADD EFFECT ')
     const result = composeCostumeSkillDescription(
       costumeSkill({
         liveSkillTriggerGroupId: null,
@@ -272,55 +276,57 @@ describe('composeCostumeSkillDescription', () => {
       locale,
     )
     const expected =
-      locale === 'jpn' ? 'MAIN EFFECT\nADD EFFECT' : 'MAIN EFFECT ADD EFFECT'
+      locale === 'jpn' || locale === 'cht' || locale === 'chs'
+        ? 'MAIN EFFECT、ADD EFFECT'
+        : 'MAIN EFFECT; ADD EFFECT'
     expect(result).toBe(expected)
   })
 
-  it('does not ignore an additional trigger without an effect and records pending once', () => {
+  it('returns null without mutating data or logging for an incomplete skill', () => {
     const data = createData()
     setDescriptions(data)
     const skill = costumeSkill({
       additionalLiveSkillTriggerGroupId: 'add-trigger',
     })
+    const before = JSON.stringify(data)
 
     expect(composeCostumeSkillDescription(skill, data, 'eng')).toBeNull()
-    expect(composeCostumeSkillDescription(skill, data, 'eng')).toBeNull()
-    expect(data.pendingDescriptions).toEqual([
-      {
-        table: 'LiveLeaderSkill',
-        key: skill.id,
-        type: null,
-        language: 'eng',
-        reason: '附加條件存在但沒有附加效果',
-      },
-    ])
+    expect(JSON.stringify(data)).toBe(before)
+    expect(console.warn).not.toHaveBeenCalled()
   })
 
-  it('rejects multi-row groups and records source context', () => {
+  it('reports an incomplete skill through the supplied callback', () => {
+    const data = createData()
+    setDescriptions(data)
+    const report = vi.fn()
+    const skill = costumeSkill({
+      additionalLiveSkillTriggerGroupId: 'add-trigger',
+    })
+
+    expect(
+      composeCostumeSkillDescription(skill, data, 'eng', report),
+    ).toBeNull()
+    expect(report).toHaveBeenCalledWith('附加條件存在但沒有附加效果')
+    expect(data.pendingDescriptions).toEqual([])
+  })
+
+  it('reports multi-row effects through the supplied callback', () => {
     const data = createData()
     setDescriptions(data)
     data.effects['main-effect']!.push({
       ...effect('main-effect'),
       number: 2,
     })
-    const skill = costumeSkill()
+    const report = vi.fn()
 
-    expect(composeCostumeSkillDescription(skill, data, 'cht')).toBeNull()
-    expect(data.pendingDescriptions).toEqual([
-      {
-        table: 'LiveLeaderSkill',
-        key: skill.id,
-        type: null,
-        language: 'cht',
-        reason: '主要效果必須恰有一列',
-      },
-    ])
-    expect(console.warn).toHaveBeenCalledWith(
-      'LiveLeaderSkill skill-1 (cht): 主要效果必須恰有一列',
-    )
+    expect(
+      composeCostumeSkillDescription(costumeSkill(), data, 'cht', report),
+    ).toBeNull()
+    expect(report).toHaveBeenCalledWith('主要效果必須恰有一列')
+    expect(data.pendingDescriptions).toEqual([])
   })
 
-  it('trims only the complete composed result', () => {
+  it('trims segment boundaries and avoids duplicate punctuation', () => {
     const data = createData()
     setDescriptions(data)
     data.catalog.templates['effect-main-effect']!.text = localized(
@@ -328,32 +334,47 @@ describe('composeCostumeSkillDescription', () => {
     )
     data.catalog.templates['trigger-main-trigger']!.text = localized(' 条件 ')
 
-    expect(composeCostumeSkillDescription(costumeSkill(), data, 'jpn')).toBe(
-      '条件  MAIN [attribute=1]',
+    expect(composeCostumeSkillDescription(costumeSkill(), data, 'eng')).toBe(
+      '条件, MAIN [attribute=1]',
     )
   })
 
-  it('rejects multi-row trigger groups and records source context', () => {
+  it.each([
+    ['jpn', 'MAIN TRIGGER、MAIN EFFECT'],
+    ['cht', 'MAIN TRIGGER，MAIN EFFECT'],
+    ['chs', 'MAIN TRIGGER，MAIN EFFECT'],
+    ['eng', 'MAIN TRIGGER, MAIN EFFECT'],
+    ['kor', 'MAIN TRIGGER, MAIN EFFECT'],
+    ['ind', 'Saat MAIN TRIGGER, MAIN EFFECT'],
+  ] as const)(
+    'formats condition/effect punctuation in %s',
+    (locale, expected) => {
+      const data = createData()
+      setDescriptions(data)
+      data.catalog.templates['trigger-main-trigger']!.text =
+        localized(' MAIN TRIGGER , , ')
+      data.catalog.templates['effect-main-effect']!.text =
+        localized(' ; ; MAIN EFFECT ')
+
+      expect(composeCostumeSkillDescription(costumeSkill(), data, locale)).toBe(
+        expected,
+      )
+    },
+  )
+
+  it('reports multi-row triggers through the supplied callback', () => {
     const data = createData()
     setDescriptions(data)
     data.triggers['main-trigger']!.push({
       ...trigger('main-trigger'),
       number: 2,
     })
-    const skill = costumeSkill()
+    const report = vi.fn()
 
-    expect(composeCostumeSkillDescription(skill, data, 'eng')).toBeNull()
-    expect(data.pendingDescriptions).toEqual([
-      {
-        table: 'LiveLeaderSkill',
-        key: skill.id,
-        type: null,
-        language: 'eng',
-        reason: '主要條件缺少資料或不是單列',
-      },
-    ])
-    expect(console.warn).toHaveBeenCalledWith(
-      'LiveLeaderSkill skill-1 (eng): 主要條件缺少資料或不是單列',
-    )
+    expect(
+      composeCostumeSkillDescription(costumeSkill(), data, 'eng', report),
+    ).toBeNull()
+    expect(report).toHaveBeenCalledWith('主要條件缺少資料或不是單列')
+    expect(data.pendingDescriptions).toEqual([])
   })
 })

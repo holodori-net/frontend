@@ -36,6 +36,7 @@ function card(
   return {
     id,
     characterId: values.characterId,
+    costumeId: values.costumeId ?? null,
     characterOrder: values.characterOrder,
     characterAssetId: values.characterAssetId ?? null,
     name: values.name ?? name,

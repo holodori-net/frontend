@@ -7,11 +7,13 @@ import { sql } from 'drizzle-orm'
 import type { CardData } from '../../shared/game-data/cards.ts'
 import type { CardGrowthData } from '../../shared/game-data/card-growth.ts'
 import type { CharacterData } from '../../shared/game-data/characters.ts'
+import type { LiveSkillData } from '../../shared/game-data/live-skills.ts'
 import type { LocalizedNames } from '../../shared/game-data/localized-text.ts'
 import { readCardList } from '../../server/data/card-list.ts'
 import { transformCardGrowth } from '../../server/data/converters/card-growth.ts'
 import { transformCards } from '../../server/data/converters/cards.ts'
 import { transformCharacters } from '../../server/data/converters/characters.ts'
+import { transformLiveSkillData } from '../../server/data/converters/live-skills.ts'
 
 vi.mock('../../server/data/converters/cards.ts', () => ({
   transformCards: vi.fn(),
@@ -22,10 +24,14 @@ vi.mock('../../server/data/converters/characters.ts', () => ({
 vi.mock('../../server/data/converters/card-growth.ts', () => ({
   transformCardGrowth: vi.fn(),
 }))
+vi.mock('../../server/data/converters/live-skills.ts', () => ({
+  transformLiveSkillData: vi.fn(),
+}))
 
 const transformCardsMock = vi.mocked(transformCards)
 const transformCharactersMock = vi.mocked(transformCharacters)
 const transformCardGrowthMock = vi.mocked(transformCardGrowth)
+const transformLiveSkillDataMock = vi.mocked(transformLiveSkillData)
 
 const names: LocalizedNames = {
   jpn: '櫻巫女',
@@ -83,7 +89,7 @@ function createCharacter(
     order: 7,
     dominantHandType: 0,
     isTutorial: null,
-    defaultCostumeId: '',
+    defaultCostumeId: 'costume-1',
     defaultSdCostumeId: '',
     bgmAssetId: null,
     color1: null,
@@ -97,6 +103,34 @@ function createCharacter(
       skillTreePointId: null,
     },
     ...overrides,
+  }
+}
+
+function createLiveSkills(): LiveSkillData {
+  return {
+    costumes: [
+      {
+        id: 'costume-1',
+        characterId: 'chr-1',
+        name: names,
+        liveLeaderSkillId: null,
+      },
+      {
+        id: 'costume-2',
+        characterId: 'chr-2',
+        name: names,
+        liveLeaderSkillId: null,
+      },
+    ],
+    leaderSkills: [],
+    effects: {},
+    triggers: {},
+    targets: [],
+    catalog: {
+      templates: {},
+      labels: { character: {}, group: {}, attribute: {}, judgement: {} },
+    },
+    pendingDescriptions: [],
   }
 }
 
@@ -162,6 +196,8 @@ describe('card list reader', () => {
     transformCardsMock.mockReset()
     transformCharactersMock.mockReset()
     transformCardGrowthMock.mockReset()
+    transformLiveSkillDataMock.mockReset()
+    transformLiveSkillDataMock.mockReturnValue(createLiveSkills())
   })
 
   afterEach(async () => {
@@ -193,50 +229,73 @@ describe('card list reader', () => {
     })
     transformCharactersMock.mockReturnValue([
       createCharacter({ assetId: 'character-asset-1' }),
-      createCharacter({ id: 'chr-2', assetId: null }),
+      createCharacter({
+        id: 'chr-2',
+        assetId: null,
+        defaultCostumeId: 'costume-2',
+      }),
     ])
     transformCardGrowthMock.mockReturnValue(createGrowth())
 
-    expect(readCardList()).toEqual([
-      {
-        id: 'card-1',
-        characterId: 'chr-1',
-        characterOrder: 7,
-        characterAssetId: 'character-asset-1',
-        name: names,
-        characterName: names,
-        rarity: 5,
-        attributeType: 2,
-        assetId: 'asset-1',
-        order: 3,
-        level: 80,
-        stats: { performance: 4400, technique: 3300, sense: 3300 },
-        total: 11000,
-        specializations: ['performance'],
+    expect(readCardList()).toEqual({
+      cards: [
+        {
+          id: 'card-1',
+          characterId: 'chr-1',
+          costumeId: 'costume-1',
+          characterOrder: 7,
+          characterAssetId: 'character-asset-1',
+          name: names,
+          characterName: names,
+          rarity: 5,
+          attributeType: 2,
+          assetId: 'asset-1',
+          order: 3,
+          level: 80,
+          stats: { performance: 4400, technique: 3300, sense: 3300 },
+          total: 11000,
+          specializations: ['performance'],
+        },
+        {
+          id: 'card-2',
+          characterId: 'chr-2',
+          costumeId: 'costume-2',
+          characterOrder: 7,
+          characterAssetId: null,
+          name: names,
+          characterName: names,
+          rarity: 5,
+          attributeType: 2,
+          assetId: 'card-asset-2',
+          order: 3,
+          level: 80,
+          stats: { performance: 4400, technique: 3300, sense: 3300 },
+          total: 11000,
+          specializations: ['performance'],
+        },
+      ],
+      costumes: {
+        'costume-1': { name: names, leaderSkillId: null },
+        'costume-2': { name: names, leaderSkillId: null },
       },
-      {
-        id: 'card-2',
-        characterId: 'chr-2',
-        characterOrder: 7,
-        characterAssetId: null,
-        name: names,
-        characterName: names,
-        rarity: 5,
-        attributeType: 2,
-        assetId: 'card-asset-2',
-        order: 3,
-        level: 80,
-        stats: { performance: 4400, technique: 3300, sense: 3300 },
-        total: 11000,
-        specializations: ['performance'],
+      skills: {
+        leaderSkills: {},
+        effects: {},
+        triggers: {},
+        targets: [],
+        catalog: {
+          templates: {},
+          labels: { character: {}, group: {}, attribute: {}, judgement: {} },
+        },
       },
-    ])
+    })
     expect(writeError).toMatchObject({
       cause: { message: 'attempt to write a readonly database' },
     })
     expect(transformCardsMock).toHaveBeenCalledOnce()
     expect(transformCharactersMock).toHaveBeenCalledOnce()
     expect(transformCardGrowthMock).toHaveBeenCalledOnce()
+    expect(transformLiveSkillDataMock).toHaveBeenCalledOnce()
     expect(closeSpy).toHaveBeenCalledOnce()
   })
 
@@ -248,9 +307,75 @@ describe('card list reader', () => {
     closeSpy.mockClear()
     transformCardsMock.mockReturnValue([])
 
-    expect(readCardList()).toEqual([])
+    expect(readCardList()).toMatchObject({
+      cards: [],
+      costumes: {},
+      skills: { leaderSkills: {}, effects: {}, triggers: {}, targets: [] },
+    })
     expect(transformCharactersMock).not.toHaveBeenCalled()
     expect(transformCardGrowthMock).not.toHaveBeenCalled()
+    expect(transformLiveSkillDataMock).not.toHaveBeenCalled()
+    expect(closeSpy).toHaveBeenCalledOnce()
+  })
+
+  it('logs each locale failure for an unresolved selected leader skill', () => {
+    const setup = new DatabaseSync(
+      resolve(process.cwd(), '.data/master.sqlite'),
+    )
+    setup.close()
+    closeSpy.mockClear()
+    transformCardsMock.mockReturnValue([createCard()])
+    transformCharactersMock.mockReturnValue([createCharacter()])
+    transformCardGrowthMock.mockReturnValue(createGrowth())
+    transformLiveSkillDataMock.mockReturnValue({
+      ...createLiveSkills(),
+      costumes: [
+        {
+          id: 'costume-1',
+          characterId: 'chr-1',
+          name: names,
+          liveLeaderSkillId: 'skill-1',
+        },
+      ],
+      leaderSkills: [
+        {
+          id: 'skill-1',
+          liveSkillTriggerGroupId: null,
+          livePassiveSkillEffectGroupId: 'effect-group',
+          additionalLiveSkillTriggerGroupId: null,
+          additionalLivePassiveSkillEffectGroupId: null,
+        },
+      ],
+      effects: {
+        'effect-group': [
+          {
+            groupId: 'effect-group',
+            number: 1,
+            type: 1,
+            value: null,
+            liveSkillEffectTargetId: null,
+            resourceType: null,
+            resourceIds: null,
+            description: null,
+          },
+        ],
+      },
+    })
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const payload = readCardList()
+
+    expect(payload.cards[0]?.costumeId).toBe('costume-1')
+    expect(payload.skills.effects['effect-group']).toEqual([
+      { description: null },
+    ])
+    expect(warning).toHaveBeenCalledTimes(6)
+    expect(warning).toHaveBeenCalledWith(
+      '[LiveLeaderSkill skill-1 (jpn)] 主要條件或效果描述無法解析',
+    )
+    expect(warning).toHaveBeenCalledWith(
+      '[LiveLeaderSkill skill-1 (eng)] 主要條件或效果描述無法解析',
+    )
     expect(closeSpy).toHaveBeenCalledOnce()
   })
 
