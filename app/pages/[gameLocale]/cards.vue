@@ -3,6 +3,7 @@ import {
   ArrowDownWideNarrow,
   ArrowUpNarrowWide,
   LayoutList,
+  RotateCcw,
   SquareText,
 } from '@lucide/vue'
 import {
@@ -104,7 +105,7 @@ const ready = computed(
   () =>
     conditionsReady.value && layoutInitialized.value && fieldsInitialized.value,
 )
-const openPanels = ref<string[]>(['filters'])
+const openPanels = ref<string[]>(['filters', 'display'])
 const visibleCards = computed(() =>
   filterAndSortCards(cardItems.value, conditions.value),
 )
@@ -223,9 +224,28 @@ function selectedOrder(group: CardListFieldGroup['key']) {
         >
           <Accordion v-model:value="openPanels" multiple>
             <AccordionPanel value="filters">
-              <AccordionHeader>{{
-                t('cardList.filtersAndSort')
-              }}</AccordionHeader>
+              <div class="flex items-stretch">
+                <AccordionHeader class="min-w-0 flex-1">{{
+                  t('cardList.filtersAndSort')
+                }}</AccordionHeader>
+                <Button
+                  id="card-filters-reset"
+                  type="button"
+                  severity="secondary"
+                  text
+                  class="!h-auto min-h-11 !w-14 shrink-0 rounded-none !p-0"
+                  :aria-label="t('cardList.reset')"
+                  :title="t('cardList.reset')"
+                  @click="resetConditions"
+                >
+                  <RotateCcw
+                    aria-hidden="true"
+                    :size="20"
+                    :stroke-width="2"
+                    color="currentColor"
+                  />
+                </Button>
+              </div>
               <AccordionContent>
                 <div class="space-y-4">
                   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -455,34 +475,45 @@ function selectedOrder(group: CardListFieldGroup['key']) {
                         color="currentColor"
                       />
                     </Button>
-                    <Button
-                      type="button"
-                      severity="secondary"
-                      text
-                      @click="resetConditions"
-                    >
-                      {{ t('cardList.reset') }}
-                    </Button>
                   </div>
                 </div>
               </AccordionContent>
             </AccordionPanel>
             <AccordionPanel value="display">
-              <AccordionHeader>
-                <span
-                  class="flex min-w-0 flex-1 flex-wrap items-center gap-x-2"
-                >
-                  <span>{{ t('cardList.displaySettings') }}</span>
-                  <span class="text-sm font-normal text-muted-color">
-                    {{ t(`cardList.layout.${layout}`) }} ·
-                    {{
-                      t('cardList.fieldsCount', {
-                        count: selectedGroups.length,
-                      })
-                    }}
+              <div class="flex items-stretch">
+                <AccordionHeader class="min-w-0 flex-1">
+                  <span
+                    class="flex min-w-0 flex-1 flex-wrap items-center gap-x-2"
+                  >
+                    <span>{{ t('cardList.displaySettings') }}</span>
+                    <span class="text-sm font-normal text-muted-color">
+                      {{ t(`cardList.layout.${layout}`) }} ·
+                      {{
+                        t('cardList.fieldsCount', {
+                          count: selectedGroups.length,
+                        })
+                      }}
+                    </span>
                   </span>
-                </span>
-              </AccordionHeader>
+                </AccordionHeader>
+                <Button
+                  id="card-display-reset"
+                  type="button"
+                  severity="secondary"
+                  text
+                  class="!h-auto min-h-11 !w-14 shrink-0 rounded-none !p-0"
+                  :aria-label="t('cardList.resetDisplay')"
+                  :title="t('cardList.resetDisplay')"
+                  @click="resetDisplay"
+                >
+                  <RotateCcw
+                    aria-hidden="true"
+                    :size="20"
+                    :stroke-width="2"
+                    color="currentColor"
+                  />
+                </Button>
+              </div>
               <AccordionContent>
                 <div class="flex flex-col gap-5 sm:flex-row sm:items-start">
                   <fieldset class="w-full border-0 p-0 sm:w-52">
@@ -709,17 +740,6 @@ function selectedOrder(group: CardListFieldGroup['key']) {
                           <span>{{ option.label }}</span>
                         </Button>
                       </template>
-                      <Button
-                        id="card-display-reset"
-                        type="button"
-                        severity="secondary"
-                        text
-                        size="small"
-                        class="h-8 rounded px-2 py-1 text-sm leading-5 font-medium text-color"
-                        @click="resetDisplay"
-                      >
-                        {{ t('cardList.resetDisplay') }}
-                      </Button>
                     </div>
                   </fieldset>
                 </div>
