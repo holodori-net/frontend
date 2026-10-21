@@ -13,6 +13,8 @@ pnpm preview
 
 Fetching the database requires `curl`. Run `pnpm data:fetch` to download it to `.data/master.sqlite`, which is ignored by Git. Running the command again downloads and overwrites the file. If `curl` fails, the command returns a nonzero status and removes any incomplete output.
 
+Google Analytics is disabled by `pnpm dev`. Run `pnpm generate` followed by `pnpm preview` to check the production tag, then confirm the `gtag/js` request and GA4 page views in the browser's Network panel. `NUXT_PUBLIC_GA_ID` optionally overrides the default Measurement ID or disables Analytics when set to an empty string. In the GA4 web data stream, enable page views based on browser history events under **Enhanced measurement** for in-app navigation.
+
 The card and character pages and member theme plugin read SQLite during prerendering and store their data in Nuxt payloads. Their readers open `.data/master.sqlite` in read-only mode, convert the source data, select the required fields, and close the database. Each reader reports the source path and loaded count; read and conversion failures retain their underlying cause and stop generation. Style generation also requires the database.
 
 See [knowledge/README.md](knowledge/README.md) for the data dictionary, relationships, and field conversion status. Update the relevant knowledge documents when changing data mappings.

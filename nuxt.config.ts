@@ -20,6 +20,7 @@ import {
 const prerenderWorkerCount = getPrerenderWorkerCount(
   process.env.NUXT_PRERENDER_WORKERS,
 )
+const gaId = (process.env.NUXT_PUBLIC_GA_ID ?? 'G-3Z3154J0WR').trim()
 const defaultThemePalette = createMemberThemePalette(
   resolveMemberTheme(readMemberThemes(), defaultThemeId),
 )
@@ -80,6 +81,23 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      script:
+        process.env.NODE_ENV === 'production' && gaId
+          ? [
+              {
+                async: true,
+                src: `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`,
+              },
+              {
+                innerHTML: [
+                  'window.dataLayer = window.dataLayer || [];',
+                  'function gtag(){dataLayer.push(arguments);}',
+                  "gtag('js', new Date());",
+                  `gtag('config', ${JSON.stringify(gaId)});`,
+                ].join('\n'),
+              },
+            ]
+          : [],
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         {
