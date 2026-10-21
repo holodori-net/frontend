@@ -16,6 +16,7 @@ import type {
   CardListPayload,
   CardStatKey,
 } from '#shared/game-data/card-list-data'
+import { buildCardSkillFilterCatalog } from '#shared/game-data/card-skill-filter'
 import {
   getCardAttributeIconUrl,
   getCardStatIconUrl,
@@ -75,12 +76,32 @@ if (payload.value === null || payload.value === undefined) {
 const cardItems = computed(() => payload.value!.cards)
 const costumes = computed(() => payload.value!.costumes)
 const skills = computed(() => payload.value!.skills)
-const filterOptions = computed(() => getCardFilterOptions(cardItems.value))
+const skillCatalog = buildCardSkillFilterCatalog(payload.value)
+const skillKeys = Object.keys(skillCatalog.canonicalKeys)
+const filterOptions = computed(() =>
+  getCardFilterOptions(cardItems.value, skillKeys),
+)
 const {
   conditions,
   reset: resetConditions,
   ready: conditionsReady,
+  skillQuerySupported,
+  skillQueryError,
 } = useCardListConditions(filterOptions)
+const selectedSkillKeys = computed({
+  get: () => [
+    ...new Set(
+      conditions.value.skill.map(
+        (key) => skillCatalog.canonicalKeys[key] ?? key,
+      ),
+    ),
+  ],
+  set: (keys: string[]) => {
+    conditions.value.skill = [
+      ...new Set(keys.map((key) => skillCatalog.canonicalKeys[key] ?? key)),
+    ]
+  },
+})
 const {
   layout,
   reset: resetLayout,
@@ -107,8 +128,14 @@ const ready = computed(
 )
 const openPanels = ref<string[]>(['filters', 'display'])
 const visibleCards = computed(() =>
-  filterAndSortCards(cardItems.value, conditions.value),
+  filterAndSortCards(
+    cardItems.value,
+    conditions.value,
+    skillCatalog.cardSkills,
+    skillCatalog.canonicalKeys,
+  ),
 )
+const visibleCardIds = computed(() => visibleCards.value.map(({ id }) => id))
 const characterOptions = computed(() => {
   const characters = new Map(
     cardItems.value.map((card) => [card.characterId, card]),
@@ -249,7 +276,7 @@ function selectedOrder(group: CardListFieldGroup['key']) {
               <AccordionContent>
                 <div class="space-y-4">
                   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <label class="block min-w-0 lg:col-span-2">
+                    <label class="block min-w-0">
                       <span class="mb-1.5 block text-sm font-medium">{{
                         t('cardList.search')
                       }}</span>
@@ -308,9 +335,34 @@ function selectedOrder(group: CardListFieldGroup['key']) {
                         </template>
                       </MultiSelect>
                     </label>
-                  </div>
-
-                  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <fieldset class="min-w-0">
+                      <legend class="mb-1.5 text-sm font-medium">
+                        {{ t('cardList.skills.label') }}
+                      </legend>
+                      <Message
+                        v-if="!skillQuerySupported"
+                        severity="warn"
+                        :closable="false"
+                        class="mb-2"
+                      >
+                        {{ t('cardList.skills.unsupported') }}
+                      </Message>
+                      <Message
+                        v-else-if="skillQueryError"
+                        severity="warn"
+                        :closable="false"
+                        class="mb-2"
+                      >
+                        {{ t(`cardList.skills.queryError.${skillQueryError}`) }}
+                      </Message>
+                      <CardListSkillFilter
+                        v-model="selectedSkillKeys"
+                        :catalog="skillCatalog"
+                        :game-locale="gameLocale"
+                        :visible-card-ids="visibleCardIds"
+                        :disabled="!skillQuerySupported"
+                      />
+                    </fieldset>
                     <fieldset class="min-w-0">
                       <legend class="mb-1.5 text-sm font-medium">
                         {{ t('cardList.rarity') }}

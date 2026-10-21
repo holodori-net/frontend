@@ -12,12 +12,17 @@ export const primeVueComponents = [
   'InputText',
   'InputGroup',
   'InputGroupAddon',
+  'InputIcon',
   'Message',
   'MultiSelect',
   'Popover',
   'Select',
   'Skeleton',
   'Tag',
+  'Tab',
+  'TabList',
+  'Tabs',
+  'Tree',
   'ToggleSwitch',
 ] as const
 
@@ -38,6 +43,12 @@ export const primeVueStyleDependencies: Partial<
   Popover: { directives: ['ripple'] },
   Select: {
     components: ['IconField', 'VirtualScroller'],
+    directives: ['ripple'],
+  },
+  Tab: { directives: ['ripple'] },
+  TabList: { directives: ['ripple'] },
+  Tree: {
+    components: ['Checkbox', 'Button', 'IconField', 'InputIcon'],
     directives: ['ripple'],
   },
 } as const

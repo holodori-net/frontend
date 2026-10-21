@@ -85,6 +85,51 @@
     "imageUnavailable": "暫無卡面圖片",
     "noLeaderSkill": "無隊長服裝技能",
     "skillUnavailable": "技能資訊暫無法顯示",
+    "skills": {
+      "label": "技能",
+      "placeholder": "選擇技能",
+      "search": "搜尋技能效果或描述",
+      "grouping": "技能分類方式",
+      "byEffect": "依效果",
+      "byKind": "依技能類型",
+      "selectedCount": "已選取 {count} 項技能",
+      "cardCount": "{count} 張卡片",
+      "visibleCardCount": "目前顯示 {count} 張卡片",
+      "clear": "清除",
+      "done": "完成",
+      "close": "關閉",
+      "expandAll": "全部展開",
+      "collapseAll": "全部收合",
+      "unsupported": "此瀏覽器無法將技能篩選編碼至網址，因此無法使用技能篩選。",
+      "queryError": {
+        "decode": "無法讀取網址中的技能篩選條件。",
+        "encode": "無法將技能篩選條件儲存至網址。",
+        "length": "網址過長，無法儲存此技能篩選條件。"
+      },
+      "kind": {
+        "passive": "被動技能",
+        "active": "主動技能",
+        "special": "特殊技能",
+        "leader": "隊長服裝技能"
+      },
+      "effect": {
+        "performance": "表現力提升",
+        "technique": "技巧提升",
+        "sense": "品味提升",
+        "allStats": "全能力提升",
+        "scoreUp": "分數提升",
+        "scoreSupport": "分數加成效果提升",
+        "activationRate": "技能發動機率提升",
+        "lifeRecovery": "生命值回復",
+        "judgement": "判定強化"
+      },
+      "variantEffect": {
+        "all": "所有類型",
+        "conditional": "條件式",
+        "pure": "單一加成",
+        "additional": "多重加成效果"
+      }
+    },
     "total": "合計"
   },
   "languagePreferenceTitle": "確認語言設定",

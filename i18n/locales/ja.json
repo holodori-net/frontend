@@ -85,6 +85,51 @@
     "imageUnavailable": "カード画像がありません",
     "noLeaderSkill": "リーダー衣装スキルなし",
     "skillUnavailable": "スキル情報を表示できません",
+    "skills": {
+      "label": "スキル",
+      "placeholder": "スキルを選択",
+      "search": "効果または説明から検索",
+      "grouping": "スキルの分類",
+      "byEffect": "効果別",
+      "byKind": "スキル種別",
+      "selectedCount": "{count} 件選択中",
+      "cardCount": "{count}枚のカード",
+      "visibleCardCount": "表示中のカード {count}枚",
+      "clear": "クリア",
+      "done": "完了",
+      "close": "閉じる",
+      "expandAll": "すべて展開",
+      "collapseAll": "すべて折りたたむ",
+      "unsupported": "このブラウザーでは URL にスキル条件を保存できないため、スキルで絞り込めません。",
+      "queryError": {
+        "decode": "URL のスキル条件を読み取れませんでした。",
+        "encode": "スキル条件を URL に保存できませんでした。",
+        "length": "スキル条件を保存するには URL が長すぎます。"
+      },
+      "kind": {
+        "passive": "パッシブ",
+        "active": "アクティブ",
+        "special": "スペシャル",
+        "leader": "リーダー衣装"
+      },
+      "effect": {
+        "performance": "パフォーマンスUP",
+        "technique": "テクニックUP",
+        "sense": "センスUP",
+        "allStats": "全パラメータUP",
+        "scoreUp": "スコアUP",
+        "scoreSupport": "スコアサポート効果UP",
+        "activationRate": "スキル発動率UP",
+        "lifeRecovery": "ライフ回復",
+        "judgement": "判定強化"
+      },
+      "variantEffect": {
+        "all": "すべての種類",
+        "conditional": "条件付き",
+        "pure": "単独効果",
+        "additional": "複数効果"
+      }
+    },
     "total": "合計"
   },
   "languagePreferenceTitle": "言語設定を確認",

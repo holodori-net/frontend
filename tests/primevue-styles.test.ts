@@ -14,6 +14,9 @@ describe('PrimeVue shared styles', () => {
       'accordionheader',
       'accordioncontent',
       'inputgroupaddon',
+      'inputicon',
+      'tab',
+      'tablist',
     ]
     const expectedComponentStyles = primeVueComponents
       .map((component) => `${component.toLowerCase()}-style`)
@@ -29,6 +32,12 @@ describe('PrimeVue shared styles', () => {
     expect(result.css).toContain('.p-accordionheader')
     expect(result.css).toContain('.p-accordioncontent')
     expect(result.css).toContain('.p-inputgroupaddon')
+    expect(result.css).toContain('.p-inputicon')
+    expect(result.css).toContain('.p-tabs')
+    expect(result.css).toContain('.p-tablist')
+    expect(result.css).toContain('.p-tab')
+    expect(result.styleIds).not.toContain('tab-style')
+    expect(result.styleIds).not.toContain('tablist-style')
     expect(new Set(result.styleIds).size).toBe(result.styleIds.length)
     expect(result.styleIds.indexOf('checkbox-style')).toBeLessThan(
       result.styleIds.indexOf('button-style'),
@@ -53,6 +62,7 @@ describe('PrimeVue shared styles', () => {
     ]
 
     expect(styleIds).toEqual(expect.arrayContaining(dependencyStyles))
+    expect(styleIds).toContain('tree-style')
     expect(styleIds.indexOf('tag-style')).toBeLessThan(
       styleIds.indexOf('virtualscroller'),
     )

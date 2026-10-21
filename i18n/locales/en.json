@@ -85,6 +85,51 @@
     "imageUnavailable": "Card image unavailable",
     "noLeaderSkill": "No leader outfit skill",
     "skillUnavailable": "Skill information is unavailable",
+    "skills": {
+      "label": "Skills",
+      "placeholder": "Select skills",
+      "search": "Search skill effects or descriptions",
+      "grouping": "Group skills",
+      "byEffect": "By effect",
+      "byKind": "By skill type",
+      "selectedCount": "{count} skills selected",
+      "cardCount": "{count} cards",
+      "visibleCardCount": "{count} visible cards",
+      "clear": "Clear",
+      "done": "Done",
+      "close": "Close",
+      "expandAll": "Expand all",
+      "collapseAll": "Collapse all",
+      "unsupported": "This browser cannot encode skill filters in the URL. Skill filtering is unavailable.",
+      "queryError": {
+        "decode": "The skill filter in this URL could not be read.",
+        "encode": "The skill filter could not be saved to the URL.",
+        "length": "The URL is too long to save this skill filter."
+      },
+      "kind": {
+        "passive": "Passive",
+        "active": "Active",
+        "special": "Special",
+        "leader": "Leader outfit"
+      },
+      "effect": {
+        "performance": "Performance UP",
+        "technique": "Technique UP",
+        "sense": "Sense UP",
+        "allStats": "All Stats UP",
+        "scoreUp": "Score UP",
+        "scoreSupport": "Score Support Effect UP",
+        "activationRate": "Skill Activation Rate UP",
+        "lifeRecovery": "LIFE Recovery",
+        "judgement": "Judgement Enhancement"
+      },
+      "variantEffect": {
+        "all": "All types",
+        "conditional": "Conditional",
+        "pure": "Single effect",
+        "additional": "Multiple effects"
+      }
+    },
     "total": "Total"
   },
   "languagePreferenceTitle": "Confirm language settings",
