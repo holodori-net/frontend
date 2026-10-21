@@ -111,7 +111,7 @@ Add language resolution and route behavior tests under `tests/` when changing la
 
 ## UI icons
 
-Custom UI icons use named imports from `@lucide/vue`, rendered as 20px inline SVGs with a 2px stroke and `currentColor`. Decorative icons use `aria-hidden`. Display preferences use `SlidersHorizontal`, appearance options use `Monitor`, `Sun`, and `Moon`, and the PWA install notice uses `X` to dismiss. PrimeVue supplies its component icons; game icons use the existing asset mappings. Verify icon states, keyboard activation, theme colors, and offline rendering on the generated site.
+Custom UI icons use named imports from `@lucide/vue`, rendered as 20px inline SVGs with a 2px stroke and `currentColor`. Sort direction uses `ArrowUpNarrowWide` for ascending and `ArrowDownWideNarrow` for descending. Card layout uses two icon-only PrimeVue Buttons: `SquareText` for full art and `LayoutList` for vertical art. The selected layout uses primary severity; the other uses secondary outlined styling. Each button has a 44px target, a localized title and accessible name; layout buttons expose `aria-pressed` within a labeled fieldset. Decorative icons use `aria-hidden`. Display preferences use `SlidersHorizontal`, appearance options use `Monitor`, `Sun`, and `Moon`, and the PWA install notice uses `X` to dismiss. PrimeVue supplies its component icons; game icons use the existing asset mappings. Verify icon states, keyboard activation, theme colors, and offline rendering on the generated site.
 
 ## Member themes
 

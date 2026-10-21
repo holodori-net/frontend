@@ -103,6 +103,8 @@
 
 **CONFIRMED**：`06003-5-uniq-0091-00`、`00034-5-uniq-0090-00` 與 `00001-3-nrml-0000-00` 的來源完整卡圖尺寸均為 2048×1152。每張圖的 RGBA8 像素資料為 9 MiB。
 
+排序方向使用 Lucide 圖示表示目前狀態：升冪為 `ArrowUpNarrowWide`、降冪為 `ArrowDownWideNarrow`。版型使用兩個並排的圖示按鈕，完整卡圖為 `SquareText`、直式卡圖為 `LayoutList`；選取項使用 primary 色，未選項使用 secondary outlined 樣式，並以 `aria-pressed` 表達選取狀態。按鈕保留本地化的文字提示與可存取名稱；排序沿用 query，版型沿用 `holodori-card-layout` 偏好。
+
 ### 三圍與屬性圖示
 
 **CONFIRMED**：APK 圖集包含以下 Sprite；三圍為透明底白色字母，屬性使用彩色圓形圖示。尺寸為圖集中裁切後的 WebP 像素大小。

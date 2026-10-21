@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import {
+  ArrowDownWideNarrow,
+  ArrowUpNarrowWide,
+  LayoutList,
+  SquareText,
+} from '@lucide/vue'
+import {
   gameLocaleLanguages,
   isGameLocale,
   resolveLocalizedName,
@@ -403,9 +409,17 @@ function selectedOrder(field: CardListField) {
                     </label>
                     <Button
                       type="button"
+                      class="!size-11 !p-0"
                       severity="secondary"
                       outlined
                       :aria-label="
+                        t(
+                          conditions.direction === 'desc'
+                            ? 'cardList.descending'
+                            : 'cardList.ascending',
+                        )
+                      "
+                      :title="
                         t(
                           conditions.direction === 'desc'
                             ? 'cardList.descending'
@@ -417,13 +431,20 @@ function selectedOrder(field: CardListField) {
                           conditions.direction === 'desc' ? 'asc' : 'desc'
                       "
                     >
-                      {{
-                        t(
-                          conditions.direction === 'desc'
-                            ? 'cardList.descending'
-                            : 'cardList.ascending',
-                        )
-                      }}
+                      <ArrowDownWideNarrow
+                        v-if="conditions.direction === 'desc'"
+                        aria-hidden="true"
+                        :size="20"
+                        :stroke-width="2"
+                        color="currentColor"
+                      />
+                      <ArrowUpNarrowWide
+                        v-else
+                        aria-hidden="true"
+                        :size="20"
+                        :stroke-width="2"
+                        color="currentColor"
+                      />
                     </Button>
                     <Button
                       type="button"
@@ -451,20 +472,42 @@ function selectedOrder(field: CardListField) {
               </AccordionHeader>
               <AccordionContent>
                 <div class="flex flex-col gap-5 sm:flex-row sm:items-start">
-                  <label class="w-full sm:w-52">
-                    <span class="mb-1.5 block text-sm font-medium">{{
-                      t('cardList.layoutLabel')
-                    }}</span>
-                    <Select
-                      v-model="layout"
-                      input-id="card-layout"
-                      class="w-full"
-                      :options="layoutOptions"
-                      option-label="label"
-                      option-value="value"
-                      :aria-label="t('cardList.layoutLabel')"
-                    />
-                  </label>
+                  <fieldset class="w-full border-0 p-0 sm:w-52">
+                    <legend class="mb-1.5 text-sm font-medium">
+                      {{ t('cardList.layoutLabel') }}
+                    </legend>
+                    <div class="flex gap-2">
+                      <Button
+                        v-for="option in layoutOptions"
+                        :key="option.value"
+                        type="button"
+                        class="!size-11 !p-0"
+                        :severity="
+                          layout === option.value ? 'primary' : 'secondary'
+                        "
+                        :outlined="layout !== option.value"
+                        :aria-label="option.label"
+                        :aria-pressed="layout === option.value"
+                        :title="option.label"
+                        @click="layout = option.value"
+                      >
+                        <SquareText
+                          v-if="option.value === 'full'"
+                          aria-hidden="true"
+                          :size="20"
+                          :stroke-width="2"
+                          color="currentColor"
+                        />
+                        <LayoutList
+                          v-else
+                          aria-hidden="true"
+                          :size="20"
+                          :stroke-width="2"
+                          color="currentColor"
+                        />
+                      </Button>
+                    </div>
+                  </fieldset>
                   <fieldset class="min-w-0 flex-1">
                     <legend class="mb-1.5 text-sm font-medium">
                       {{ t('cardList.fieldsLabel') }}
