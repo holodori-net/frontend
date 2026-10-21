@@ -68,10 +68,14 @@ const skills = computed(() => payload.value!.skills)
 const filterOptions = computed(() => getCardFilterOptions(cardItems.value))
 const {
   conditions,
-  reset,
+  reset: resetConditions,
   ready: conditionsReady,
 } = useCardListConditions(filterOptions)
-const { layout, initialized: layoutInitialized } = useCardLayout()
+const {
+  layout,
+  reset: resetLayout,
+  initialized: layoutInitialized,
+} = useCardLayout()
 const availableSkillLevels = computed(() =>
   getCardSkillAvailableLevels(skills.value),
 )
@@ -80,8 +84,13 @@ const {
   skillLevels,
   toggleField,
   toggleSkillLevel,
+  reset: resetFields,
   initialized: fieldsInitialized,
 } = useCardFields(availableSkillLevels.value)
+function resetDisplay() {
+  resetLayout()
+  resetFields()
+}
 const ready = computed(
   () =>
     conditionsReady.value && layoutInitialized.value && fieldsInitialized.value,
@@ -420,7 +429,7 @@ function selectedOrder(field: CardListField) {
                       type="button"
                       severity="secondary"
                       text
-                      @click="reset"
+                      @click="resetConditions"
                     >
                       {{ t('cardList.reset') }}
                     </Button>
@@ -584,6 +593,17 @@ function selectedOrder(field: CardListField) {
                           </Button>
                         </InputGroup>
                       </template>
+                      <Button
+                        id="card-display-reset"
+                        type="button"
+                        severity="secondary"
+                        text
+                        size="small"
+                        class="h-8 rounded px-2 py-1 text-sm leading-5 font-medium text-color"
+                        @click="resetDisplay"
+                      >
+                        {{ t('cardList.resetDisplay') }}
+                      </Button>
                     </div>
                   </fieldset>
                 </div>

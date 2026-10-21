@@ -116,6 +116,18 @@ describe('useCardLayout', () => {
     expect(setItem).toHaveBeenCalledWith('holodori-card-layout', 'vertical')
   })
 
+  it('resets a saved layout to full and persists the default', () => {
+    const setItem = vi.fn()
+    start({ getItem: vi.fn(() => 'vertical'), setItem } as unknown as Storage)
+    const result = useCardLayout()
+    mount()
+
+    result.reset()
+
+    expect(result.layout.value).toBe('full')
+    expect(setItem).toHaveBeenCalledWith('holodori-card-layout', 'full')
+  })
+
   it('shares layout and initialization across composable calls', () => {
     const getItem = vi.fn(() => 'vertical')
     const setItem = vi.fn()
@@ -152,6 +164,26 @@ describe('useCardLayout', () => {
     expect(second.layout.value).toBe('vertical')
     expect(getItem).toHaveBeenCalledTimes(1)
     expect(setItem).toHaveBeenCalledWith('holodori-card-layout', 'vertical')
+    expect(warning).toHaveBeenCalledWith(
+      'Holodori card layout preference could not be saved',
+      error,
+    )
+  })
+
+  it('keeps the reset layout in memory and warns when saving it fails', () => {
+    const error = new Error('write failed')
+    const setItem = vi.fn(() => {
+      throw error
+    })
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    start({ getItem: vi.fn(() => 'vertical'), setItem } as unknown as Storage)
+    const result = useCardLayout()
+    mount()
+
+    result.reset()
+
+    expect(result.layout.value).toBe('full')
+    expect(setItem).toHaveBeenCalledWith('holodori-card-layout', 'full')
     expect(warning).toHaveBeenCalledWith(
       'Holodori card layout preference could not be saved',
       error,

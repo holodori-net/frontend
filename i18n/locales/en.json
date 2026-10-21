@@ -30,6 +30,7 @@
     "fieldsLabel": "Information",
     "fieldsCount": "{count} item | {count} items",
     "fieldOrderHelp": "Items follow their enable order. Each skill type keeps one position, with levels shown from lowest to highest.",
+    "resetDisplay": "Reset display",
     "skillLevel": "Lv. {level}",
     "skillLevelOption": "{skill} Lv. {level}",
     "field": {

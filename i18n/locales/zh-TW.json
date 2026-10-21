@@ -30,6 +30,7 @@
     "fieldsLabel": "顯示資訊",
     "fieldsCount": "{count} 項資訊",
     "fieldOrderHelp": "依選取先後排序；同一技能共用排序位置，等級由低至高顯示。",
+    "resetDisplay": "重設顯示",
     "skillLevel": "Lv. {level}",
     "skillLevelOption": "{skill} Lv. {level}",
     "field": {

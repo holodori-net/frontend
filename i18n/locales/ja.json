@@ -30,6 +30,7 @@
     "fieldsLabel": "表示情報",
     "fieldsCount": "{count} 項目",
     "fieldOrderHelp": "有効にした順に表示します。同じスキルは1つの位置にまとめ、レベルは低い順に表示します。",
+    "resetDisplay": "表示設定をリセット",
     "skillLevel": "Lv. {level}",
     "skillLevelOption": "{skill} Lv. {level}",
     "field": {

@@ -226,11 +226,16 @@ export function useCardFields(availableLevels: CardSkillLevelSelections) {
     update({ fields: nextFields, skillLevels: nextLevels }, true)
   }
 
+  function reset() {
+    update(defaultPreference(availableLevels), true)
+  }
+
   return {
     fields: readonly(fields),
     skillLevels: readonly(skillLevels),
     initialized: readonly(initializedState),
     toggleField,
     toggleSkillLevel,
+    reset,
   }
 }

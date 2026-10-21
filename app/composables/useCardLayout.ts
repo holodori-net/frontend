@@ -2,13 +2,17 @@ import { computed, readonly } from 'vue'
 import type { CardListLayout } from '#shared/game-data/card-list'
 
 const STORAGE_KEY = 'holodori-card-layout'
+const DEFAULT_LAYOUT: CardListLayout = 'full'
 
 function isCardListLayout(value: string | null): value is CardListLayout {
   return value === 'full' || value === 'vertical'
 }
 
 export function useCardLayout() {
-  const layoutState = useState<CardListLayout>('card-list-layout', () => 'full')
+  const layoutState = useState<CardListLayout>(
+    'card-list-layout',
+    () => DEFAULT_LAYOUT,
+  )
   const initializedState = useState<boolean>(
     'card-list-layout-initialized',
     () => false,
@@ -36,14 +40,18 @@ export function useCardLayout() {
 
     try {
       const value = localStorage.getItem(STORAGE_KEY)
-      layoutState.value = isCardListLayout(value) ? value : 'full'
+      layoutState.value = isCardListLayout(value) ? value : DEFAULT_LAYOUT
     } catch (error) {
       console.warn('Holodori card layout preference could not be read', error)
-      layoutState.value = 'full'
+      layoutState.value = DEFAULT_LAYOUT
     } finally {
       initializedState.value = true
     }
   })
 
-  return { layout, initialized: readonly(initializedState) }
+  function reset() {
+    layout.value = DEFAULT_LAYOUT
+  }
+
+  return { layout, initialized: readonly(initializedState), reset }
 }

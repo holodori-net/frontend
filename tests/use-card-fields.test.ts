@@ -201,6 +201,65 @@ describe('useCardFields', () => {
     )
   })
 
+  it('resets reordered fields and skill levels to current defaults and persists them', () => {
+    const setItem = vi.fn()
+    start({
+      getItem: vi.fn(() =>
+        makeStored(['costume', 'specialSkill', 'name'], {
+          passiveSkill: [],
+          activeSkill: [],
+          specialSkill: [1, 3],
+        }),
+      ),
+      setItem,
+    } as unknown as Storage)
+    const result = useCardFields(available)
+    mount()
+
+    expect(result.fields.value).toEqual(['costume', 'specialSkill', 'name'])
+    result.reset()
+
+    expect(result.fields.value).toEqual(defaultFields)
+    expect(result.skillLevels.value).toEqual(defaultLevels)
+    expect(setItem).toHaveBeenLastCalledWith(
+      'holodori-card-fields',
+      makeStored(defaultFields, defaultLevels),
+    )
+  })
+
+  it('keeps reset defaults in memory and warns when saving the reset fails', () => {
+    const error = new Error('write failed')
+    const setItem = vi.fn(() => {
+      throw error
+    })
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    start({
+      getItem: vi.fn(() =>
+        makeStored(['costume'], {
+          passiveSkill: [],
+          activeSkill: [],
+          specialSkill: [],
+        }),
+      ),
+      setItem,
+    } as unknown as Storage)
+    const result = useCardFields(available)
+    mount()
+
+    result.reset()
+
+    expect(result.fields.value).toEqual(defaultFields)
+    expect(result.skillLevels.value).toEqual(defaultLevels)
+    expect(setItem).toHaveBeenLastCalledWith(
+      'holodori-card-fields',
+      makeStored(defaultFields, defaultLevels),
+    )
+    expect(warning).toHaveBeenCalledWith(
+      'Holodori card fields preference could not be saved',
+      error,
+    )
+  })
+
   it('toggles all skill levels without moving a partially enabled group', () => {
     const setItem = vi.fn()
     start({
