@@ -102,6 +102,7 @@ describe('card list', () => {
     expect(createCardListConditions(options)).toEqual({
       q: '',
       character: [],
+      skill: [],
       rarity: [3, 4, 5],
       attribute: [1, 2, 3],
       specialization: ['performance', 'technique', 'sense'],
@@ -176,6 +177,54 @@ describe('card list', () => {
     expect(
       filterAndSortCards(cards, { ...defaults, character: [] }),
     ).toHaveLength(cards.length)
+  })
+
+  it('matches any selected skill, resolves source aliases, and combines other filters', () => {
+    const cardSkills = {
+      'c-01': ['passive:shared'],
+      'c-02': ['active:second'],
+      'c-03': ['leader:third'],
+    }
+    const aliases = { 'passive:alias': 'passive:shared' }
+    const defaults = createCardListConditions(getCardFilterOptions(cards))
+    const selected = {
+      ...defaults,
+      skill: ['passive:alias', 'leader:third'],
+    }
+    const ids = (conditions: CardListConditions) =>
+      filterAndSortCards(cards, conditions, cardSkills, aliases).map(
+        ({ id }) => id,
+      )
+
+    expect(ids(selected)).toEqual(['c-01', 'c-03'])
+    expect(ids({ ...selected, rarity: [3] })).toEqual(['c-03'])
+    expect(ids({ ...selected, character: ['c-b'] })).toEqual([])
+    expect(ids({ ...defaults, skill: ['missing'] })).toEqual([])
+    expect(ids(defaults)).toHaveLength(cards.length)
+  })
+
+  it('round-trips logical skill selections and omits empty or invalid selections', () => {
+    const options = getCardFilterOptions(cards, [
+      'special:b',
+      'active:a',
+      'active:a',
+    ])
+    expect(options.skill).toEqual(['active:a', 'special:b'])
+    const parsed = parseCardListQuery(
+      { skill: ['special:b', 'unknown', 'active:a', 'special:b'] },
+      options,
+    )
+    expect(parsed.skill).toEqual(['special:b', 'active:a'])
+    expect(toCardListQuery(parsed, options)).toEqual({
+      skill: ['active:a', 'special:b'],
+    })
+    expect(parseCardListQuery({ skill: 'unknown' }, options).skill).toEqual([])
+    expect(
+      toCardListQuery(createCardListConditions(options), options, {
+        skill: 'old',
+        custom: 'keep',
+      }),
+    ).toEqual({ custom: 'keep' })
   })
 
   it('sorts every supported key in either direction and resolves ties consistently', () => {
@@ -276,6 +325,7 @@ describe('card list', () => {
     expect(parsed).toEqual({
       q: 'Sakura',
       character: ['c-a'],
+      skill: [],
       rarity: [5],
       attribute: [2],
       specialization: ['sense'],

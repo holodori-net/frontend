@@ -89,6 +89,7 @@ export function getCardSkillAvailableLevels(
 export interface CardListConditions {
   q: string
   character: string[]
+  skill: string[]
   rarity: number[]
   attribute: number[]
   specialization: CardStatKey[]
@@ -98,6 +99,7 @@ export interface CardListConditions {
 
 export interface CardFilterOptions {
   character: string[]
+  skill?: string[]
   rarity: number[]
   attribute: number[]
   specialization: CardStatKey[]
@@ -114,6 +116,7 @@ const sortKeys: CardListSort[] = [
 const queryKeys = new Set<string>([
   'q',
   'character',
+  'skill',
   'rarity',
   'attribute',
   'specialization',
@@ -129,6 +132,7 @@ export function createCardListConditions(
   return {
     q: '',
     character: [],
+    skill: [],
     rarity: [...options.rarity],
     attribute: [...options.attribute],
     specialization: [...options.specialization],
@@ -139,6 +143,7 @@ export function createCardListConditions(
 
 export function getCardFilterOptions(
   cards: readonly CardListItemData[],
+  skillKeys?: readonly string[],
 ): CardFilterOptions {
   const characterOrders = new Map<string, number>()
   for (const card of cards) {
@@ -148,6 +153,7 @@ export function getCardFilterOptions(
   }
 
   return {
+    ...(skillKeys ? { skill: [...new Set(skillKeys)].sort() } : {}),
     character: [...characterOrders]
       .sort(
         ([aId, aOrder], [bId, bOrder]) =>
@@ -218,6 +224,11 @@ export function parseCardListQuery(
     options.character,
     (value) => value,
   )
+  conditions.skill = uniqueValid(
+    queryValues(query.skill),
+    options.skill ?? [],
+    (value) => value,
+  )
   conditions.rarity = parseCheckboxSelection(
     query.rarity,
     options.rarity,
@@ -259,6 +270,8 @@ export function toCardListQuery(
   if (q) query.q = q
   if (conditions.character.length)
     query.character = [...new Set(conditions.character)]
+  if (conditions.skill.length)
+    query.skill = [...new Set(conditions.skill)].sort()
   if (!sameSelection(conditions.rarity, options.rarity)) {
     query.rarity = conditions.rarity.length
       ? [...new Set(conditions.rarity)].map(String)
@@ -301,13 +314,24 @@ function compareText(a: string, b: string) {
 export function filterAndSortCards(
   cards: readonly CardListItemData[],
   conditions: CardListConditions,
+  cardSkills: Readonly<Record<string, readonly string[]>> = {},
+  canonicalKeys: Readonly<Record<string, string>> = {},
 ): CardListItemData[] {
   const needle = conditions.q.trim().toLowerCase()
   const direction = conditions.direction === 'asc' ? 1 : -1
+  const selectedSkills = new Set(
+    conditions.skill.map((key) => canonicalKeys[key] ?? key),
+  )
 
   return cards
     .filter((card) => {
       if (needle && !searchText(card).includes(needle)) return false
+      if (
+        selectedSkills.size &&
+        !cardSkills[card.id]?.some((key) => selectedSkills.has(key))
+      ) {
+        return false
+      }
       if (
         conditions.character.length &&
         !conditions.character.includes(card.characterId)
