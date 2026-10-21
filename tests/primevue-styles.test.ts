@@ -13,6 +13,7 @@ describe('PrimeVue shared styles', () => {
       'accordionpanel',
       'accordionheader',
       'accordioncontent',
+      'inputgroupaddon',
     ]
     const expectedComponentStyles = primeVueComponents
       .map((component) => `${component.toLowerCase()}-style`)
@@ -27,6 +28,7 @@ describe('PrimeVue shared styles', () => {
     expect(result.css).toContain('.p-accordionpanel')
     expect(result.css).toContain('.p-accordionheader')
     expect(result.css).toContain('.p-accordioncontent')
+    expect(result.css).toContain('.p-inputgroupaddon')
     expect(new Set(result.styleIds).size).toBe(result.styleIds.length)
     expect(result.styleIds.indexOf('checkbox-style')).toBeLessThan(
       result.styleIds.indexOf('button-style'),

@@ -1,5 +1,6 @@
 export const primeVueComponents = [
   'Button',
+  'Badge',
   'Accordion',
   'AccordionPanel',
   'AccordionHeader',
@@ -9,6 +10,8 @@ export const primeVueComponents = [
   'Dialog',
   'Divider',
   'InputText',
+  'InputGroup',
+  'InputGroupAddon',
   'Message',
   'MultiSelect',
   'Popover',

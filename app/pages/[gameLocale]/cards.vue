@@ -17,7 +17,11 @@ import { getCharacterIconUrl } from '#shared/game-data/character-list'
 import {
   filterAndSortCards,
   getCardFilterOptions,
+  getCardSkillAvailableLevels,
+  CARD_SKILL_FIELDS,
   CARD_LIST_FIELDS,
+  type CardListField,
+  type CardSkillField,
   type CardListLayout,
   type CardListSort,
 } from '#shared/game-data/card-list'
@@ -68,7 +72,16 @@ const {
   ready: conditionsReady,
 } = useCardListConditions(filterOptions)
 const { layout, initialized: layoutInitialized } = useCardLayout()
-const { fields, initialized: fieldsInitialized } = useCardFields()
+const availableSkillLevels = computed(() =>
+  getCardSkillAvailableLevels(skills.value),
+)
+const {
+  fields,
+  skillLevels,
+  toggleField,
+  toggleSkillLevel,
+  initialized: fieldsInitialized,
+} = useCardFields(availableSkillLevels.value)
 const ready = computed(
   () =>
     conditionsReady.value && layoutInitialized.value && fieldsInitialized.value,
@@ -145,8 +158,16 @@ const fieldOptions = computed(() =>
   CARD_LIST_FIELDS.map((field) => ({
     value: field,
     label: t(`cardList.field.${field}`),
+    levels: isSkillField(field) ? availableSkillLevels.value[field] : [],
   })),
 )
+function isSkillField(field: CardListField): field is CardSkillField {
+  return CARD_SKILL_FIELDS.includes(field as CardSkillField)
+}
+function selectedOrder(field: CardListField) {
+  const index = fields.value.indexOf(field)
+  return index < 0 ? null : index + 1
+}
 </script>
 
 <template>
@@ -439,20 +460,130 @@ const fieldOptions = computed(() =>
                     <legend class="mb-1.5 text-sm font-medium">
                       {{ t('cardList.fieldsLabel') }}
                     </legend>
-                    <div class="flex flex-wrap gap-1">
-                      <label
+                    <p class="mb-2 text-xs text-muted-color">
+                      {{ t('cardList.fieldOrderHelp') }}
+                    </p>
+                    <div
+                      class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2"
+                    >
+                      <template
                         v-for="option in fieldOptions"
                         :key="option.value"
-                        :for="`card-field-${option.value}`"
-                        class="flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-2 py-1 hover:bg-surface-100 dark:hover:bg-surface-800"
                       >
-                        <Checkbox
-                          v-model="fields"
-                          :input-id="`card-field-${option.value}`"
-                          :value="option.value"
-                        />
-                        <span>{{ option.label }}</span>
-                      </label>
+                        <Button
+                          v-if="!isSkillField(option.value)"
+                          :id="`card-field-${option.value}`"
+                          :aria-label="option.label"
+                          :aria-pressed="fields.includes(option.value)"
+                          :outlined="!fields.includes(option.value)"
+                          :severity="
+                            fields.includes(option.value)
+                              ? 'primary'
+                              : 'secondary'
+                          "
+                          size="small"
+                          class="h-8 max-w-full gap-1.5 rounded px-2 py-1 text-sm leading-5 font-medium"
+                          :class="{
+                            'text-color': !fields.includes(option.value),
+                          }"
+                          @click="
+                            toggleField(
+                              option.value,
+                              !fields.includes(option.value),
+                            )
+                          "
+                        >
+                          <Badge
+                            :value="selectedOrder(option.value) ?? '−'"
+                            severity="contrast"
+                            aria-hidden="true"
+                            class="size-5 min-w-5 shrink-0 rounded-full p-0 leading-5"
+                          />
+                          <span>{{ option.label }}</span>
+                        </Button>
+
+                        <InputGroup
+                          v-else
+                          role="group"
+                          :aria-labelledby="`card-field-label-${option.value}`"
+                          class="w-auto min-w-0 max-w-full flex-none"
+                          style="
+                            --p-inputgroup-addon-border-radius: 0.25rem;
+                            --p-inputgroup-addon-background: var(
+                              --p-button-secondary-background
+                            );
+                            --p-inputgroup-addon-border-color: var(
+                              --p-button-outlined-secondary-border-color
+                            );
+                          "
+                        >
+                          <InputGroupAddon
+                            class="h-8 min-w-0 gap-1.5 px-2 py-1 text-sm leading-5 font-medium select-none"
+                          >
+                            <Badge
+                              :value="selectedOrder(option.value) ?? '−'"
+                              severity="contrast"
+                              aria-hidden="true"
+                              class="size-5 min-w-5 shrink-0 rounded-full p-0 leading-5"
+                            />
+                            <span
+                              :id="`card-field-label-${option.value}`"
+                              class="min-w-0 text-color"
+                            >
+                              {{ option.label }}
+                            </span>
+                          </InputGroupAddon>
+                          <Button
+                            v-for="level in option.levels"
+                            :id="`card-field-${option.value}-level-${level}`"
+                            :key="level"
+                            :aria-label="
+                              t('cardList.skillLevelOption', {
+                                skill: option.label,
+                                level,
+                              })
+                            "
+                            :aria-pressed="
+                              skillLevels[
+                                option.value as CardSkillField
+                              ].includes(level)
+                            "
+                            :outlined="
+                              !skillLevels[
+                                option.value as CardSkillField
+                              ].includes(level)
+                            "
+                            :severity="
+                              skillLevels[
+                                option.value as CardSkillField
+                              ].includes(level)
+                                ? 'primary'
+                                : 'secondary'
+                            "
+                            size="small"
+                            class="h-8 shrink-0 px-2 py-1 text-sm leading-5 font-medium"
+                            :class="{
+                              'text-color':
+                                !skillLevels[
+                                  option.value as CardSkillField
+                                ].includes(level),
+                            }"
+                            @click="
+                              toggleSkillLevel(
+                                option.value as CardSkillField,
+                                level,
+                                !skillLevels[
+                                  option.value as CardSkillField
+                                ].includes(level),
+                              )
+                            "
+                          >
+                            <span>
+                              {{ t('cardList.skillLevel', { level }) }}
+                            </span>
+                          </Button>
+                        </InputGroup>
+                      </template>
                     </div>
                   </fieldset>
                 </div>
@@ -493,6 +624,7 @@ const fieldOptions = computed(() =>
             :stat-keys="statKeys"
             :layout="layout"
             :fields="fields"
+            :skill-levels="skillLevels"
           />
         </ul>
       </template>

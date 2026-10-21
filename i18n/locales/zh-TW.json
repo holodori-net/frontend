@@ -29,10 +29,16 @@
     "displaySettings": "卡片顯示",
     "fieldsLabel": "顯示資訊",
     "fieldsCount": "{count} 項資訊",
+    "fieldOrderHelp": "依選取先後排序；同一技能共用排序位置，等級由低至高顯示。",
+    "skillLevel": "Lv. {level}",
+    "skillLevelOption": "{skill} Lv. {level}",
     "field": {
       "name": "卡名",
       "characterName": "角色名",
       "parameters": "三圍與合計",
+      "passiveSkill": "被動技能",
+      "activeSkill": "主動技能",
+      "specialSkill": "特殊技能",
       "costume": "隊長服裝技能"
     },
     "search": "搜尋",

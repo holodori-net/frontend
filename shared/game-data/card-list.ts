@@ -16,9 +16,42 @@ export const CARD_LIST_FIELDS = [
   'name',
   'characterName',
   'parameters',
+  'passiveSkill',
+  'activeSkill',
+  'specialSkill',
   'costume',
 ] as const
 export type CardListField = (typeof CARD_LIST_FIELDS)[number]
+
+export const CARD_SKILL_FIELDS = [
+  'passiveSkill',
+  'activeSkill',
+  'specialSkill',
+] as const satisfies readonly CardListField[]
+export type CardSkillField = (typeof CARD_SKILL_FIELDS)[number]
+export type CardSkillLevelSelections = Record<CardSkillField, number[]>
+
+export interface CardSkillLevelGroups {
+  passiveSkills: Record<string, readonly { level: number }[]>
+  activeSkills: Record<string, readonly { level: number }[]>
+  specialSkills: Record<string, readonly { level: number }[]>
+}
+
+export function getCardSkillAvailableLevels(
+  skills: CardSkillLevelGroups,
+): CardSkillLevelSelections {
+  const levels = (groups: Record<string, readonly { level: number }[]>) =>
+    [
+      ...new Set(
+        Object.values(groups).flatMap((rows) => rows.map(({ level }) => level)),
+      ),
+    ].sort((left, right) => left - right)
+  return {
+    passiveSkill: levels(skills.passiveSkills),
+    activeSkill: levels(skills.activeSkills),
+    specialSkill: levels(skills.specialSkills),
+  }
+}
 
 export interface CardListConditions {
   q: string

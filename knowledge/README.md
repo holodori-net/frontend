@@ -4,13 +4,13 @@
 
 ## 文件索引
 
-- [卡片資料](data/cards.md)：Card 與 LangCard 的完整欄位、技能／語音／服裝關聯、服裝技能的列表資料來源、預設服裝關聯、六語描述組合與參數模板、正式屬性與三圍文字及圖示、星級動畫 WebP、來源 sprite 圖集與星形圖示、完整與直式卡圖、列表版型與隊長服裝技能顯示、共用 payload 投影及轉換狀態。
+- [卡片資料](data/cards.md)：Card 與 LangCard 的完整欄位、技能／語音／服裝關聯、服裝技能的列表資料來源、預設服裝關聯、六語描述組合與參數模板、正式屬性與三圍文字及圖示、星級動畫 WebP、來源 sprite 圖集與星形圖示、完整與直式卡圖、列表版型與全部技能顯示、共用 payload 投影及轉換狀態。
 - [角色資料](data/characters.md)：Character 與 LangCharacter 的完整欄位、多語角色資料、生日與出道日期、養成關聯、SD 動畫、群組文字、顏色用途、成員主題投影及轉換狀態。
 - [角色群組資料](data/character-groups.md)：CharacterGrouping 與 LangCharacterGrouping 的完整欄位、角色成員關聯、多語文字及轉換狀態。
 - [卡片成長資料](data/card-growth.md)：CardLevel、CardLevelLimit、CardPotential 的組別、養成階段、累積經驗門檻、特訓消耗、綻放累加、滿養成三圍公式與特化判定，以及 CardPotentialUpgradeItem 的綻放道具對應與轉換狀態。
 - [Live 技能效果目標資料](data/live-skill-effect-targets.md)：LiveSkillEffectTarget 的目標類型、人數、角色／群組／屬性關聯、六語描述與轉換對照。
 - [服裝與 Live 服裝技能](data/costume-live-skills.md)：Costume、LiveLeaderSkill、Effect、Trigger 的欄位與關聯、六語共用描述 catalog、模板確認流程、待確認警告及完整描述驗證。
-- [卡片被動、主動與特殊技能](data/card-skills.md)：三類卡片技能關聯、全部等級、主動效果、原始單位、機率標籤、六語描述組合、列表投影、完整來源比對。
+- [卡片被動、主動與特殊技能](data/card-skills.md)：三類卡片技能關聯、全部等級、主動效果、原始單位、機率標籤、六語描述組合、列表投影、等級選擇與顯示順序、完整來源比對。
 
 ## 來源與適用快照
 

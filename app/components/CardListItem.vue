@@ -10,7 +10,12 @@ import type {
   CardListSkillData,
   CardStatKey,
 } from '#shared/game-data/card-list-data'
-import { composeCostumeSkillDescription } from '#shared/game-data/live-skill-description'
+import {
+  composeActiveSkillDescription,
+  composeCostumeSkillDescription,
+  composePassiveSkillDescription,
+  composeSpecialSkillDescription,
+} from '#shared/game-data/live-skill-description'
 import {
   getCardAttributeIconUrl,
   getCardStatIconUrl,
@@ -18,9 +23,12 @@ import {
 import {
   getCardImageUrl,
   CARD_LIST_FIELDS,
+  type CardSkillField,
   type CardListField,
   type CardListLayout,
 } from '#shared/game-data/card-list'
+
+type CardSkillSelections = Readonly<Record<CardSkillField, readonly number[]>>
 
 const props = withDefaults(
   defineProps<{
@@ -30,10 +38,16 @@ const props = withDefaults(
     gameLocale: GameLocale
     statKeys: CardStatKey[]
     fields?: readonly CardListField[]
+    skillLevels?: CardSkillSelections
     layout?: CardListLayout
   }>(),
   {
     fields: () => CARD_LIST_FIELDS,
+    skillLevels: () => ({
+      passiveSkill: [2],
+      activeSkill: [2],
+      specialSkill: [2],
+    }),
     layout: 'full',
   },
 )
@@ -50,28 +64,74 @@ const hasImage = computed(() => Boolean(imageUrl.value) && !imageFailed.value)
 const cardName = computed(() =>
   resolveLocalizedName(props.card.name, props.gameLocale),
 )
-const showCardName = computed(() => props.fields.includes('name'))
-const showCharacterName = computed(() => props.fields.includes('characterName'))
-const showParameters = computed(() => props.fields.includes('parameters'))
-const showCostume = computed(() => props.fields.includes('costume'))
-const showNames = computed(() => showCardName.value || showCharacterName.value)
+const skillLocale = computed(() => gameLocaleLanguages[props.gameLocale])
+function describeSkillLevel(level: number, text: string | null) {
+  return {
+    level,
+    text: text ?? t('cardList.skillUnavailable'),
+    lang: text === null ? locale.value : skillLocale.value,
+  }
+}
+const skillDescriptions = computed(() => ({
+  passiveSkill: (
+    props.skills.passiveSkills[props.card.livePassiveSkillId] ?? []
+  )
+    .filter((level) => props.skillLevels.passiveSkill.includes(level.level))
+    .map((level) =>
+      describeSkillLevel(
+        level.level,
+        composePassiveSkillDescription(
+          level,
+          props.skills,
+          props.gameLocale,
+          undefined,
+          'display',
+        ),
+      ),
+    ),
+  activeSkill: (props.skills.activeSkills[props.card.liveActiveSkillId] ?? [])
+    .filter((level) => props.skillLevels.activeSkill.includes(level.level))
+    .map((level) =>
+      describeSkillLevel(
+        level.level,
+        composeActiveSkillDescription(
+          level,
+          props.skills,
+          props.gameLocale,
+          undefined,
+          'display',
+        ),
+      ),
+    ),
+  specialSkill: (
+    props.skills.specialSkills[props.card.liveSpecialSkillId] ?? []
+  )
+    .filter((level) => props.skillLevels.specialSkill.includes(level.level))
+    .map((level) =>
+      describeSkillLevel(
+        level.level,
+        composeSpecialSkillDescription(
+          level,
+          props.skills,
+          props.gameLocale,
+          undefined,
+          'display',
+        ),
+      ),
+    ),
+}))
 const fullSubgridStyle = computed(() => {
   if (props.layout !== 'full') return {}
 
   const style: Record<string, string> = {
-    '--card-list-row-span': String(
-      1 +
-        Number(showNames.value) +
-        Number(showParameters.value) +
-        Number(showCostume.value),
-    ),
+    '--card-list-row-span': String(1 + props.fields.length),
   }
-  let row = 1
-  if (showNames.value) style['--card-list-name-row'] = String(row++)
-  if (showParameters.value) style['--card-list-parameters-row'] = String(row++)
-  if (showCostume.value) style['--card-list-costume-row'] = String(row)
+  props.fields.forEach((field, index) => {
+    style[`--card-list-field-${field}-row`] = String(index + 1)
+  })
   return style
 })
+const hasInformation = computed(() => props.fields.length > 0)
 const costume = computed(() =>
   props.card.costumeId ? props.costumes[props.card.costumeId] : undefined,
 )
@@ -97,27 +157,47 @@ const costumeDescription = computed(() => {
     lang: text === null ? locale.value : gameLocaleLanguages[props.gameLocale],
   }
 })
-const hasInformation = computed(
-  () =>
-    showCardName.value ||
-    showCharacterName.value ||
-    showParameters.value ||
-    (showCostume.value && Boolean(costume.value)),
-)
 const informationHeight = computed(() => {
   if (!hasInformation.value) return '0rem'
-  if (showCardName.value && showCharacterName.value && showParameters.value)
-    return showCostume.value && costume.value ? '20rem' : '12rem'
-
   let height = 2
-  if (showCardName.value) height += 2.5
-  if (showCharacterName.value) height += 2
-  if (showParameters.value) height += 5
-  if (showParameters.value && (showCardName.value || showCharacterName.value))
-    height += 1
-  if (showCostume.value && costume.value) height += 8
+  for (const field of props.fields) {
+    if (field === 'name') height += 2.5
+    else if (field === 'characterName') height += 2
+    else if (field === 'parameters') height += 5
+    else if (field === 'costume' && costume.value) height += 8
+    else if (isSkillField(field)) {
+      const displayedCount = skillDescriptions.value[field].length
+      height += displayedCount ? 4 + displayedCount * 4 : 0
+    }
+  }
   return `${height}rem`
 })
+function isSkillField(field: CardListField): field is CardSkillField {
+  return (
+    field === 'passiveSkill' ||
+    field === 'activeSkill' ||
+    field === 'specialSkill'
+  )
+}
+function fieldClass(field: CardListField) {
+  return [
+    'min-w-0',
+    props.layout === 'full' && 'card-list-field-row',
+    props.layout === 'vertical' &&
+      props.fields.find(
+        (item) => item !== 'name' && item !== 'characterName',
+      ) === field &&
+      'mt-auto',
+  ]
+}
+function fieldStyle(field: CardListField) {
+  return props.layout === 'full'
+    ? { gridRow: `var(--card-list-field-${field}-row)` }
+    : undefined
+}
+function displayedSkillLevels(field: CardSkillField) {
+  return skillDescriptions.value[field]
+}
 const articleStyle = computed(() => ({
   '--card-list-info-height': informationHeight.value,
 }))
@@ -232,136 +312,153 @@ onMounted(() => {
             : 'flex flex-1 flex-col self-stretch gap-2 p-3'
         "
       >
-        <div
-          v-if="showNames"
-          class="min-w-0"
-          :class="layout === 'full' && 'card-list-name-row'"
-        >
+        <template v-for="field in fields" :key="field">
           <p
-            v-if="showCardName"
+            v-if="field === 'name'"
             class="game-text mb-0 min-w-0 text-base font-semibold leading-snug wrap-anywhere"
+            :class="fieldClass(field)"
+            :style="fieldStyle(field)"
             :lang="cardName.lang"
           >
             {{ cardName.text }}
           </p>
           <p
-            v-if="showCharacterName"
+            v-else-if="field === 'characterName'"
             class="game-text mb-0 text-sm text-muted-color wrap-anywhere"
-            :class="showCardName && 'mt-1'"
+            :class="fieldClass(field)"
+            :style="fieldStyle(field)"
             :lang="characterName.lang"
           >
             {{ characterName.text }}
           </p>
-        </div>
 
-        <dl
-          v-if="showParameters"
-          class="min-w-0 text-base"
-          :class="
-            layout === 'vertical'
-              ? 'mt-auto grid grid-cols-1 gap-y-1'
-              : 'card-list-parameters-row flex flex-wrap items-center justify-center gap-x-1 gap-y-1'
-          "
-        >
-          <div
-            v-for="stat in statKeys"
-            :key="stat"
-            class="min-w-0 max-w-full items-center gap-1 py-1"
-            :class="
-              layout === 'vertical' ? 'flex' : 'inline-flex flex-[0_1_auto]'
-            "
-          >
-            <span
-              v-if="layout !== 'vertical' && stat !== statKeys[0]"
-              aria-hidden="true"
-              class="mx-1 shrink-0"
-              >+</span
-            >
-            <dt class="sr-only">
-              {{ t(`cardList.stat.${stat}`) }}
-            </dt>
-            <dd
-              class="m-0 inline-flex min-w-0 items-center gap-1 font-medium tabular-nums"
-              :class="layout === 'vertical' && 'flex-wrap'"
-            >
-              <CardListIcon
-                :src="getCardStatIconUrl(stat)"
-                :label="t(`cardList.stat.${stat}`)"
-                aria-hidden="true"
-                monochrome
-                size="small"
-              />
-              <span
-                class="ml-px text-sm"
-                :class="card.specializations.includes(stat) && 'text-primary'"
-              >
-                {{ numberFormatter.format(card.stats[stat]) }}
-              </span>
-            </dd>
-          </div>
-          <div
-            class="min-w-0 max-w-full items-center gap-1 py-1"
-            :class="
+          <dl
+            v-else-if="field === 'parameters'"
+            class="min-w-0 text-base"
+            :class="[
+              fieldClass(field),
               layout === 'vertical'
-                ? 'flex border-t border-surface-200 pt-1 dark:border-surface-700'
-                : 'inline-flex flex-[0_1_auto]'
-            "
+                ? 'grid grid-cols-1 gap-y-1'
+                : 'card-list-parameters-row flex flex-wrap items-center justify-center gap-x-1 gap-y-1',
+            ]"
+            :style="fieldStyle(field)"
           >
-            <span
-              v-if="layout !== 'vertical'"
-              aria-hidden="true"
-              class="mx-1 shrink-0"
-              >=</span
-            >
-            <dt
+            <div
+              v-for="stat in statKeys"
+              :key="stat"
+              class="min-w-0 max-w-full items-center gap-1 py-1"
               :class="
-                layout === 'vertical' ? 'text-xs text-muted-color' : 'sr-only'
+                layout === 'vertical' ? 'flex' : 'inline-flex flex-[0_1_auto]'
               "
             >
-              {{ t('cardList.total') }}
-            </dt>
-            <dd
-              class="m-0 inline-flex min-w-0 items-center gap-1 font-bold tabular-nums"
-              :class="layout === 'vertical' && 'flex-wrap'"
-            >
-              <span>
-                {{ numberFormatter.format(card.total) }}
-              </span>
-            </dd>
-          </div>
-        </dl>
-
-        <section
-          v-if="showCostume && costume && costumeName && costumeDescription"
-          class="min-w-0"
-          :class="layout === 'full' && 'card-list-costume-row'"
-        >
-          <Divider
-            align="left"
-            role="presentation"
-            :aria-orientation="null"
-            class="my-2 min-w-0"
-            :pt="{ content: { class: 'min-w-0 max-w-full' } }"
-          >
-            <h3
-              class="m-0 min-w-0 max-w-full text-sm font-semibold leading-snug wrap-anywhere"
-            >
-              <span>{{ t('cardList.field.costume') }}</span>
               <span
-                class="game-text ml-1 text-xs font-normal text-muted-color wrap-anywhere"
-                :lang="costumeName.lang"
+                v-if="layout !== 'vertical' && stat !== statKeys[0]"
+                aria-hidden="true"
+                class="mx-1 shrink-0"
+                >+</span
               >
-                {{ costumeName.text }}
-              </span>
-            </h3>
-          </Divider>
-          <p class="game-text mb-0 text-sm leading-relaxed">
-            <CardListSkillText
-              :text="costumeDescription.text"
-              :lang="costumeDescription.lang"
-            />
-          </p>
-        </section>
+              <dt class="sr-only">
+                {{ t(`cardList.stat.${stat}`) }}
+              </dt>
+              <dd
+                class="m-0 inline-flex min-w-0 items-center gap-1 font-medium tabular-nums"
+                :class="layout === 'vertical' && 'flex-wrap'"
+              >
+                <CardListIcon
+                  :src="getCardStatIconUrl(stat)"
+                  :label="t(`cardList.stat.${stat}`)"
+                  aria-hidden="true"
+                  monochrome
+                  size="small"
+                />
+                <span
+                  class="ml-px text-sm"
+                  :class="card.specializations.includes(stat) && 'text-primary'"
+                >
+                  {{ numberFormatter.format(card.stats[stat]) }}
+                </span>
+              </dd>
+            </div>
+            <div
+              class="min-w-0 max-w-full items-center gap-1 py-1"
+              :class="
+                layout === 'vertical'
+                  ? 'flex border-t border-surface-200 pt-1 dark:border-surface-700'
+                  : 'inline-flex flex-[0_1_auto]'
+              "
+            >
+              <span
+                v-if="layout !== 'vertical'"
+                aria-hidden="true"
+                class="mx-1 shrink-0"
+                >=</span
+              >
+              <dt
+                :class="
+                  layout === 'vertical' ? 'text-xs text-muted-color' : 'sr-only'
+                "
+              >
+                {{ t('cardList.total') }}
+              </dt>
+              <dd
+                class="m-0 inline-flex min-w-0 items-center gap-1 font-bold tabular-nums"
+                :class="layout === 'vertical' && 'flex-wrap'"
+              >
+                <span>
+                  {{ numberFormatter.format(card.total) }}
+                </span>
+              </dd>
+            </div>
+          </dl>
+
+          <CardListSkillSection
+            v-else-if="
+              isSkillField(field) && displayedSkillLevels(field).length
+            "
+            :class="fieldClass(field)"
+            :style="fieldStyle(field)"
+            :title="t(`cardList.field.${field}`)"
+            :levels="displayedSkillLevels(field)"
+          />
+
+          <section
+            v-else-if="
+              field === 'costume' &&
+              costume &&
+              costumeName &&
+              costumeDescription
+            "
+            class="min-w-0"
+            :class="fieldClass(field)"
+            :style="fieldStyle(field)"
+          >
+            <Divider
+              align="left"
+              role="presentation"
+              :aria-orientation="null"
+              class="my-2 min-w-0"
+              :pt="{ content: { class: 'min-w-0 max-w-full' } }"
+            >
+              <h3
+                class="m-0 min-w-0 max-w-full text-sm font-semibold leading-snug wrap-anywhere"
+              >
+                <span>{{ t('cardList.field.costume') }}</span>
+                <span
+                  class="game-text ml-1 text-xs font-normal text-muted-color wrap-anywhere"
+                  :lang="costumeName.lang"
+                >
+                  {{ costumeName.text }}
+                </span>
+              </h3>
+            </Divider>
+            <p class="game-text mb-0 text-sm leading-relaxed">
+              <CardListSkillText
+                :text="costumeDescription.text"
+                :lang="costumeDescription.lang"
+              />
+            </p>
+          </section>
+        </template>
       </div>
     </article>
   </li>
@@ -408,23 +505,17 @@ onMounted(() => {
   display: grid;
   grid-row: 2 / -1;
   grid-template-rows: subgrid;
-  row-gap: 1rem;
+  row-gap: 0.2rem;
   align-items: start;
   min-width: 0;
   padding: 1rem;
 }
 
-.card-list-name-row {
-  grid-row: var(--card-list-name-row);
-}
-
 .card-list-parameters-row {
-  grid-row: var(--card-list-parameters-row);
   margin-top: 0;
 }
-
-.card-list-costume-row {
-  grid-row: var(--card-list-costume-row);
+.card-list-field-row {
+  min-width: 0;
 }
 
 .card-list-content--art-only-full {

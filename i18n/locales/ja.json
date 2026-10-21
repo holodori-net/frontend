@@ -29,10 +29,16 @@
     "displaySettings": "カード表示",
     "fieldsLabel": "表示情報",
     "fieldsCount": "{count} 項目",
+    "fieldOrderHelp": "有効にした順に表示します。同じスキルは1つの位置にまとめ、レベルは低い順に表示します。",
+    "skillLevel": "Lv. {level}",
+    "skillLevelOption": "{skill} Lv. {level}",
     "field": {
       "name": "カード名",
       "characterName": "キャラクター名",
       "parameters": "ステータス・合計",
+      "passiveSkill": "パッシブスキル",
+      "activeSkill": "アクティブスキル",
+      "specialSkill": "スペシャルスキル",
       "costume": "リーダー衣装スキル"
     },
     "search": "検索",
