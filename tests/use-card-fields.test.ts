@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ref, type Ref } from 'vue'
 import {
+  getCardListFieldGroups,
   getCardSkillAvailableLevels,
   type CardListField,
   type CardSkillLevelSelections,
@@ -93,6 +94,29 @@ describe('card skill field availability', () => {
   })
 })
 
+describe('card list field groups', () => {
+  it('groups basic fields at their first position and preserves their order', () => {
+    expect(
+      getCardListFieldGroups([
+        'passiveSkill',
+        'name',
+        'costume',
+        'parameters',
+        'characterName',
+        'activeSkill',
+      ]),
+    ).toEqual([
+      { key: 'passiveSkill', fields: ['passiveSkill'] },
+      {
+        key: 'basic',
+        fields: ['name', 'parameters', 'characterName'],
+      },
+      { key: 'costume', fields: ['costume'] },
+      { key: 'activeSkill', fields: ['activeSkill'] },
+    ])
+  })
+})
+
 describe('useCardFields', () => {
   it.each([
     ['missing preference', null, defaultFields, defaultLevels],
@@ -163,6 +187,36 @@ describe('useCardFields', () => {
     expect(result.fields.value).toEqual(defaultFields)
     expect(result.skillLevels.value).toEqual(defaultLevels)
     expect(result.skillLevels.value.specialSkill).not.toContain(1)
+  })
+
+  it('groups interleaved basic fields without changing their group position', () => {
+    start({
+      getItem: vi.fn(() =>
+        makeStored(
+          [
+            'passiveSkill',
+            'name',
+            'costume',
+            'parameters',
+            'activeSkill',
+            'characterName',
+          ],
+          defaultLevels,
+        ),
+      ),
+      setItem: vi.fn(),
+    } as unknown as Storage)
+    const result = useCardFields(available)
+    mount()
+
+    expect(result.fields.value).toEqual([
+      'passiveSkill',
+      'name',
+      'parameters',
+      'characterName',
+      'costume',
+      'activeSkill',
+    ])
   })
 
   it('preserves legacy selected fields and assigns level 2 only to enabled skill groups', () => {
@@ -386,6 +440,38 @@ describe('useCardFields', () => {
       'costume',
       'activeSkill',
       'name',
+    ])
+  })
+
+  it('keeps a partially selected basic group in place and appends it after all fields are disabled', () => {
+    start({
+      getItem: vi.fn(() =>
+        makeStored(['passiveSkill', 'name', 'costume'], {
+          passiveSkill: [2],
+          activeSkill: [],
+          specialSkill: [],
+        }),
+      ),
+      setItem: vi.fn(),
+    } as unknown as Storage)
+    const result = useCardFields(available)
+    mount()
+
+    result.toggleField('parameters', true)
+    expect(result.fields.value).toEqual([
+      'passiveSkill',
+      'name',
+      'parameters',
+      'costume',
+    ])
+
+    result.toggleField('name', false)
+    result.toggleField('parameters', false)
+    result.toggleField('characterName', true)
+    expect(result.fields.value).toEqual([
+      'passiveSkill',
+      'costume',
+      'characterName',
     ])
   })
 

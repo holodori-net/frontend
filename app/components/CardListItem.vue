@@ -23,6 +23,7 @@ import {
 import {
   getCardImageUrl,
   CARD_LIST_FIELDS,
+  getCardListFieldGroups,
   type CardSkillField,
   type CardListField,
   type CardListLayout,
@@ -132,6 +133,7 @@ const fullSubgridStyle = computed(() => {
   return style
 })
 const hasInformation = computed(() => props.fields.length > 0)
+const fieldGroups = computed(() => getCardListFieldGroups(props.fields))
 const costume = computed(() =>
   props.card.costumeId ? props.costumes[props.card.costumeId] : undefined,
 )
@@ -179,20 +181,17 @@ function isSkillField(field: CardListField): field is CardSkillField {
     field === 'specialSkill'
   )
 }
-function fieldClass(field: CardListField) {
-  return [
-    'min-w-0',
-    props.layout === 'full' && 'card-list-field-row',
-    props.layout === 'vertical' &&
-      props.fields.find(
-        (item) => item !== 'name' && item !== 'characterName',
-      ) === field &&
-      'mt-auto',
-  ]
+function fieldClass() {
+  return ['min-w-0', props.layout === 'full' && 'card-list-field-row']
 }
 function fieldStyle(field: CardListField) {
   return props.layout === 'full'
     ? { gridRow: `var(--card-list-field-${field}-row)` }
+    : undefined
+}
+function fieldGroupStyle(groupIndex: number) {
+  return props.layout === 'vertical'
+    ? { gridColumn: `${groupIndex + 1}`, gridRow: '1' }
     : undefined
 }
 function displayedSkillLevels(field: CardSkillField) {
@@ -200,6 +199,7 @@ function displayedSkillLevels(field: CardSkillField) {
 }
 const articleStyle = computed(() => ({
   '--card-list-info-height': informationHeight.value,
+  '--card-list-field-count': String(fieldGroups.value.length),
 }))
 const characterName = computed(() =>
   resolveLocalizedName(props.card.characterName, props.gameLocale),
@@ -226,19 +226,23 @@ onMounted(() => {
 <template>
   <li
     class="card-list-container block min-w-0"
-    :class="layout === 'full' && 'card-list-container--full-subgrid'"
+    :class="[
+      layout === 'full' && 'card-list-container--full-subgrid',
+      layout === 'vertical' &&
+        !hasInformation &&
+        'card-list-container--art-only-vertical',
+    ]"
     :style="fullSubgridStyle"
   >
     <article
-      class="card-list-content flex h-full min-w-0 overflow-hidden rounded-2xl border border-surface-200 bg-surface-0 shadow-sm dark:border-surface-700 dark:bg-surface-900"
+      class="card-list-content h-full min-w-0 overflow-hidden rounded-2xl border border-surface-200 bg-surface-0 shadow-sm dark:border-surface-700 dark:bg-surface-900"
       :class="[
         layout === 'vertical' &&
           hasInformation &&
-          'flex-row items-start card-list-content--vertical',
+          'grid grid-cols-[6rem_minmax(0,1fr)] items-start card-list-content--vertical',
         layout === 'vertical' &&
           !hasInformation &&
-          'flex-col card-list-content--art-only-vertical',
-        layout === 'full' && 'flex-col',
+          'flex flex-col card-list-content--art-only-vertical',
         layout === 'full' && 'card-list-content--full-subgrid',
         !hasInformation &&
           layout === 'full' &&
@@ -254,7 +258,7 @@ onMounted(() => {
         class="card-list-art relative overflow-hidden bg-surface-100 dark:bg-surface-800"
         :class="
           layout === 'vertical' && hasInformation
-            ? 'aspect-[256/366] w-[40%] min-w-28 max-w-40 shrink-0'
+            ? 'aspect-[256/366] w-24 shrink-0'
             : layout === 'vertical'
               ? 'aspect-[256/366] w-full'
               : 'aspect-video w-full'
@@ -309,156 +313,148 @@ onMounted(() => {
         :class="
           layout === 'full'
             ? 'card-list-info--full-subgrid'
-            : 'flex flex-1 flex-col self-stretch gap-2 p-3'
+            : 'card-list-info--vertical grid content-start items-start gap-x-4 gap-y-2 p-3'
         "
       >
-        <template v-for="field in fields" :key="field">
-          <p
-            v-if="field === 'name'"
-            class="game-text mb-0 min-w-0 text-base font-semibold leading-snug wrap-anywhere"
-            :class="fieldClass(field)"
-            :style="fieldStyle(field)"
-            :lang="cardName.lang"
-          >
-            {{ cardName.text }}
-          </p>
-          <p
-            v-else-if="field === 'characterName'"
-            class="game-text mb-0 text-sm text-muted-color wrap-anywhere"
-            :class="fieldClass(field)"
-            :style="fieldStyle(field)"
-            :lang="characterName.lang"
-          >
-            {{ characterName.text }}
-          </p>
-
-          <dl
-            v-else-if="field === 'parameters'"
-            class="min-w-0 text-base"
-            :class="[
-              fieldClass(field),
-              layout === 'vertical'
-                ? 'grid grid-cols-1 gap-y-1'
-                : 'card-list-parameters-row flex flex-wrap items-center justify-center gap-x-1 gap-y-1',
-            ]"
-            :style="fieldStyle(field)"
-          >
-            <div
-              v-for="stat in statKeys"
-              :key="stat"
-              class="min-w-0 max-w-full items-center gap-1 py-1"
-              :class="
-                layout === 'vertical' ? 'flex' : 'inline-flex flex-[0_1_auto]'
-              "
+        <div
+          v-for="(group, groupIndex) in fieldGroups"
+          :key="group.key"
+          :class="
+            layout === 'full'
+              ? 'card-list-field-group--full'
+              : 'card-list-field-group--vertical'
+          "
+          :style="fieldGroupStyle(groupIndex)"
+        >
+          <template v-for="field in group.fields" :key="field">
+            <p
+              v-if="field === 'name'"
+              class="game-text mb-0 min-w-0 text-base font-semibold leading-snug wrap-anywhere"
+              :class="fieldClass()"
+              :style="fieldStyle(field)"
+              :lang="cardName.lang"
             >
-              <span
-                v-if="layout !== 'vertical' && stat !== statKeys[0]"
-                aria-hidden="true"
-                class="mx-1 shrink-0"
-                >+</span
-              >
-              <dt class="sr-only">
-                {{ t(`cardList.stat.${stat}`) }}
-              </dt>
-              <dd
-                class="m-0 inline-flex min-w-0 items-center gap-1 font-medium tabular-nums"
-                :class="layout === 'vertical' && 'flex-wrap'"
-              >
-                <CardListIcon
-                  :src="getCardStatIconUrl(stat)"
-                  :label="t(`cardList.stat.${stat}`)"
-                  aria-hidden="true"
-                  monochrome
-                  size="small"
-                />
-                <span
-                  class="ml-px text-sm"
-                  :class="card.specializations.includes(stat) && 'text-primary'"
-                >
-                  {{ numberFormatter.format(card.stats[stat]) }}
-                </span>
-              </dd>
-            </div>
-            <div
-              class="min-w-0 max-w-full items-center gap-1 py-1"
-              :class="
-                layout === 'vertical'
-                  ? 'flex border-t border-surface-200 pt-1 dark:border-surface-700'
-                  : 'inline-flex flex-[0_1_auto]'
-              "
-            >
-              <span
-                v-if="layout !== 'vertical'"
-                aria-hidden="true"
-                class="mx-1 shrink-0"
-                >=</span
-              >
-              <dt
-                :class="
-                  layout === 'vertical' ? 'text-xs text-muted-color' : 'sr-only'
-                "
-              >
-                {{ t('cardList.total') }}
-              </dt>
-              <dd
-                class="m-0 inline-flex min-w-0 items-center gap-1 font-bold tabular-nums"
-                :class="layout === 'vertical' && 'flex-wrap'"
-              >
-                <span>
-                  {{ numberFormatter.format(card.total) }}
-                </span>
-              </dd>
-            </div>
-          </dl>
-
-          <CardListSkillSection
-            v-else-if="
-              isSkillField(field) && displayedSkillLevels(field).length
-            "
-            :class="fieldClass(field)"
-            :style="fieldStyle(field)"
-            :title="t(`cardList.field.${field}`)"
-            :levels="displayedSkillLevels(field)"
-          />
-
-          <section
-            v-else-if="
-              field === 'costume' &&
-              costume &&
-              costumeName &&
-              costumeDescription
-            "
-            class="min-w-0"
-            :class="fieldClass(field)"
-            :style="fieldStyle(field)"
-          >
-            <Divider
-              align="left"
-              role="presentation"
-              :aria-orientation="null"
-              class="my-2 min-w-0"
-              :pt="{ content: { class: 'min-w-0 max-w-full' } }"
-            >
-              <h3
-                class="m-0 min-w-0 max-w-full text-sm font-semibold leading-snug wrap-anywhere"
-              >
-                <span>{{ t('cardList.field.costume') }}</span>
-                <span
-                  class="game-text ml-1 text-xs font-normal text-muted-color wrap-anywhere"
-                  :lang="costumeName.lang"
-                >
-                  {{ costumeName.text }}
-                </span>
-              </h3>
-            </Divider>
-            <p class="game-text mb-0 text-sm leading-relaxed">
-              <CardListSkillText
-                :text="costumeDescription.text"
-                :lang="costumeDescription.lang"
-              />
+              {{ cardName.text }}
             </p>
-          </section>
-        </template>
+            <p
+              v-else-if="field === 'characterName'"
+              class="game-text mb-0 text-sm text-muted-color wrap-anywhere"
+              :class="fieldClass()"
+              :style="fieldStyle(field)"
+              :lang="characterName.lang"
+            >
+              {{ characterName.text }}
+            </p>
+
+            <dl
+              v-else-if="field === 'parameters'"
+              class="min-w-0 text-base"
+              :class="[
+                fieldClass(),
+                'card-list-parameters-row flex flex-wrap items-center justify-center gap-x-1 gap-y-1',
+              ]"
+              :style="fieldStyle(field)"
+            >
+              <div
+                v-for="stat in statKeys"
+                :key="stat"
+                class="inline-flex min-w-0 max-w-full flex-[0_1_auto] items-center gap-1 py-1"
+              >
+                <span
+                  v-if="stat !== statKeys[0]"
+                  aria-hidden="true"
+                  class="mx-1 shrink-0"
+                  >+</span
+                >
+                <dt class="sr-only">
+                  {{ t(`cardList.stat.${stat}`) }}
+                </dt>
+                <dd
+                  class="m-0 inline-flex min-w-0 items-center gap-1 font-medium tabular-nums"
+                >
+                  <CardListIcon
+                    :src="getCardStatIconUrl(stat)"
+                    :label="t(`cardList.stat.${stat}`)"
+                    aria-hidden="true"
+                    monochrome
+                    size="small"
+                  />
+                  <span
+                    class="ml-px text-sm"
+                    :class="
+                      card.specializations.includes(stat) && 'text-primary'
+                    "
+                  >
+                    {{ numberFormatter.format(card.stats[stat]) }}
+                  </span>
+                </dd>
+              </div>
+              <div
+                class="inline-flex min-w-0 max-w-full flex-[0_1_auto] items-center gap-1 py-1"
+              >
+                <span aria-hidden="true" class="mx-1 shrink-0">=</span>
+                <dt class="sr-only">
+                  {{ t('cardList.total') }}
+                </dt>
+                <dd
+                  class="m-0 inline-flex min-w-0 items-center gap-1 font-bold tabular-nums"
+                >
+                  <span>
+                    {{ numberFormatter.format(card.total) }}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+
+            <CardListSkillSection
+              v-else-if="
+                isSkillField(field) && displayedSkillLevels(field).length
+              "
+              :class="fieldClass()"
+              :style="fieldStyle(field)"
+              :title="t(`cardList.field.${field}`)"
+              :levels="displayedSkillLevels(field)"
+            />
+
+            <section
+              v-else-if="
+                field === 'costume' &&
+                costume &&
+                costumeName &&
+                costumeDescription
+              "
+              class="min-w-0"
+              :class="fieldClass()"
+              :style="fieldStyle(field)"
+            >
+              <Divider
+                align="left"
+                role="presentation"
+                :aria-orientation="null"
+                class="my-2 min-w-0"
+                :pt="{ content: { class: 'min-w-0 max-w-full' } }"
+              >
+                <h3
+                  class="m-0 min-w-0 max-w-full text-sm font-semibold leading-snug wrap-anywhere"
+                >
+                  <span>{{ t('cardList.field.costume') }}</span>
+                  <span
+                    class="game-text ml-1 text-xs font-normal text-muted-color wrap-anywhere"
+                    :lang="costumeName.lang"
+                  >
+                    {{ costumeName.text }}
+                  </span>
+                </h3>
+              </Divider>
+              <p class="game-text mb-0 text-sm leading-relaxed">
+                <CardListSkillText
+                  :text="costumeDescription.text"
+                  :lang="costumeDescription.lang"
+                />
+              </p>
+            </section>
+          </template>
+        </div>
       </div>
     </article>
   </li>
@@ -467,6 +463,11 @@ onMounted(() => {
 <style scoped>
 .card-list-container {
   container-type: inline-size;
+}
+
+.card-list-container--art-only-vertical {
+  width: 100%;
+  max-width: 16rem;
 }
 
 .card-list-container--full-subgrid {
@@ -485,8 +486,27 @@ onMounted(() => {
 }
 
 .card-list-content--vertical {
-  contain-intrinsic-block-size: auto
-    max(57.19cqw, var(--card-list-info-height, 12rem));
+  contain-intrinsic-block-size: auto 24rem;
+}
+
+.card-list-info--vertical {
+  grid-template-columns: repeat(
+    var(--card-list-field-count),
+    minmax(12rem, 1fr)
+  );
+}
+
+.card-list-field-group--full {
+  display: contents;
+}
+
+.card-list-field-group--vertical {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-self: stretch;
+  grid-row: 1;
 }
 
 .card-list-content--full-subgrid {

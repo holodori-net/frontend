@@ -2,6 +2,7 @@ import { computed, readonly } from 'vue'
 import {
   CARD_LIST_FIELDS,
   CARD_SKILL_FIELDS,
+  getCardListFieldGroups,
   type CardListField,
   type CardSkillField,
   type CardSkillLevelSelections,
@@ -40,8 +41,11 @@ function normalizePreference(
         : [],
     ]),
   ) as CardSkillLevelSelections
-  const normalizedFields = [...new Set(fields)].filter(
+  const selectedFields = [...new Set(fields)].filter(
     (field) => !isSkillField(field) || skillLevels[field].length > 0,
+  )
+  const normalizedFields = getCardListFieldGroups(selectedFields).flatMap(
+    (group) => group.fields,
   )
   return { fields: normalizedFields, skillLevels }
 }

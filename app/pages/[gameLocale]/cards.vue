@@ -24,9 +24,12 @@ import {
   filterAndSortCards,
   getCardFilterOptions,
   getCardSkillAvailableLevels,
+  getCardListFieldGroups,
+  CARD_BASIC_INFORMATION_FIELDS,
   CARD_SKILL_FIELDS,
   CARD_LIST_FIELDS,
   type CardListField,
+  type CardListFieldGroup,
   type CardSkillField,
   type CardListLayout,
   type CardListSort,
@@ -176,11 +179,17 @@ const fieldOptions = computed(() =>
     levels: isSkillField(field) ? availableSkillLevels.value[field] : [],
   })),
 )
+const basicFieldOptions = computed(() =>
+  fieldOptions.value.filter((option) =>
+    (CARD_BASIC_INFORMATION_FIELDS as readonly string[]).includes(option.value),
+  ),
+)
+const selectedGroups = computed(() => getCardListFieldGroups(fields.value))
 function isSkillField(field: CardListField): field is CardSkillField {
   return CARD_SKILL_FIELDS.includes(field as CardSkillField)
 }
-function selectedOrder(field: CardListField) {
-  const index = fields.value.indexOf(field)
+function selectedOrder(group: CardListFieldGroup['key']) {
+  const index = selectedGroups.value.findIndex((item) => item.key === group)
   return index < 0 ? null : index + 1
 }
 </script>
@@ -188,8 +197,8 @@ function selectedOrder(field: CardListField) {
 <template>
   <div class="min-h-screen">
     <SiteHeader />
-    <main class="mx-auto w-[min(calc(100%-2rem),100rem)] py-8 pb-20 sm:py-12">
-      <div class="mb-7">
+    <main class="mx-auto w-[calc(100%-2rem)] py-8 pb-20 sm:py-12">
+      <div class="mx-auto mb-7 w-full max-w-[100rem]">
         <h1 class="mb-2 text-2xl font-bold sm:text-3xl">
           {{ t('cards') }}
         </h1>
@@ -209,7 +218,7 @@ function selectedOrder(field: CardListField) {
 
       <template v-else>
         <section
-          class="mb-4 overflow-hidden rounded-xl border border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900"
+          class="mx-auto mb-4 w-full max-w-[100rem] overflow-hidden rounded-xl border border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900"
           :aria-label="t('cardList.controls')"
         >
           <Accordion v-model:value="openPanels" multiple>
@@ -466,7 +475,11 @@ function selectedOrder(field: CardListField) {
                   <span>{{ t('cardList.displaySettings') }}</span>
                   <span class="text-sm font-normal text-muted-color">
                     {{ t(`cardList.layout.${layout}`) }} ·
-                    {{ t('cardList.fieldsCount', { count: fields.length }) }}
+                    {{
+                      t('cardList.fieldsCount', {
+                        count: selectedGroups.length,
+                      })
+                    }}
                   </span>
                 </span>
               </AccordionHeader>
@@ -516,46 +529,75 @@ function selectedOrder(field: CardListField) {
                       {{ t('cardList.fieldOrderHelp') }}
                     </p>
                     <div
-                      class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2"
+                      class="flex min-w-0 flex-wrap items-start gap-x-3 gap-y-2"
                     >
                       <template
                         v-for="option in fieldOptions"
                         :key="option.value"
                       >
-                        <Button
-                          v-if="!isSkillField(option.value)"
-                          :id="`card-field-${option.value}`"
-                          :aria-label="option.label"
-                          :aria-pressed="fields.includes(option.value)"
-                          :outlined="!fields.includes(option.value)"
-                          :severity="
-                            fields.includes(option.value)
-                              ? 'primary'
-                              : 'secondary'
-                          "
-                          size="small"
-                          class="h-8 max-w-full gap-1.5 rounded px-2 py-1 text-sm leading-5 font-medium"
-                          :class="{
-                            'text-color': !fields.includes(option.value),
-                          }"
-                          @click="
-                            toggleField(
-                              option.value,
-                              !fields.includes(option.value),
-                            )
+                        <InputGroup
+                          v-if="option.value === 'name'"
+                          role="group"
+                          aria-labelledby="card-field-label-basic"
+                          class="w-auto min-w-0 max-w-full flex-wrap items-stretch"
+                          style="
+                            --p-inputgroup-addon-border-radius: 0.25rem;
+                            --p-inputgroup-addon-background: var(
+                              --p-button-secondary-background
+                            );
+                            --p-inputgroup-addon-border-color: var(
+                              --p-button-outlined-secondary-border-color
+                            );
                           "
                         >
-                          <Badge
-                            :value="selectedOrder(option.value) ?? '−'"
-                            severity="contrast"
-                            aria-hidden="true"
-                            class="size-5 min-w-5 shrink-0 rounded-full p-0 leading-5"
-                          />
-                          <span>{{ option.label }}</span>
-                        </Button>
+                          <InputGroupAddon
+                            class="h-auto min-h-8 min-w-0 max-w-full flex-none flex-wrap gap-1.5 px-2 py-1 text-sm leading-5 font-medium select-none"
+                          >
+                            <Badge
+                              :value="selectedOrder('basic') ?? '−'"
+                              severity="contrast"
+                              aria-hidden="true"
+                              class="size-5 min-w-5 shrink-0 rounded-full p-0 leading-5"
+                            />
+                            <span
+                              id="card-field-label-basic"
+                              class="min-w-0 text-color break-words"
+                            >
+                              {{ t('cardList.basicInformation') }}
+                            </span>
+                          </InputGroupAddon>
+                          <Button
+                            v-for="basicOption in basicFieldOptions"
+                            :id="`card-field-${basicOption.value}`"
+                            :key="basicOption.value"
+                            :aria-label="basicOption.label"
+                            :aria-pressed="fields.includes(basicOption.value)"
+                            :outlined="!fields.includes(basicOption.value)"
+                            :severity="
+                              fields.includes(basicOption.value)
+                                ? 'primary'
+                                : 'secondary'
+                            "
+                            size="small"
+                            class="h-auto min-h-8 min-w-0 max-w-full flex-none whitespace-normal px-2 py-1 text-sm leading-5 font-medium"
+                            :class="{
+                              'text-color': !fields.includes(basicOption.value),
+                            }"
+                            @click="
+                              toggleField(
+                                basicOption.value,
+                                !fields.includes(basicOption.value),
+                              )
+                            "
+                          >
+                            <span class="min-w-0 whitespace-normal break-words">
+                              {{ basicOption.label }}
+                            </span>
+                          </Button>
+                        </InputGroup>
 
                         <InputGroup
-                          v-else
+                          v-else-if="isSkillField(option.value)"
                           role="group"
                           :aria-labelledby="`card-field-label-${option.value}`"
                           class="w-auto min-w-0 max-w-full flex-none"
@@ -635,6 +677,37 @@ function selectedOrder(field: CardListField) {
                             </span>
                           </Button>
                         </InputGroup>
+                        <Button
+                          v-else-if="option.value === 'costume'"
+                          :id="`card-field-${option.value}`"
+                          :aria-label="option.label"
+                          :aria-pressed="fields.includes(option.value)"
+                          :outlined="!fields.includes(option.value)"
+                          :severity="
+                            fields.includes(option.value)
+                              ? 'primary'
+                              : 'secondary'
+                          "
+                          size="small"
+                          class="h-8 max-w-full gap-1.5 rounded px-2 py-1 text-sm leading-5 font-medium"
+                          :class="{
+                            'text-color': !fields.includes(option.value),
+                          }"
+                          @click="
+                            toggleField(
+                              option.value,
+                              !fields.includes(option.value),
+                            )
+                          "
+                        >
+                          <Badge
+                            :value="selectedOrder(option.value) ?? '−'"
+                            severity="contrast"
+                            aria-hidden="true"
+                            class="size-5 min-w-5 shrink-0 rounded-full p-0 leading-5"
+                          />
+                          <span>{{ option.label }}</span>
+                        </Button>
                       </template>
                       <Button
                         id="card-display-reset"
@@ -671,26 +744,64 @@ function selectedOrder(field: CardListField) {
         >
           {{ t('cardList.noResults') }}
         </p>
-        <ul
+        <div
           v-else
-          class="grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,350px),1fr))] gap-x-5 p-0"
-          :class="layout === 'full' ? 'gap-y-0' : 'gap-y-5'"
-          :aria-label="t('cards')"
+          :class="
+            layout === 'vertical' &&
+            selectedGroups.length > 0 &&
+            'overflow-x-auto'
+          "
+          :tabindex="
+            layout === 'vertical' && selectedGroups.length > 0 ? 0 : undefined
+          "
+          :role="
+            layout === 'vertical' && selectedGroups.length > 0
+              ? 'region'
+              : undefined
+          "
+          :aria-label="
+            layout === 'vertical' && selectedGroups.length > 0
+              ? t('cards')
+              : undefined
+          "
         >
-          <CardListItem
-            v-for="card in visibleCards"
-            :key="card.id"
-            :card="card"
-            :costumes="costumes"
-            :skills="skills"
-            :game-locale="gameLocale"
-            :stat-keys="statKeys"
-            :layout="layout"
-            :fields="fields"
-            :skill-levels="skillLevels"
-          />
-        </ul>
+          <ul
+            class="grid list-none p-0"
+            :class="
+              layout === 'full'
+                ? 'grid-cols-[repeat(auto-fill,minmax(min(100%,350px),1fr))] gap-x-5 gap-y-0'
+                : [
+                    'grid-cols-1 gap-y-5',
+                    selectedGroups.length > 0 && 'card-list-vertical-has-info',
+                  ]
+            "
+            :style="{ '--card-list-field-count': selectedGroups.length }"
+            :aria-label="t('cards')"
+          >
+            <CardListItem
+              v-for="card in visibleCards"
+              :key="card.id"
+              :card="card"
+              :costumes="costumes"
+              :skills="skills"
+              :game-locale="gameLocale"
+              :stat-keys="statKeys"
+              :layout="layout"
+              :fields="fields"
+              :skill-levels="skillLevels"
+            />
+          </ul>
+        </div>
       </template>
     </main>
   </div>
 </template>
+
+<style scoped>
+.card-list-vertical-has-info {
+  min-width: calc(
+    6rem + 1.5rem + 2px + var(--card-list-field-count) * 12rem +
+      (var(--card-list-field-count) - 1) * 1rem
+  );
+}
+</style>

@@ -23,6 +23,39 @@ export const CARD_LIST_FIELDS = [
 ] as const
 export type CardListField = (typeof CARD_LIST_FIELDS)[number]
 
+export const CARD_BASIC_INFORMATION_FIELDS = [
+  'name',
+  'characterName',
+  'parameters',
+] as const satisfies readonly CardListField[]
+
+export interface CardListFieldGroup {
+  key:
+    | 'basic'
+    | Exclude<CardListField, (typeof CARD_BASIC_INFORMATION_FIELDS)[number]>
+  fields: CardListField[]
+}
+
+export function getCardListFieldGroups(
+  fields: readonly CardListField[],
+): CardListFieldGroup[] {
+  const groups = new Map<CardListFieldGroup['key'], CardListFieldGroup>()
+  for (const field of fields) {
+    const key: CardListFieldGroup['key'] = (
+      CARD_BASIC_INFORMATION_FIELDS as readonly string[]
+    ).includes(field)
+      ? 'basic'
+      : (field as Exclude<
+          CardListField,
+          (typeof CARD_BASIC_INFORMATION_FIELDS)[number]
+        >)
+    const group = groups.get(key) ?? { key, fields: [] }
+    group.fields.push(field)
+    groups.set(key, group)
+  }
+  return [...groups.values()]
+}
+
 export const CARD_SKILL_FIELDS = [
   'passiveSkill',
   'activeSkill',
