@@ -13,6 +13,7 @@ import { transformCharacters } from './converters/characters.ts'
 import { createGameDatabase } from './database.ts'
 import { calculateCardListStats } from './card-list-stats.ts'
 import { transformLiveSkillData } from './converters/live-skills.ts'
+import { transformCardSkillData } from './converters/card-skills.ts'
 import {
   costumeIdsForCards,
   projectCardListSkills,
@@ -35,6 +36,7 @@ export function readCardList(): CardListPayload {
     const characters = transformCharacters(gameDatabase)
     const growth = transformCardGrowth(gameDatabase)
     const liveSkills = transformLiveSkillData(gameDatabase)
+    const cardSkills = transformCardSkillData(gameDatabase)
     const charactersById = new Map(
       characters.map((character) => [character.id, character]),
     )
@@ -46,6 +48,8 @@ export function readCardList(): CardListPayload {
     )
     const projected = projectCardListSkills(
       liveSkills,
+      cardSkills,
+      cards,
       new Set(cardCostumeIds.values()),
     )
     for (const skill of Object.values(projected.skills.leaderSkills)) {
@@ -92,6 +96,9 @@ export function readCardList(): CardListPayload {
         id: card.id,
         characterId: card.characterId,
         costumeId: cardCostumeIds.get(card.id)!,
+        livePassiveSkillId: card.livePassiveSkillId,
+        liveActiveSkillId: card.liveActiveSkillId,
+        liveSpecialSkillId: card.liveSpecialSkillId,
         characterOrder: character.order,
         characterAssetId: character.assetId,
         name: card.name,
@@ -105,7 +112,7 @@ export function readCardList(): CardListPayload {
       }
     })
     console.info(
-      `Loaded ${cardList.length} cards, ${Object.keys(projected.costumes).length} costumes, ${Object.keys(projected.skills.leaderSkills).length} leader skills`,
+      `Loaded ${cardList.length} cards, ${Object.keys(projected.costumes).length} costumes, ${Object.keys(projected.skills.leaderSkills).length} leader skills, ${Object.keys(projected.skills.passiveSkills).length} passive skills, ${Object.keys(projected.skills.activeSkills).length} active skills, ${Object.keys(projected.skills.specialSkills).length} special skills`,
     )
     return { cards: cardList, ...projected }
   } catch (cause) {
@@ -122,7 +129,11 @@ export function readCardList(): CardListPayload {
 function emptySkills(): CardListSkillData {
   return {
     leaderSkills: {},
+    passiveSkills: {},
+    activeSkills: {},
+    specialSkills: {},
     effects: {},
+    activeEffects: {},
     triggers: {},
     targets: [],
     catalog: {

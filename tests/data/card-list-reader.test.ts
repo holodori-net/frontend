@@ -8,12 +8,14 @@ import type { CardData } from '../../shared/game-data/cards.ts'
 import type { CardGrowthData } from '../../shared/game-data/card-growth.ts'
 import type { CharacterData } from '../../shared/game-data/characters.ts'
 import type { LiveSkillData } from '../../shared/game-data/live-skills.ts'
+import type { CardSkillData } from '../../shared/game-data/card-skills.ts'
 import type { LocalizedNames } from '../../shared/game-data/localized-text.ts'
 import { readCardList } from '../../server/data/card-list.ts'
 import { transformCardGrowth } from '../../server/data/converters/card-growth.ts'
 import { transformCards } from '../../server/data/converters/cards.ts'
 import { transformCharacters } from '../../server/data/converters/characters.ts'
 import { transformLiveSkillData } from '../../server/data/converters/live-skills.ts'
+import { transformCardSkillData } from '../../server/data/converters/card-skills.ts'
 
 vi.mock('../../server/data/converters/cards.ts', () => ({
   transformCards: vi.fn(),
@@ -27,11 +29,15 @@ vi.mock('../../server/data/converters/card-growth.ts', () => ({
 vi.mock('../../server/data/converters/live-skills.ts', () => ({
   transformLiveSkillData: vi.fn(),
 }))
+vi.mock('../../server/data/converters/card-skills.ts', () => ({
+  transformCardSkillData: vi.fn(),
+}))
 
 const transformCardsMock = vi.mocked(transformCards)
 const transformCharactersMock = vi.mocked(transformCharacters)
 const transformCardGrowthMock = vi.mocked(transformCardGrowth)
 const transformLiveSkillDataMock = vi.mocked(transformLiveSkillData)
+const transformCardSkillDataMock = vi.mocked(transformCardSkillData)
 
 const names: LocalizedNames = {
   jpn: '櫻巫女',
@@ -137,6 +143,99 @@ function createLiveSkills(): LiveSkillData {
   }
 }
 
+function createCardSkills(): CardSkillData {
+  return {
+    passiveSkills: Object.fromEntries(
+      ['passive-1'].map((id) => [
+        id,
+        [
+          {
+            livePassiveSkillId: id,
+            level: 1,
+            liveSkillTriggerGroupId: null,
+            livePassiveSkillEffectGroupId: 'p-effect',
+            additionalLiveSkillTriggerGroupId: null,
+            additionalLivePassiveSkillEffectGroupId: null,
+          },
+        ],
+      ]),
+    ),
+    activeSkills: Object.fromEntries(
+      ['active-1'].map((id) => [
+        id,
+        [
+          {
+            liveActiveSkillId: id,
+            level: 1,
+            liveSkillTriggerGroupId: null,
+            liveActiveSkillEffectGroupId: 'a-effect',
+            additionalLiveSkillTriggerGroupId: null,
+            additionalLiveActiveSkillEffectGroupId: null,
+            coolTimeMillisecond: null,
+            activationProbabilityPermilMultiply: null,
+            limitCount: null,
+            effectDurationMillisecond: null,
+          },
+        ],
+      ]),
+    ),
+    specialSkills: Object.fromEntries(
+      ['special-1'].map((id) => [
+        id,
+        [
+          {
+            liveSpecialSkillId: id,
+            level: 1,
+            liveActiveSkillEffectGroupId: 's-effect',
+            additionalLiveSkillTriggerGroupId: null,
+            additionalLiveActiveSkillEffectGroupId: null,
+            effectDurationMillisecond: null,
+          },
+        ],
+      ]),
+    ),
+    effects: Object.fromEntries(
+      ['p-effect'].map((id) => [
+        id,
+        [
+          {
+            groupId: id,
+            number: 1,
+            type: 0,
+            value: null,
+            liveSkillEffectTargetId: null,
+            resourceType: null,
+            resourceIds: null,
+            description: null,
+          },
+        ],
+      ]),
+    ),
+    activeEffects: Object.fromEntries(
+      ['a-effect', 's-effect'].map((id) => [
+        id,
+        [
+          {
+            groupId: id,
+            number: 1,
+            type: 0,
+            value: null,
+            scoreUpBasedOnParameterPermilMultiply: null,
+            description: null,
+          },
+        ],
+      ]),
+    ),
+    triggers: {},
+    targets: [],
+    catalog: {
+      templates: {},
+      labels: { character: {}, group: {}, attribute: {}, judgement: {} },
+    },
+    pendingDescriptions: [],
+  }
+}
+
 function createGrowth(): CardGrowthData {
   return {
     levels: {
@@ -200,7 +299,9 @@ describe('card list reader', () => {
     transformCharactersMock.mockReset()
     transformCardGrowthMock.mockReset()
     transformLiveSkillDataMock.mockReset()
+    transformCardSkillDataMock.mockReset()
     transformLiveSkillDataMock.mockReturnValue(createLiveSkills())
+    transformCardSkillDataMock.mockReturnValue(createCardSkills())
   })
 
   afterEach(async () => {
@@ -246,6 +347,9 @@ describe('card list reader', () => {
           id: 'card-1',
           characterId: 'chr-1',
           costumeId: 'costume-1',
+          livePassiveSkillId: 'passive-1',
+          liveActiveSkillId: 'active-1',
+          liveSpecialSkillId: 'special-1',
           characterOrder: 7,
           characterAssetId: 'character-asset-1',
           name: names,
@@ -263,6 +367,9 @@ describe('card list reader', () => {
           id: 'card-2',
           characterId: 'chr-2',
           costumeId: 'costume-2',
+          livePassiveSkillId: 'passive-1',
+          liveActiveSkillId: 'active-1',
+          liveSpecialSkillId: 'special-1',
           characterOrder: 7,
           characterAssetId: null,
           name: names,
@@ -283,12 +390,25 @@ describe('card list reader', () => {
       },
       skills: {
         leaderSkills: {},
-        effects: {},
+        passiveSkills: createCardSkills().passiveSkills,
+        activeSkills: createCardSkills().activeSkills,
+        specialSkills: createCardSkills().specialSkills,
+        effects: { 'p-effect': [{ description: null }] },
+        activeEffects: {
+          'a-effect': [{ description: null }],
+          's-effect': [{ description: null }],
+        },
         triggers: {},
         targets: [],
         catalog: {
           templates: {},
-          labels: { character: {}, group: {}, attribute: {}, judgement: {} },
+          labels: {
+            character: {},
+            group: {},
+            attribute: {},
+            judgement: {},
+            probability: {},
+          },
         },
       },
     })
@@ -299,6 +419,7 @@ describe('card list reader', () => {
     expect(transformCharactersMock).toHaveBeenCalledOnce()
     expect(transformCardGrowthMock).toHaveBeenCalledOnce()
     expect(transformLiveSkillDataMock).toHaveBeenCalledOnce()
+    expect(transformCardSkillDataMock).toHaveBeenCalledOnce()
     expect(closeSpy).toHaveBeenCalledOnce()
   })
 
@@ -318,6 +439,7 @@ describe('card list reader', () => {
     expect(transformCharactersMock).not.toHaveBeenCalled()
     expect(transformCardGrowthMock).not.toHaveBeenCalled()
     expect(transformLiveSkillDataMock).not.toHaveBeenCalled()
+    expect(transformCardSkillDataMock).not.toHaveBeenCalled()
     expect(closeSpy).toHaveBeenCalledOnce()
   })
 
@@ -364,6 +486,24 @@ describe('card list reader', () => {
         ],
       },
     })
+    transformCardSkillDataMock.mockImplementation(() => ({
+      ...createCardSkills(),
+      effects: {
+        ...createCardSkills().effects,
+        'effect-group': [
+          {
+            groupId: 'effect-group',
+            number: 1,
+            type: 1,
+            value: null,
+            liveSkillEffectTargetId: null,
+            resourceType: null,
+            resourceIds: null,
+            description: null,
+          },
+        ],
+      },
+    }))
     const warning = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     const payload = readCardList()

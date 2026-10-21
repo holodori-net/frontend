@@ -176,6 +176,95 @@ const specialSkill = {
 
 describe('card skill description composition', () => {
   it.each([
+    ['jpn', 'TRIGGER、Power 7%'],
+    ['eng', 'TRIGGER, Power 7%'],
+    ['ind', 'Saat TRIGGER, Power 7%'],
+    ['kor', 'TRIGGER, Power 7%'],
+    ['cht', 'TRIGGER，Power 7%'],
+    ['chs', 'TRIGGER，Power 7%'],
+  ] as const)(
+    'formats passive display punctuation in %s',
+    (locale, expected) => {
+      expect(
+        composePassiveSkillDescription(
+          passiveSkill,
+          createData(),
+          locale,
+          undefined,
+          'display',
+        ),
+      ).toBe(expected)
+    },
+  )
+
+  it.each([
+    [
+      'jpn',
+      '17秒毎に低確率で6秒間、SCORE、COND、ADD',
+      '8秒間、SPECIAL、COND、ADD',
+    ],
+    [
+      'eng',
+      'For 6s, SCORE, Every 17s with a Low Probability chance; COND, ADD',
+      'For 8s, SPECIAL; COND, ADD',
+    ],
+    [
+      'ind',
+      'Selama 6 dtk, SCORE, setiap 17 dtk dengan Peluang Rendah; Saat COND, ADD',
+      'Selama 8 dtk, SPECIAL; saat COND, ADD',
+    ],
+    [
+      'kor',
+      '17초마다 낮은 확률로  6초 동안 SCORE; COND, ADD',
+      '8초 동안 SPECIAL; COND, ADD',
+    ],
+    [
+      'cht',
+      '每 17 秒以低機率在 6 秒內，SCORE、COND，ADD',
+      '在 8 秒內，SPECIAL、且COND，ADD',
+    ],
+    [
+      'chs',
+      '每 17 秒以低概率在 6 秒内，SCORE、COND，ADD',
+      '在 8 秒内，SPECIAL、且COND，ADD',
+    ],
+  ] as const)(
+    'formats active and special display punctuation in %s',
+    (locale, activeExpected, specialExpected) => {
+      const data = createData()
+      const active = {
+        ...activeSkill,
+        additionalLiveSkillTriggerGroupId: 'additional',
+        additionalLiveActiveSkillEffectGroupId: 'additional',
+      }
+      const special = {
+        ...specialSkill,
+        additionalLiveSkillTriggerGroupId: 'additional',
+        additionalLiveActiveSkillEffectGroupId: 'additional',
+      }
+
+      expect(
+        composeActiveSkillDescription(
+          active,
+          data,
+          locale,
+          undefined,
+          'display',
+        ),
+      ).toBe(activeExpected)
+      expect(
+        composeSpecialSkillDescription(
+          special,
+          data,
+          locale,
+          undefined,
+          'display',
+        ),
+      ).toBe(specialExpected)
+    },
+  )
+
+  it.each([
     ['jpn', 'TRIGGERPower 7%'],
     ['eng', 'TRIGGER Power 7%'],
     ['ind', 'Saat TRIGGER, Power 7%'],

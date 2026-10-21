@@ -8,7 +8,7 @@
 
 `Card.live_passive_skill_id`、`live_active_skill_id`、`live_special_skill_id` 均為非 nullable 的 TEXT，由 `transformCards()` 分別回傳 `livePassiveSkillId`、`liveActiveSkillId`、`liveSpecialSkillId`。各自關聯 `LivePassiveSkill.id`、`LiveActiveSkill.id`、`LiveSpecialSkill.id`；這三張 ID 表皆只有非 nullable TEXT 主鍵 `id`。
 
-各類技能的全部等級來自對應 `*SkillLevel` 表，包含未直接被卡片引用的主動技能。轉換保留來源等級，不選取最高等級。列表仍只投影服裝技能；卡片技能 ID、等級與主動效果保留於 server 資料層。
+各類技能的全部等級來自對應 `*SkillLevel` 表，包含未直接被卡片引用的主動技能。轉換保留來源等級，不選取最高等級。列表保留卡片的三類技能 ID，按 ID 共用被引用技能的全部等級及可達描述依賴。主動效果以獨立的 `activeEffects` 字典保存精簡描述；服裝與卡片技能共用模板、Target 與實體標籤，機率標籤依選中主動技能各等級的原始機率值收集。技能等級保留組合所需欄位，效果的原始欄位及待確認診斷留在 server。
 
 ## LivePassiveSkillLevel
 
@@ -83,9 +83,11 @@
 
 ## 六語描述組合
 
-`composePassiveSkillDescription`、`composeActiveSkillDescription`、`composeSpecialSkillDescription` 位於 [live-skill-description.ts](../../shared/game-data/live-skill-description.ts)。函式接收指定等級列、唯讀描述資料、遊戲語言與可選的 `onFailure(reason)`，回傳 `string | null`。組合不修改資料，時間僅在組合時由毫秒除以 1,000 換算為秒。
+`composePassiveSkillDescription`、`composeActiveSkillDescription`、`composeSpecialSkillDescription` 位於 [live-skill-description.ts](../../shared/game-data/live-skill-description.ts)。函式接收指定等級列、唯讀描述資料、遊戲語言、可選的 `onFailure(reason)` 及第五個參數 `format: 'source' | 'display'`（預設 `source`），回傳 `string | null`。組合不修改資料，時間僅在組合時由毫秒除以 1,000 換算為秒。
 
-被動技能分別組合主要與附加條件／效果：日文與中文直接相接，英文及韓文以空格相接，印尼文使用 `Saat {trigger}, {effect}`。主要與附加段落在日文以換行相隔，其餘語言以空格相隔。主動技能保留各語言的時間、機率、效果順序；特殊技能共用持續時間與主動效果描述。屬性標記、描述內部空白、標點與日文換行保留。
+`source` 模式供來源還原與驗證。被動技能分別組合主要與附加條件／效果：日文與中文直接相接，英文及韓文以空格相接，印尼文使用 `Saat {trigger}, {effect}`。主要與附加段落在日文以換行相隔，其餘語言以空格相隔。主動技能保留各語言的時間、機率、效果順序；特殊技能共用持續時間與主動效果描述。屬性標記、描述內部空白、標點與日文換行保留。
+
+`display` 模式供列表使用。條件與效果間，繁簡中文使用 `，`、日文使用 `、`，其餘語言使用逗號加空格；主要與附加段落間，繁簡中文及日文使用 `、`，其餘語言使用分號加空格。時間與機率子句依語言補上分隔，片段邊界去除重複標點，內文與屬性標記保留。隊長服裝技能沿用相同分隔符。
 
 主動技能 `catalog.labels.probability` 保存以下已確認來源值的六語標籤，原始機率不變：
 
@@ -103,4 +105,6 @@
 
 2026-10-20 本機快照 `master_version=452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`：196 個被動技能／392 列等級、198 個主動技能／395 列等級、196 個特殊技能／392 列等級；有 2 個主動技能未被卡片直接引用。主動效果共 55 筆（type 1：22、5：22、6：6、8：3、9：2）。
 
-`tests/data/card-skills-master.test.ts` 驗證全部 330 個主動效果六語描述與 7,074 個完整技能描述。自動歸納比對只移除來源 `[highlight]` 標記及首尾空白；已確認模板另驗證完整組合，允許獨立文案。共用的 Indonesia Target 因人數為 null 保持待確認，詳見 [服裝技能](costume-live-skills.md#描述-catalog-與確認流程)。記憶體 SQLite 測試涵蓋欄位保留、排序、錯誤與轉換入口的資料表邊界；列表投影及頁面測試驗證既有使用方式。指令見 [CONTRIBUTING.md](../../CONTRIBUTING.md)。
+**CONFIRMED**：此快照的列表投影包含 196 張卡片、三類技能各 392 列等級。`JSON.stringify(readCardList())` 為 848,532 bytes，以 Node.js `gzipSync` 預設設定壓縮為 70,185 bytes；Nuxt 生成的 payload 使用自己的序列化格式。
+
+`tests/data/card-skills-master.test.ts` 驗證全部 330 個主動效果六語描述與 7,074 個完整技能描述。自動歸納比對只移除來源 `[highlight]` 標記及首尾空白；已確認模板另驗證完整組合，允許獨立文案。共用的 Indonesia Target 因人數為 null 保持待確認，詳見 [服裝技能](costume-live-skills.md#描述-catalog-與確認流程)。記憶體 SQLite 測試涵蓋欄位保留、排序、錯誤與轉換入口的資料表邊界；列表投影測試驗證全部被引用等級的六語組合與完整 converter 一致、移除未引用資料及缺少必要等級時的錯誤。指令見 [CONTRIBUTING.md](../../CONTRIBUTING.md)。

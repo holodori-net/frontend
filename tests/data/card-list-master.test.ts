@@ -1,11 +1,19 @@
 import { existsSync } from 'node:fs'
 import { DatabaseSync } from 'node:sqlite'
 import { describe, expect, it, vi } from 'vitest'
-import { composeCostumeSkillDescription } from '../../shared/game-data/live-skill-description.ts'
+import {
+  composeActiveSkillDescription,
+  composeCostumeSkillDescription,
+  composePassiveSkillDescription,
+  composeSpecialSkillDescription,
+} from '../../shared/game-data/live-skill-description.ts'
 import { gameLocales } from '../../shared/language.ts'
+import type { GameLocale } from '../../shared/language.ts'
+import type { CardSkillDescriptionData } from '../../shared/game-data/live-skill-description.ts'
 import { readCardList } from '../../server/data/card-list.ts'
 import { createGameDatabase } from '../../server/data/database.ts'
 import { transformLiveSkillData } from '../../server/data/converters/live-skills.ts'
+import { transformCardSkillData } from '../../server/data/converters/card-skills.ts'
 
 const sourcePath = new URL('../../.data/master.sqlite', import.meta.url)
 
@@ -18,6 +26,9 @@ describe.skipIf(!existsSync(sourcePath))(
       const database = new DatabaseSync(sourcePath, { readOnly: true })
       try {
         const fullSkills = transformLiveSkillData(createGameDatabase(database))
+        const fullCardSkills = transformCardSkillData(
+          createGameDatabase(database),
+        )
         const cardCount = Number(
           database.prepare('SELECT COUNT(*) AS count FROM Card').get()?.count,
         )
@@ -33,15 +44,60 @@ describe.skipIf(!existsSync(sourcePath))(
           fullSkills.costumes.map((costume) => [costume.id, costume]),
         )
         for (const card of payload.cards) {
-          expect(card).not.toHaveProperty('livePassiveSkillId')
-          expect(card).not.toHaveProperty('liveActiveSkillId')
-          expect(card).not.toHaveProperty('liveSpecialSkillId')
           const costume = payload.costumes[card.costumeId!]
           expect(costume).toBeDefined()
           expect(sourceCostumes.get(card.costumeId!)?.characterId).toBe(
             card.characterId,
           )
         }
+
+        const verifyCardSkills = <T extends { level: number }>(
+          ids: Set<string>,
+          projected: Record<string, T[]>,
+          full: Record<string, T[]>,
+          compose: (
+            skill: T,
+            data: CardSkillDescriptionData,
+            locale: GameLocale,
+          ) => string | null,
+        ) => {
+          expect(Object.keys(projected).sort()).toEqual([...ids].sort())
+          for (const id of ids) {
+            expect(projected[id]).toEqual(full[id])
+            for (const level of projected[id]!) {
+              for (const locale of gameLocales) {
+                expect(
+                  compose(level, payload.skills, locale),
+                  `${id} level ${level.level} (${locale})`,
+                ).toEqual(compose(level, fullCardSkills, locale))
+              }
+            }
+          }
+        }
+        verifyCardSkills(
+          new Set(
+            payload.cards.map(({ livePassiveSkillId }) => livePassiveSkillId),
+          ),
+          payload.skills.passiveSkills,
+          fullCardSkills.passiveSkills,
+          composePassiveSkillDescription,
+        )
+        verifyCardSkills(
+          new Set(
+            payload.cards.map(({ liveActiveSkillId }) => liveActiveSkillId),
+          ),
+          payload.skills.activeSkills,
+          fullCardSkills.activeSkills,
+          composeActiveSkillDescription,
+        )
+        verifyCardSkills(
+          new Set(
+            payload.cards.map(({ liveSpecialSkillId }) => liveSpecialSkillId),
+          ),
+          payload.skills.specialSkills,
+          fullCardSkills.specialSkills,
+          composeSpecialSkillDescription,
+        )
 
         const referencedSkillIds = new Set(
           Object.values(payload.costumes)
@@ -76,11 +132,6 @@ describe.skipIf(!existsSync(sourcePath))(
 
         expect(payload.skills).not.toHaveProperty('pendingDescriptions')
         expect(payload.skills).not.toHaveProperty('costumes')
-        expect(payload.skills).not.toHaveProperty('passiveSkills')
-        expect(payload.skills).not.toHaveProperty('activeSkills')
-        expect(payload.skills).not.toHaveProperty('specialSkills')
-        expect(payload.skills).not.toHaveProperty('activeEffects')
-        expect(payload.skills.catalog.labels).not.toHaveProperty('probability')
         for (const skill of Object.values(payload.skills.leaderSkills)) {
           expect(Object.keys(skill).sort()).toEqual([
             'additionalLivePassiveSkillEffectGroupId',
@@ -97,6 +148,7 @@ describe.skipIf(!existsSync(sourcePath))(
         }
         for (const groups of [
           payload.skills.effects,
+          payload.skills.activeEffects,
           payload.skills.triggers,
         ]) {
           for (const rows of Object.values(groups)) {

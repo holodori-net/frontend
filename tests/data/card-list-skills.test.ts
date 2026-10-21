@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import type { LiveSkillData } from '../../shared/game-data/live-skills.ts'
+import type {
+  CardSkillData,
+  LiveActiveSkillLevelData,
+  LivePassiveSkillLevelData,
+  LiveSpecialSkillLevelData,
+} from '../../shared/game-data/card-skills.ts'
 import {
   costumeIdsForCards,
   projectCardListSkills,
@@ -134,6 +140,35 @@ function data(): LiveSkillData {
   }
 }
 
+function cardSkills(source = data()): CardSkillData {
+  return {
+    passiveSkills: {},
+    activeSkills: {},
+    specialSkills: {},
+    effects: Object.fromEntries(
+      Object.entries(source.effects).map(([id, rows]) => [
+        id,
+        rows.map((row) => ({ ...row })),
+      ]),
+    ),
+    activeEffects: {},
+    triggers: {},
+    targets: source.targets,
+    catalog: source.catalog,
+    pendingDescriptions: [],
+  }
+}
+
+const cards: {
+  id: string
+  livePassiveSkillId: string
+  liveActiveSkillId: string
+  liveSpecialSkillId: string
+}[] = []
+function project(source = data(), skills = cardSkills(source)) {
+  return projectCardListSkills(source, skills, cards, new Set(['costume-1']))
+}
+
 describe('projectCardListSkills', () => {
   it('uses a reward costume when present and otherwise uses the character default', () => {
     const selected = costumeIdsForCards(
@@ -185,13 +220,20 @@ describe('projectCardListSkills', () => {
 
     const source = data()
     source.costumes[0]!.liveLeaderSkillId = 'missing-skill'
-    expect(() => projectCardListSkills(source, new Set(['costume-1']))).toThrow(
+    expect(() =>
+      projectCardListSkills(
+        source,
+        cardSkills(source),
+        cards,
+        new Set(['costume-1']),
+      ),
+    ).toThrow(
       'Missing LiveLeaderSkill missing-skill referenced by Costume.live_leader_skill_id in row costume-1',
     )
   })
 
   it('keeps only reachable costumes, skills, groups, targets, templates, and labels', () => {
-    const result = projectCardListSkills(data(), new Set(['costume-1']))
+    const result = project()
 
     expect(result.costumes).toEqual({
       'costume-1': { name: text, leaderSkillId: 'skill-1' },
@@ -212,10 +254,97 @@ describe('projectCardListSkills', () => {
     expect('pendingDescriptions' in result.skills).toBe(false)
   })
 
+  it('projects every referenced level, only reachable groups, and known probability labels', () => {
+    const source = data()
+    const skills = cardSkills(source)
+    const passive = (level: number): LivePassiveSkillLevelData => ({
+      livePassiveSkillId: 'passive-1',
+      level,
+      liveSkillTriggerGroupId: null,
+      livePassiveSkillEffectGroupId: 'effect-group',
+      additionalLiveSkillTriggerGroupId: null,
+      additionalLivePassiveSkillEffectGroupId: null,
+    })
+    const active = (
+      level: number,
+      probability: number | null,
+    ): LiveActiveSkillLevelData => ({
+      liveActiveSkillId: 'active-1',
+      level,
+      liveSkillTriggerGroupId: null,
+      liveActiveSkillEffectGroupId: 'active-effect',
+      additionalLiveSkillTriggerGroupId: null,
+      additionalLiveActiveSkillEffectGroupId: null,
+      coolTimeMillisecond: null,
+      activationProbabilityPermilMultiply: probability,
+      limitCount: null,
+      effectDurationMillisecond: null,
+    })
+    const special: LiveSpecialSkillLevelData = {
+      liveSpecialSkillId: 'special-1',
+      level: 1,
+      liveActiveSkillEffectGroupId: 'active-effect',
+      additionalLiveSkillTriggerGroupId: null,
+      additionalLiveActiveSkillEffectGroupId: null,
+      effectDurationMillisecond: null,
+    }
+    skills.passiveSkills = {
+      'passive-1': [passive(5), passive(2), passive(1)],
+      unused: [passive(1)],
+    }
+    skills.activeSkills = {
+      'active-1': [active(2, 370), active(1, 999)],
+      unused: [active(1, 550)],
+    }
+    skills.specialSkills = {
+      'special-1': [special],
+      unused: [{ ...special, liveSpecialSkillId: 'unused' }],
+    }
+    skills.activeEffects['active-effect'] = [
+      {
+        groupId: 'active-effect',
+        number: 1,
+        type: 8,
+        value: '4',
+        scoreUpBasedOnParameterPermilMultiply: null,
+        description: null,
+      },
+    ]
+    skills.catalog.labels.probability = { '370': text, '550': text }
+
+    const result = projectCardListSkills(
+      source,
+      skills,
+      [
+        {
+          id: 'card-1',
+          livePassiveSkillId: 'passive-1',
+          liveActiveSkillId: 'active-1',
+          liveSpecialSkillId: 'special-1',
+        },
+      ],
+      new Set(['costume-1']),
+    )
+
+    expect(
+      result.skills.passiveSkills['passive-1']?.map(({ level }) => level),
+    ).toEqual([1, 2, 5])
+    expect(
+      result.skills.activeSkills['active-1']?.map(({ level }) => level),
+    ).toEqual([1, 2])
+    expect(Object.keys(result.skills.passiveSkills)).toEqual(['passive-1'])
+    expect(result.skills.catalog.labels.probability).toEqual({ '370': text })
+    expect(result.skills.activeEffects).toEqual({
+      'active-effect': [{ description: null }],
+    })
+    expect(result.skills.effects['unused-group']).toBeUndefined()
+    expect(result.skills).not.toHaveProperty('pendingDescriptions')
+  })
+
   it('retains null descriptions while projecting a skill group', () => {
     const source = data()
     source.effects['effect-group']![0]!.description = null
-    const result = projectCardListSkills(source, new Set(['costume-1']))
+    const result = project(source)
     expect(result.skills.effects['effect-group']).toEqual([
       { description: null },
     ])
@@ -254,7 +383,7 @@ describe('projectCardListSkills', () => {
       text,
     }
 
-    const result = projectCardListSkills(source, new Set(['costume-1']))
+    const result = project(source)
     expect(result.skills.targets.map(({ id }) => id)).toEqual([
       'target-1',
       'target-2',
@@ -267,24 +396,20 @@ describe('projectCardListSkills', () => {
     const missingTemplate = data()
     missingTemplate.effects['effect-group']![0]!.description!.templateId =
       'missing-template'
-    expect(() =>
-      projectCardListSkills(missingTemplate, new Set(['costume-1'])),
-    ).toThrow(
+    expect(() => project(missingTemplate)).toThrow(
       'LivePassiveSkillEffect effect-group:1 references missing description template missing-template',
     )
 
     const missingLabel = data()
     delete missingLabel.catalog.labels.character['chr-1']
-    expect(() =>
-      projectCardListSkills(missingLabel, new Set(['costume-1'])),
-    ).toThrow(
+    expect(() => project(missingLabel)).toThrow(
       'LivePassiveSkillEffect effect-group:1 references missing character label chr-1',
     )
   })
 
   it('fails with context when a selected costume is missing', () => {
-    expect(() => projectCardListSkills(data(), new Set(['missing']))).toThrow(
-      'Missing Costume missing referenced by Card or Character',
-    )
+    expect(() =>
+      projectCardListSkills(data(), cardSkills(), cards, new Set(['missing'])),
+    ).toThrow('Missing Costume missing referenced by Card or Character')
   })
 })

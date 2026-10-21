@@ -109,11 +109,20 @@ export function renderSkillDescription(
 }
 
 function joinSkillText(left: string, right: string, separator: string): string {
-  const normalizedLeft = left.trim().replace(/[\s,，、;；]+$/u, '')
-  const normalizedRight = right.trim().replace(/^[\s,，、;；]+/u, '')
+  const normalizedLeft = left.trim().replace(/[\s,，、;；.!?。！？]+$/u, '')
+  const normalizedRight = right.trim().replace(/^[\s,，、;；.!?。！？]+/u, '')
   if (!normalizedLeft) return normalizedRight
   if (!normalizedRight) return normalizedLeft
   return `${normalizedLeft}${separator}${normalizedRight}`
+}
+
+function conditionSeparator(locale: GameLocale): string {
+  if (locale === 'cht' || locale === 'chs') return '，'
+  return locale === 'jpn' ? '、' : ', '
+}
+
+function segmentSeparator(locale: GameLocale): string {
+  return locale === 'jpn' || locale === 'cht' || locale === 'chs' ? '、' : '; '
 }
 
 export function composeCostumeSkillDescription(
@@ -183,12 +192,7 @@ export function composeCostumeSkillDescription(
     )
     if (triggerText === null) return null
 
-    const separator =
-      locale === 'cht' || locale === 'chs'
-        ? '，'
-        : locale === 'jpn'
-          ? '、'
-          : ', '
+    const separator = conditionSeparator(locale)
     const condition =
       locale === 'ind' ? `Saat ${triggerText.trim()}` : triggerText
     return joinSkillText(condition, effectText, separator)
@@ -204,8 +208,7 @@ export function composeCostumeSkillDescription(
     segments.push(additional)
   }
 
-  const separator =
-    locale === 'jpn' || locale === 'cht' || locale === 'chs' ? '、' : '; '
+  const separator = segmentSeparator(locale)
   return segments.reduce(
     (text, segment) =>
       text === '' ? segment.trim() : joinSkillText(text, segment, separator),
@@ -244,8 +247,14 @@ function passiveSegment(
   triggerText: string | null,
   effectText: string,
   locale: GameLocale,
+  format: 'source' | 'display',
 ): string {
   if (!triggerText) return effectText
+  if (format === 'display') {
+    const condition =
+      locale === 'ind' ? `Saat ${triggerText.trim()}` : triggerText
+    return joinSkillText(condition, effectText, conditionSeparator(locale))
+  }
   switch (locale) {
     case 'jpn':
     case 'cht':
@@ -273,6 +282,7 @@ export function composePassiveSkillDescription(
   data: CardSkillDescriptionData,
   locale: GameLocale,
   onFailure?: (reason: string) => void,
+  format: 'source' | 'display' = 'source',
 ): string | null {
   const fail = (reason: string) => failCardSkill(onFailure, reason)
   if (
@@ -301,7 +311,7 @@ export function composePassiveSkillDescription(
   if (trigger && triggerText === null) {
     return fail('卡片被動技能條件描述無法解析')
   }
-  const segments = [passiveSegment(triggerText, effectText, locale)]
+  const segments = [passiveSegment(triggerText, effectText, locale, format)]
   if (skill.additionalLivePassiveSkillEffectGroupId !== null) {
     const additionalEffect = getSingleSkillRow(
       data.effects,
@@ -334,8 +344,16 @@ export function composePassiveSkillDescription(
       return fail('卡片被動技能附加條件或效果描述無法解析')
     }
     segments.push(
-      passiveSegment(additionalTriggerText, additionalEffectText, locale),
+      passiveSegment(
+        additionalTriggerText,
+        additionalEffectText,
+        locale,
+        format,
+      ),
     )
+  }
+  if (format === 'display' && segments.length > 1) {
+    return joinSkillText(segments[0]!, segments[1]!, segmentSeparator(locale))
   }
   const separator = locale === 'jpn' ? '\n' : ' '
   return segments.join(separator).trim()
@@ -372,22 +390,23 @@ function activeMainSegment(
   duration: string | null,
   probability: string,
   locale: GameLocale,
+  format: 'source' | 'display',
 ): string {
   const coolTime = durationSeconds(skill.coolTimeMillisecond)!
   const chance = probability
   switch (locale) {
     case 'jpn':
-      return `${coolTime}秒毎に${chance}で${duration ? `${duration}秒間` : ''}${effectText}`
+      return `${coolTime}秒毎に${chance}で${duration ? `${duration}秒間` : ''}${format === 'display' ? '、' : ''}${effectText}`
     case 'eng':
-      return `${duration ? `For ${duration}s, ` : ''}${effectText} Every ${coolTime}s with a ${chance} chance.`
+      return `${duration ? `For ${duration}s, ` : ''}${format === 'display' ? joinSkillText(effectText, `Every ${coolTime}s with a ${chance} chance.`, conditionSeparator(locale)) : `${effectText} Every ${coolTime}s with a ${chance} chance.`}`
     case 'ind':
-      return `${duration ? `Selama ${duration} dtk, ` : ''}${effectText} setiap ${coolTime} dtk dengan ${chance}`
+      return `${duration ? `Selama ${duration} dtk, ` : ''}${format === 'display' ? joinSkillText(effectText, `setiap ${coolTime} dtk dengan ${chance}`, conditionSeparator(locale)) : `${effectText} setiap ${coolTime} dtk dengan ${chance}`}`
     case 'kor':
       return `${coolTime}초마다 ${chance}로${duration ? '  ' : ' '}${duration ? `${duration}초 동안 ` : ''}${effectText}`
     case 'cht':
-      return `每 ${coolTime} 秒以${chance}${duration ? `在 ${duration} 秒內` : ''}${effectText}`
+      return `每 ${coolTime} 秒以${chance}${duration ? `在 ${duration} 秒內` : ''}${format === 'display' ? '，' : ''}${effectText}`
     case 'chs':
-      return `每 ${coolTime} 秒以${chance}${duration ? `在 ${duration} 秒内` : ''}${effectText}`
+      return `每 ${coolTime} 秒以${chance}${duration ? `在 ${duration} 秒内` : ''}${format === 'display' ? '，' : ''}${effectText}`
   }
 }
 
@@ -395,7 +414,14 @@ function activeAdditionalSegment(
   triggerText: string | null,
   effectText: string,
   locale: GameLocale,
+  format: 'source' | 'display',
 ): string {
+  if (format === 'display') {
+    if (!triggerText) return effectText
+    const condition =
+      locale === 'ind' ? `Saat ${triggerText.trim()}` : triggerText
+    return joinSkillText(condition, effectText, conditionSeparator(locale))
+  }
   switch (locale) {
     case 'jpn':
       return `${triggerText ?? ''}${effectText}`
@@ -417,6 +443,7 @@ export function composeActiveSkillDescription(
   data: CardSkillDescriptionData,
   locale: GameLocale,
   onFailure?: (reason: string) => void,
+  format: 'source' | 'display' = 'source',
 ): string | null {
   const fail = (reason: string) => failCardSkill(onFailure, reason)
   if (skill.liveSkillTriggerGroupId !== null) {
@@ -457,6 +484,7 @@ export function composeActiveSkillDescription(
     duration,
     probability,
     locale,
+    format,
   )
 
   if (skill.additionalLiveActiveSkillEffectGroupId === null) return main.trim()
@@ -489,7 +517,11 @@ export function composeActiveSkillDescription(
     additionalTriggerText,
     additionalEffectText,
     locale,
+    format,
   )
+  if (format === 'display') {
+    return joinSkillText(main, additional, segmentSeparator(locale))
+  }
   return `${main}${locale === 'jpn' ? '\n' : ' '}${additional}`.trim()
 }
 
@@ -497,10 +529,11 @@ function specialMainSegment(
   effectText: string,
   duration: string,
   locale: GameLocale,
+  format: 'source' | 'display',
 ): string {
   switch (locale) {
     case 'jpn':
-      return `${duration}秒間${effectText}`
+      return `${duration}秒間${format === 'display' ? '、' : ''}${effectText}`
     case 'eng':
       return `For ${duration}s, ${effectText}`
     case 'ind':
@@ -508,9 +541,9 @@ function specialMainSegment(
     case 'kor':
       return `${duration}초 동안 ${effectText}`
     case 'cht':
-      return `在 ${duration} 秒內${effectText}`
+      return `在 ${duration} 秒內${format === 'display' ? '，' : ''}${effectText}`
     case 'chs':
-      return `在 ${duration} 秒内${effectText}`
+      return `在 ${duration} 秒内${format === 'display' ? '，' : ''}${effectText}`
   }
 }
 
@@ -518,7 +551,18 @@ function specialAdditionalSegment(
   triggerText: string | null,
   effectText: string,
   locale: GameLocale,
+  format: 'source' | 'display',
 ): string {
+  if (format === 'display') {
+    if (!triggerText) return effectText
+    const condition =
+      locale === 'ind'
+        ? `saat ${triggerText.trim()}`
+        : locale === 'cht' || locale === 'chs'
+          ? `且${triggerText}`
+          : triggerText
+    return joinSkillText(condition, effectText, conditionSeparator(locale))
+  }
   switch (locale) {
     case 'jpn':
       return `${triggerText ?? ''}${effectText}`
@@ -539,6 +583,7 @@ export function composeSpecialSkillDescription(
   data: CardSkillDescriptionData,
   locale: GameLocale,
   onFailure?: (reason: string) => void,
+  format: 'source' | 'display' = 'source',
 ): string | null {
   const fail = (reason: string) => failCardSkill(onFailure, reason)
   if (
@@ -557,7 +602,7 @@ export function composeSpecialSkillDescription(
   if (duration === null) return fail('卡片特殊技能效果時間無法解析')
   const effectText = renderCardSkillRow(effect, data, locale)
   if (effectText === null) return fail('卡片特殊技能效果描述無法解析')
-  const main = specialMainSegment(effectText, duration, locale)
+  const main = specialMainSegment(effectText, duration, locale, format)
 
   if (skill.additionalLiveActiveSkillEffectGroupId === null) {
     return main.trim()
@@ -594,7 +639,11 @@ export function composeSpecialSkillDescription(
     additionalTriggerText,
     additionalEffectText,
     locale,
+    format,
   )
+  if (format === 'display') {
+    return joinSkillText(main, additional, segmentSeparator(locale))
+  }
   const separator =
     locale === 'jpn' ? '\n' : locale === 'cht' || locale === 'chs' ? '' : ' '
   return `${main}${separator}${additional}`.trim()

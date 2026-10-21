@@ -339,6 +339,30 @@ describe('composeCostumeSkillDescription', () => {
     )
   })
 
+  it('removes a sentence-ending period before the additional segment separator', () => {
+    const data = createData()
+    setDescriptions(data)
+    data.catalog.templates['effect-main-effect']!.text = localized(
+      'Grants Sense UP 80% to all.',
+    )
+    data.catalog.templates['effect-add-effect']!.text = localized(
+      'Grants Score Support Effect of 25% to all.',
+    )
+
+    expect(
+      composeCostumeSkillDescription(
+        costumeSkill({
+          additionalLiveSkillTriggerGroupId: 'add-trigger',
+          additionalLivePassiveSkillEffectGroupId: 'add-effect',
+        }),
+        data,
+        'eng',
+      ),
+    ).toBe(
+      'MAIN TRIGGER, Grants Sense UP 80% to all; ADD TRIGGER, Grants Score Support Effect of 25% to all.',
+    )
+  })
+
   it.each([
     ['jpn', 'MAIN TRIGGER、MAIN EFFECT'],
     ['cht', 'MAIN TRIGGER，MAIN EFFECT'],
