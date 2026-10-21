@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { X } from '@lucide/vue'
+
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
@@ -77,16 +79,12 @@ async function install() {
         text
         @click="dismissInstall"
       >
-        <svg
+        <X
           aria-hidden="true"
-          viewBox="0 0 24 24"
-          class="size-5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path d="m18 6-12 12M6 6l12 12" />
-        </svg>
+          :size="20"
+          :stroke-width="2"
+          color="currentColor"
+        />
       </Button>
       <Button
         v-if="installPrompt"

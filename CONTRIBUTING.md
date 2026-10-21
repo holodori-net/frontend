@@ -109,6 +109,10 @@ Localized pages live under `app/pages/[gameLocale]/`. Nuxt's `pages:extend` hook
 
 Add language resolution and route behavior tests under `tests/` when changing language handling. Verify offline selection changes preserve the previous cache if any requested page or payload cannot be downloaded.
 
+## UI icons
+
+Custom UI icons use named imports from `@lucide/vue`, rendered as 20px inline SVGs with a 2px stroke and `currentColor`. Decorative icons use `aria-hidden`. Display preferences use `SlidersHorizontal`, appearance options use `Monitor`, `Sun`, and `Moon`, and the PWA install notice uses `X` to dismiss. PrimeVue supplies its component icons; game icons use the existing asset mappings. Verify icon states, keyboard activation, theme colors, and offline rendering on the generated site.
+
 ## Member themes
 
 The build generates shared CSS from `app/themes/primevue.ts` and the component list in `shared/primevue.ts`. Register used PrimeVue components in that list and include their nested component and directive styles in `primeVueStyleDependencies`. Verify this mapping when adding components or upgrading PrimeVue. The generated stylesheet is bundled by Nuxt and cached with application assets for offline use.

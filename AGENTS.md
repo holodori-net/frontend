@@ -19,6 +19,7 @@
 
 ## 主題與素材
 
+- 自訂 UI 圖示使用 `@lucide/vue` 具名匯入，統一為 20px、2px 線寬及 `currentColor`。PrimeVue 元件內建圖示與遊戲素材沿用各自來源。
 - 主題 ID 使用 `Character.id`，預設為みこ `chr-00015`。
 - `shared/theme.ts` 定義主題型別、預設及 `avatar`／`motifMain`／`motifLight` 素材用途；素材網址保留 `assetId` 前導零，缺圖時保留成員色票或漸層底色。
 - `app/plugins/member-theme.ts` 以 `useAsyncData('member-themes', ...)` 保存 Nuxt payload，初始化偏好並更新 `data-theme-id`；composable 以 `useNuxtData` 與 `useState` 共用資料及選擇。靜態 HTML 使用みこ，hydration 後套用 cookie；無效 ID 使用預設。

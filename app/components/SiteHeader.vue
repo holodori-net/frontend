@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Monitor, Moon, SlidersHorizontal, Sun } from '@lucide/vue'
 import {
   buildLocalizedPath,
   buildLocalizedRoute,
@@ -53,9 +54,9 @@ const themeOptions = computed(() =>
   }),
 )
 const appearanceOptions = computed(() => [
-  { value: 'system', label: t('modeSystem'), icon: 'computer' },
-  { value: 'light', label: t('modeLight'), icon: 'sun' },
-  { value: 'dark', label: t('modeDark'), icon: 'moon' },
+  { value: 'system', label: t('modeSystem'), icon: Monitor },
+  { value: 'light', label: t('modeLight'), icon: Sun },
+  { value: 'dark', label: t('modeDark'), icon: Moon },
 ])
 
 function togglePreferences(event: Event) {
@@ -113,19 +114,18 @@ async function chooseGameLocale(value: GameLocale) {
       text
       rounded
       :aria-label="t('displaySettings')"
+      :title="t('displaySettings')"
       :aria-haspopup="'dialog'"
       aria-controls="display-preferences"
       :aria-expanded="preferencesOpen"
       @click="togglePreferences"
     >
-      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" class="size-5">
-        <path
-          d="M4 7h7m4 0h5M4 17h3m4 0h9M11 4v6m-4 4v6"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-        />
-      </svg>
+      <SlidersHorizontal
+        aria-hidden="true"
+        :size="20"
+        :stroke-width="2"
+        color="currentColor"
+      />
     </Button>
     <Popover
       ref="preferencesPopover"
@@ -224,65 +224,13 @@ async function chooseGameLocale(value: GameLocale) {
               :title="option.label"
               @click="colorMode.preference = option.value"
             >
-              <svg
-                v-if="option.icon === 'computer'"
+              <component
+                :is="option.icon"
                 aria-hidden="true"
-                viewBox="0 0 24 24"
-                fill="none"
-                class="size-5"
-              >
-                <rect
-                  x="3"
-                  y="4"
-                  width="18"
-                  height="13"
-                  rx="2"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                />
-                <path
-                  d="M8 21h8m-4-4v4"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                />
-              </svg>
-              <svg
-                v-else-if="option.icon === 'sun'"
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                fill="none"
-                class="size-5"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="4"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                />
-                <path
-                  d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                />
-              </svg>
-              <svg
-                v-else
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                fill="none"
-                class="size-5"
-              >
-                <path
-                  d="M20.2 15.1A8.5 8.5 0 0 1 8.9 3.8 8.5 8.5 0 1 0 20.2 15.1Z"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
+                :size="20"
+                :stroke-width="2"
+                color="currentColor"
+              />
             </button>
           </div>
         </fieldset>
