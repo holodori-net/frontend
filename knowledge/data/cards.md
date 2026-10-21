@@ -29,7 +29,7 @@
 | ✓    | `asset_id`                              | TEXT / null               | 卡面素材識別碼                                                | —                                                          | `cards[].assetId`                          | —                                                                                               |
 |      | `background_asset_id`                   | TEXT / null               | 背景素材識別欄位；實際用途 **UNKNOWN**                        | —                                                          | —                                          | 用途未確認；目前 196 筆皆為 null                                                                |
 |      | `live_skill_character_voice_id`         | TEXT / null               | Live 技能啟動時的候選語音 ID                                  | `CharacterVoice.id`                                        | —                                          | 未回傳語音；用途 **CONFIRMED**，完整抽選機率 **UNKNOWN**                                        |
-|      | `skill_tree_connect_effect_id`          | TEXT / null               | 技能樹連結效果 ID                                             | `SkillTreeConnectEffect.id`                                | —                                          | 未回傳此技能關聯                                                                                |
+| ✓    | `skill_tree_connect_effect_id`          | TEXT / null               | 技能樹連結效果 ID                                             | `SkillTreeConnectEffect.id`                                | `cards[].skillTreeConnectEffectId`         | 保留 nullable 關聯                                                                              |
 | ✓    | `reward_costume_id`                     | TEXT / null               | 附帶的 Live 服裝獎勵 ID；抽卡精選詳情顯示服裝縮圖             | `Costume.id`                                               | `cards[].rewardCostumeId`                  | 保留 null；顯示用途 **CONFIRMED**，發放條件及首次／重複取得差異 **UNKNOWN**                     |
 |      | `reward_sd_costume_id`                  | TEXT / null               | 附帶的 SD 服裝獎勵 ID；抽卡精選詳情顯示服裝縮圖               | `SdCostume.id`                                             | —                                          | 未回傳服裝；顯示用途 **CONFIRMED**，發放條件及首次／重複取得差異 **UNKNOWN**                    |
 | ✓    | `asset_type`                            | INTEGER（enum）           | 卡面素材種類；見枚舉                                          | `enums.CardAssetType`                                      | `cards[].assetType`                        | —                                                                                               |
@@ -46,6 +46,99 @@
 | ✓    | `order`                                 | INTEGER                   | 來源顯示排序值                                                | —                                                          | `cards[].order`                            | —                                                                                               |
 |      | `potential_alternative_reward`          | TEXT（JSON） / null       | 重複卡片的綻放替代獎勵；抽卡結果及卡片交換預覽顯示            | `common.Reward`                                            | —                                          | 未回傳獎勵；顯示用途 **CONFIRMED**；達最大綻放時取代點數為 **LIKELY**，完整發放門檻 **UNKNOWN** |
 |      | `acquire_reward`                        | TEXT（JSON） / null       | 取得卡片附加獎勵；抽卡結果及卡片交換預覽顯示縮圖與數量        | `common.Reward`                                            | —                                          | 未回傳獎勵；顯示用途 **CONFIRMED**，發放條件及首次／重複取得差異 **UNKNOWN**                    |
+
+## 技能樹 Connect 範圍
+
+**CONFIRMED**：Connect 效果由 `Card.skill_tree_connect_effect_id` 關聯 `SkillTreeConnectEffect.id`，再以 `skill_tree_connect_effect_extent_group_id` 查詢 `SkillTreeConnectEffectExtent.group_id`。後者每列保存一個 `(position_x, position_y)`，可用於重建範圍形狀。`SkillTreeConnectEffect` 的主鍵為 `(id, level)`；`SkillTreeConnectEffectExtent` 的主鍵為 `(group_id, position_x, position_y)`。卡片轉換保留 nullable 的 `skillTreeConnectEffectId`；列表 payload 為被卡片引用的效果提供各等級的 extent group ID 與完整六語描述，並按 group ID 去重範圍座標。
+
+`transformSkillTreeConnectEffects(database)` 依效果 ID、等級排序，回傳效果欄位及 `LangGeneratedSkillTreeConnectEffect` 六語描述，並依 group ID、y、x 排序範圍位置。列表 reader 只投影被卡片引用的效果與所需範圍；原始效果欄位留在 server，來源描述的 `[highlight]` 標記於顯示時移除。描述直接使用來源六語翻譯，不另行推導 catalog。缺少非 null 的效果、非空 extent group 或設定語言翻譯時，生成失敗並保留來源列資訊。Connect 效果描述使用遊戲語言，介面標籤使用網站語言。
+
+轉換欄位對照：
+
+| 轉換 | 來源欄位                                    | 型別            | 意義              | 關聯                                     | 回傳對應                                            | 備註／未轉換原因                     |
+| ---- | ------------------------------------------- | --------------- | ----------------- | ---------------------------------------- | --------------------------------------------------- | ------------------------------------ |
+| ✓    | `id`                                        | TEXT            | Connect 效果 ID   | `Card.skill_tree_connect_effect_id`      | `effects[id]`                                       | 依 level 排序                        |
+| ✓    | `level`                                     | INTEGER         | 效果等級          | —                                        | `effects[id][].level`                               | —                                    |
+| ✓    | `connect_effect_type`                       | INTEGER（enum） | 效果類型          | —                                        | `effects[id][].connectEffectType`                   | 原始欄位保留於 server                |
+| ✓    | `skill_tree_connect_effect_extent_group_id` | TEXT            | 範圍組 ID         | `SkillTreeConnectEffectExtent.group_id`  | `effects[id][].skillTreeConnectEffectExtentGroupId` | 列表 payload 以 `extentGroupId` 投影 |
+| ✓    | `effect_permil_up`                          | TEXT / null     | 效果提升千分比    | —                                        | `effects[id][].effectPermilUp`                      | 原始欄位保留於 server                |
+| ✓    | `additional_skill_tree_effect_id`           | TEXT / null     | 附加技能樹效果 ID | —                                        | `effects[id][].additionalSkillTreeEffectId`         | 原始欄位保留於 server                |
+| ✓    | `target_skill_tree_effect_id`               | TEXT / null     | 目標技能樹效果 ID | —                                        | `effects[id][].targetSkillTreeEffectId`             | 原始欄位保留於 server                |
+| ✓    | `target_node_type`                          | INTEGER / null  | 目標節點類型      | —                                        | `effects[id][].targetNodeType`                      | 原始欄位保留於 server                |
+| ✓    | `target_node_grade`                         | INTEGER / null  | 目標節點階級      | —                                        | `effects[id][].targetNodeGrade`                     | 原始欄位保留於 server                |
+| ✓    | `description_lang_id`                       | TEXT            | 描述文字 ID       | `LangGeneratedSkillTreeConnectEffect.id` | `effects[id][].description[language]`               | 讀取設定的六語翻譯                   |
+
+`SkillTreeConnectEffectExtent` 依範圍組 ID 聚合座標，列表 payload 對重複 group 僅保存一份：
+
+| 轉換 | 來源欄位     | 型別    | 意義      | 關聯 | 回傳對應                      | 備註／未轉換原因 |
+| ---- | ------------ | ------- | --------- | ---- | ----------------------------- | ---------------- |
+| ✓    | `group_id`   | TEXT    | 範圍組 ID | —    | `connectExtents[groupId]`     | 依 group ID 分組 |
+| ✓    | `position_x` | INTEGER | X 座標    | —    | `connectExtents[groupId][].x` | 依 x 排序        |
+| ✓    | `position_y` | INTEGER | Y 座標    | —    | `connectExtents[groupId][].y` | 依 y 排序        |
+
+來源 schema 見 [Connect 效果](https://github.com/holodori-net/android-protos/blob/main/descriptors/entity/master/skill_tree_connect_effect.gen.proto)與[範圍座標](https://github.com/holodori-net/android-protos/blob/main/descriptors/entity/master/skill_tree_connect_effect_extent.gen.proto)。[連結 API](https://github.com/holodori-net/android-protos/blob/main/descriptors/rpc/api/skill_tree.gen.proto) 的 `SkillTreeConnectNodeRequest` 使用 `character_id`、`node_group_id` 與 `card_id`；[使用者技能樹](https://github.com/holodori-net/android-protos/blob/main/descriptors/entity/transaction/user_character_skill_tree.gen.proto)亦保存連結的節點群組與卡片 ID。
+
+### 百鬼あやめ「鬼神流・ぷかぷかリゾート」
+
+**CONFIRMED**：2026-10-21 查詢本機 `master_version=452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`，卡片 ID 為 `card-00010-5-uniq-0069-00`，效果 ID 為 `skill_tree_connect_effect-skill_tree_effect_up-skill_tree_connect_effect_extent-card_area-001-rare_5`。Lv. 1 與 Lv. 2 皆引用 `skill_tree_connect_effect_extent-card_area-001`，包含六個座標：
+
+```text
+(-1, -1), (0, -1), (-1, 0), (1, 0), (-1, 1), (0, 1)
+```
+
+以 `★` 標示原點 `(0, 0)`、`■` 標示上述座標，重建結果與卡片介紹的 5×5 預覽一致：
+
+```text
+· · · · ·
+· ■ ■ · ·
+· ■ ★ ■ ·
+· ■ ■ · ·
+· · · · ·
+```
+
+**CONFIRMED**：本機 `SkillTreeNodePosition` 的 `group_id='tree-model-002'` 顯示 R-001 `(null, 1)`（leader、type 2）、B-001 `(1, null)`（card、type 3）、G-001 `(null, -1)`（ALL_MEMBER、type 4）與 Y-001 `(-1, null)`（content、type 5）；null 軸座標視為 0。官方[棋盤圖](https://www.hololive-dreams.com/_vercel/image?q=100&url=_astro%2Fimg_skill2.CUk0O-7C.png&w=3840)顯示紅在上、藍在右、綠在下、黃在左，確認棋盤 x 軸向右、y 軸向上；Connect 範圍圖沿用此方向。**LIKELY**：範圍座標相對於放置卡片的 Connect 節點，將節點位置加上座標偏移可取得受影響位置；此語意尚未從 runtime 完整追蹤。
+
+`buildConnectGraphGrid(positions)` 使用固定 5×5 網格，x 由左至右、y 由下至上。原點 `(0, 0)` 預設置中；單側超過兩格時，範圍與原點一起向對側平移一格。兩軸分別計算位移，星號跟隨原點格子。列表將網格置於 7rem 欄位，效果描述在右側，空間不足時換行；沒有 Connect 效果的卡片保留對齊空間但不顯示內容。圖形由離線 payload 生成 inline SVG，不依賴遠端素材。
+
+**CONFIRMED**：此效果 `connect_effect_type=1`，枚舉為 `SKILL_TREE_CONNECT_EFFECT_TYPE_SKILL_TREE_EFFECT_UP`。Lv. 1／2 的 `effect_permil_up` 分別為字串 `1100`／`1600`，來源描述對應範圍內 Holomem Board 效果提升 110%／160%。同一快照的 40 筆效果共用 17 組範圍、89 筆座標；沒有 `(0, 0)` 的範圍列，且同一效果 ID 的不同等級皆使用相同範圍。
+
+可於 `.data/master.sqlite` 唯讀執行下列查詢，取得此卡 Lv. 1 的範圍：
+
+```sql
+SELECT extent.position_x, extent.position_y
+FROM Card AS card
+JOIN SkillTreeConnectEffect AS effect
+  ON effect.id = card.skill_tree_connect_effect_id
+  AND effect.level = 1
+JOIN SkillTreeConnectEffectExtent AS extent
+  ON extent.group_id = effect.skill_tree_connect_effect_extent_group_id
+WHERE card.id = 'card-00010-5-uniq-0069-00'
+ORDER BY extent.position_y, extent.position_x;
+```
+
+### 範圍形狀與方向
+
+**CONFIRMED**：目前快照有 17 種不同座標範圍；以原點為中心合併 90° 旋轉變體後，共有 7 類形狀。`SkillTreeConnectEffectExtent` 只有 group ID 與 x、y 座標，方向依範圍相對於原點的幾何分布分類。下表省略 group ID 的 `skill_tree_connect_effect_extent-` 前綴；格數不含原點，形狀名稱為辨識用分類。
+
+| 範圍 ID                    | 形狀       | 方向   | 格數 |
+| -------------------------- | ---------- | ------ | ---- |
+| `card_area-001`            | 矩形加側格 | 偏左   | 6    |
+| `card_area-002`            | 半菱形     | 左     | 8    |
+| `card_area-003`            | 單向直線   | 右     | 3    |
+| `card_area-004`            | L 形       | 左＋上 | 4    |
+| `center_area-001`          | 外側十字   | 上     | 5    |
+| `center_area-002`          | 外側十字   | 右     | 5    |
+| `center_area-003`          | 外側十字   | 左     | 5    |
+| `center_area-004`          | L 形       | 左＋下 | 4    |
+| `center_area-005`          | 外側十字   | 下     | 5    |
+| `content_area-001`         | 矩形加側格 | 偏右   | 6    |
+| `content_area-002`         | 半菱形     | 右     | 8    |
+| `content_area-003`         | 單向直線   | 左     | 3    |
+| `content_area-004`         | L 形       | 右＋下 | 4    |
+| `general_purpose_area-001` | 菱形       | 全周   | 12   |
+| `leader_area-001`          | 雙向直線   | 上＋下 | 4    |
+| `leader_area-002`          | 單向直線   | 下     | 3    |
+| `leader_area-003`          | L 形       | 右＋上 | 4    |
 
 ## LangCard
 
@@ -101,7 +194,7 @@
 
 **CONFIRMED**：「篩選與排序」與「卡片顯示」面板預設皆展開；各標題列提供同樣式的 `RotateCcw` 圖示按鈕，分別重設對應設定，保留本地化提示與可存取名稱。收合時仍可重設，並保留面板收合狀態。重設按鈕寬 56px，填滿標題列高度且至少 44px 高；圖示為 20px。
 
-**CONFIRMED**：列表的「卡片顯示」提供版型及基礎資訊、被動技能、主動技能、特殊技能、隊長服裝技能五個群組；摘要計算已選群組數。基礎資訊包含可獨立選取的卡名、角色名、三圍與合計。資訊選項使用緊湊的小圓角 PrimeVue Button，以 primary 色表示選取、secondary outlined 樣式表示未選，並提供 aria-pressed。各群組名稱左側以圓形 Badge 顯示共用排序號，未選時顯示「−」。基礎資訊與三類卡片技能使用 PrimeVue InputGroup 將名稱、排序號與子項按鈕相連；群組內高度、字級與內距一致，只有外側保留小圓角。所有選項共用同一層靠上排列，基本高度為 32px；基礎資訊子項依內容寬度排列，空間不足時換行。技能群組依可用寬度整組換行；窄螢幕允許技能名稱折行，等級 chip 維持並排。預設開啟一般資訊，三類卡片技能只選 Lv. 2，各等級可獨立選取；關閉時移除對應內容與間距。全部關閉時只顯示填滿卡片寬度的卡圖、屬性與星級，保留所選版型比例及可存取卡名；直式純卡圖每列一張、靠左排列，卡片最大寬度為 256px。資訊項目定義由 `shared/game-data/card-list.ts` 的 `CARD_LIST_FIELDS` 管理；`useCardFields` 以 `holodori-card-fields` 保存 `{ fields, skillLevels }` JSON 物件，`fields` 保存群組與組內選取順序，基礎資訊成員連續排列，空陣列表示純卡圖；`skillLevels` 保存各技能已選等級。既有偏好保留選取項目，以最早的基礎資訊項目決定群組位置，組內維持選取順序；舊版陣列的已選技能使用 Lv. 2。兩種版型的基礎資訊與各技能群組都只占一個排序位置。新增部分子項保留群組位置，全部清除後再選取移至最後；技能等級遞增排列。顯示偏好跨語言共用，搜尋與排序仍使用完整列表資料。「重設顯示」重新套用目前版本的預設版型、資訊項目、技能等級與順序並儲存偏好，保留篩選、網址與面板收合狀態。
+**CONFIRMED**：列表的「卡片顯示」提供版型及基礎資訊、被動技能、主動技能、特殊技能、隊長服裝技能、Connect 六個群組；摘要計算已選群組數。基礎資訊包含可獨立選取的卡名、角色名、三圍與合計。資訊選項使用緊湊的小圓角 PrimeVue Button，以 primary 色表示選取、secondary outlined 樣式表示未選，並提供 aria-pressed。各群組名稱左側以圓形 Badge 顯示共用排序號，未選時顯示「−」。基礎資訊、三類卡片技能與 Connect 使用 PrimeVue InputGroup 將名稱、排序號與子項按鈕相連；群組內高度、字級與內距一致，只有外側保留小圓角。所有選項共用同一層靠上排列，基本高度為 32px；基礎資訊子項依內容寬度排列，空間不足時換行。技能群組依可用寬度整組換行；窄螢幕允許技能名稱折行，等級 chip 維持並排。預設開啟一般資訊，三類卡片技能只選 Lv. 2，Connect 選取所有可用等級；各等級可獨立選取。關閉時移除對應內容與間距。全部關閉時只顯示填滿卡片寬度的卡圖、屬性與星級，保留所選版型比例及可存取卡名；直式純卡圖每列一張、靠左排列，卡片最大寬度為 256px。資訊項目定義由 `shared/game-data/card-list.ts` 的 `CARD_LIST_FIELDS` 管理；`useCardFields` 以 `holodori-card-fields` 保存 `{ fields, skillLevels }` JSON 物件，`fields` 保存群組與組內選取順序，基礎資訊成員連續排列，空陣列表示純卡圖；`skillLevels` 保存各技能已選等級。既有偏好保留選取項目，以最早的基礎資訊項目決定群組位置，組內維持選取順序；舊版陣列的三類卡片技能使用 Lv. 2，已選 Connect 使用所有可用等級。缺少 `skillLevels.connectEffect` 的舊 JSON 補空選取，不套用新預設或更改既有欄位與技能等級。兩種版型的基礎資訊與各技能群組都只占一個排序位置。新增部分子項保留群組位置，全部清除後再選取移至最後；技能等級遞增排列。顯示偏好跨語言共用，搜尋與排序仍使用完整列表資料。「重設顯示」重新套用目前版本的預設版型、資訊項目、技能等級與順序並儲存偏好，保留篩選、網址與面板收合狀態。
 
 **CONFIRMED**：`06003-5-uniq-0091-00`、`00034-5-uniq-0090-00` 與 `00001-3-nrml-0000-00` 的來源完整卡圖尺寸均為 2048×1152。每張圖的 RGBA8 像素資料為 9 MiB。
 

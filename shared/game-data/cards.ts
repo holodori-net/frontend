@@ -18,6 +18,7 @@ export interface CardData {
   livePassiveSkillId: string
   liveActiveSkillId: string
   liveSpecialSkillId: string
+  skillTreeConnectEffectId: string | null
   name: LocalizedNames
   rarity: number
   attributeType: number

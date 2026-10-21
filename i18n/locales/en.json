@@ -41,8 +41,10 @@
       "passiveSkill": "Passive Skill",
       "activeSkill": "Active Skill",
       "specialSkill": "Special Skill",
-      "costume": "Leader Outfit Skill"
+      "costume": "Leader Outfit Skill",
+      "connectEffect": "Connect Effect"
     },
+    "connectGraphDescription": "The star marks the connection point; {count} squares show the affected cells.",
     "search": "Search",
     "searchPlaceholder": "Search card or character names in any game language",
     "character": "Character",

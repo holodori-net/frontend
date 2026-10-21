@@ -14,6 +14,7 @@ import { createGameDatabase } from './database.ts'
 import { calculateCardListStats } from './card-list-stats.ts'
 import { transformLiveSkillData } from './converters/live-skills.ts'
 import { transformCardSkillData } from './converters/card-skills.ts'
+import { transformSkillTreeConnectEffects } from './converters/skill-tree-connect-effects.ts'
 import {
   costumeIdsForCards,
   projectCardListSkills,
@@ -30,13 +31,47 @@ export function readCardList(): CardListPayload {
     const cards = transformCards(gameDatabase)
     if (cards.length === 0) {
       console.info('Loaded 0 cards, 0 costumes, 0 leader skills')
-      return { cards: [], costumes: {}, skills: emptySkills() }
+      return {
+        cards: [],
+        costumes: {},
+        skills: emptySkills(),
+        connectEffects: {},
+        connectExtents: {},
+      }
     }
 
     const characters = transformCharacters(gameDatabase)
     const growth = transformCardGrowth(gameDatabase)
     const liveSkills = transformLiveSkillData(gameDatabase)
     const cardSkills = transformCardSkillData(gameDatabase)
+    const connectData = transformSkillTreeConnectEffects(gameDatabase)
+    const connectEffects: CardListPayload['connectEffects'] = {}
+    const connectExtents: CardListPayload['connectExtents'] = {}
+    for (const card of cards) {
+      const id = card.skillTreeConnectEffectId
+      if (id === null || connectEffects[id]) continue
+      const levels = connectData.effects[id]
+      if (!levels?.length) {
+        throw new Error(
+          `Card ${card.id} references missing SkillTreeConnectEffect ${id} in skill_tree_connect_effect_id`,
+        )
+      }
+      connectEffects[id] = levels.map((level) => {
+        const extentGroupId = level.skillTreeConnectEffectExtentGroupId
+        const extent = connectData.extents[extentGroupId]
+        if (!extent?.length) {
+          throw new Error(
+            `SkillTreeConnectEffect ${id} level ${level.level} references missing SkillTreeConnectEffectExtent ${extentGroupId}`,
+          )
+        }
+        connectExtents[extentGroupId] = extent
+        return {
+          level: level.level,
+          extentGroupId,
+          description: level.description,
+        }
+      })
+    }
     const charactersById = new Map(
       characters.map((character) => [character.id, character]),
     )
@@ -99,6 +134,7 @@ export function readCardList(): CardListPayload {
         livePassiveSkillId: card.livePassiveSkillId,
         liveActiveSkillId: card.liveActiveSkillId,
         liveSpecialSkillId: card.liveSpecialSkillId,
+        skillTreeConnectEffectId: card.skillTreeConnectEffectId,
         characterOrder: character.order,
         characterAssetId: character.assetId,
         name: card.name,
@@ -112,9 +148,9 @@ export function readCardList(): CardListPayload {
       }
     })
     console.info(
-      `Loaded ${cardList.length} cards, ${Object.keys(projected.costumes).length} costumes, ${Object.keys(projected.skills.leaderSkills).length} leader skills, ${Object.keys(projected.skills.passiveSkills).length} passive skills, ${Object.keys(projected.skills.activeSkills).length} active skills, ${Object.keys(projected.skills.specialSkills).length} special skills`,
+      `Loaded ${cardList.length} cards, ${Object.keys(projected.costumes).length} costumes, ${Object.keys(projected.skills.leaderSkills).length} leader skills, ${Object.keys(projected.skills.passiveSkills).length} passive skills, ${Object.keys(projected.skills.activeSkills).length} active skills, ${Object.keys(projected.skills.specialSkills).length} special skills, ${Object.keys(connectEffects).length} connect effects, ${Object.keys(connectExtents).length} connect extents`,
     )
-    return { cards: cardList, ...projected }
+    return { cards: cardList, ...projected, connectEffects, connectExtents }
   } catch (cause) {
     const error = new Error(`Unable to read card data from ${databasePath}`, {
       cause,

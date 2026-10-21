@@ -6,6 +6,7 @@ import type {
   LivePassiveSkillLevelData,
   LiveSpecialSkillLevelData,
 } from './card-skills.ts'
+import type { ConnectPosition } from './skill-tree-connect-effects.ts'
 
 export type CardStatKey = 'performance' | 'technique' | 'sense'
 
@@ -16,6 +17,7 @@ export interface CardListItemData {
   livePassiveSkillId: string
   liveActiveSkillId: string
   liveSpecialSkillId: string
+  skillTreeConnectEffectId: string | null
   characterOrder: number
   characterAssetId: string | null
   name: LocalizedNames
@@ -33,6 +35,12 @@ export interface CardListItemData {
 export interface CardListCostumeData {
   name: LocalizedText
   leaderSkillId: string | null
+}
+
+export interface CardListConnectEffectLevelData {
+  level: number
+  extentGroupId: string
+  description: LocalizedText
 }
 
 export interface CardListSkillData extends Omit<
@@ -67,4 +75,6 @@ export interface CardListPayload {
   cards: CardListItemData[]
   costumes: Record<string, CardListCostumeData>
   skills: CardListSkillData
+  connectEffects: Record<string, CardListConnectEffectLevelData[]>
+  connectExtents: Record<string, ConnectPosition[]>
 }

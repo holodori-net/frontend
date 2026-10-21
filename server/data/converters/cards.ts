@@ -13,6 +13,7 @@ export function transformCards(database: GameDatabase): CardData[] {
       livePassiveSkillId: card.livePassiveSkillId,
       liveActiveSkillId: card.liveActiveSkillId,
       liveSpecialSkillId: card.liveSpecialSkillId,
+      skillTreeConnectEffectId: card.skillTreeConnectEffectId,
       nameLangId: card.nameLangId,
       rarity: card.rarity,
       attributeType: card.attributeType,
@@ -44,6 +45,7 @@ export function transformCards(database: GameDatabase): CardData[] {
     livePassiveSkillId: row.livePassiveSkillId,
     liveActiveSkillId: row.liveActiveSkillId,
     liveSpecialSkillId: row.liveSpecialSkillId,
+    skillTreeConnectEffectId: row.skillTreeConnectEffectId,
     name: localizedText(nameQuery.all({ id: row.nameLangId }), row.nameLangId, {
       languageTable: 'LangCard',
       table: 'Card',

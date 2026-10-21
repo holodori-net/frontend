@@ -19,7 +19,12 @@ function isSkillField(field: CardListField): field is CardSkillField {
 }
 
 function emptySkillLevels(): CardSkillLevelSelections {
-  return { passiveSkill: [], activeSkill: [], specialSkill: [] }
+  return {
+    passiveSkill: [],
+    activeSkill: [],
+    specialSkill: [],
+    connectEffect: [],
+  }
 }
 
 function normalizePreference(
@@ -55,7 +60,12 @@ function defaultPreference(
 ): Preference {
   const skillLevels = emptySkillLevels()
   for (const field of CARD_SKILL_FIELDS) {
-    if (availableLevels[field].includes(2)) skillLevels[field] = [2]
+    skillLevels[field] =
+      field === 'connectEffect'
+        ? [...availableLevels[field]]
+        : availableLevels[field].includes(2)
+          ? [2]
+          : []
   }
   return normalizePreference(
     CARD_LIST_FIELDS.filter(
@@ -87,7 +97,10 @@ function readStoredPreference(
       const fields = [...new Set(parsed)]
       const skillLevels = emptySkillLevels()
       for (const field of CARD_SKILL_FIELDS) {
-        if (fields.includes(field) && availableLevels[field].includes(2)) {
+        if (!fields.includes(field)) continue
+        if (field === 'connectEffect') {
+          skillLevels[field] = [...availableLevels[field]]
+        } else if (availableLevels[field].includes(2)) {
           skillLevels[field] = [2]
         }
       }
@@ -113,17 +126,22 @@ function readStoredPreference(
       ) ||
       CARD_SKILL_FIELDS.some(
         (field) =>
-          !Array.isArray(savedLevels[field]) ||
-          !(savedLevels[field] as unknown[]).every(
-            (level) => Number.isSafeInteger(level) && (level as number) > 0,
-          ),
+          (field !== 'connectEffect' && !Array.isArray(savedLevels[field])) ||
+          (savedLevels[field] !== undefined &&
+            (!Array.isArray(savedLevels[field]) ||
+              !(savedLevels[field] as unknown[]).every(
+                (level) => Number.isSafeInteger(level) && (level as number) > 0,
+              ))),
       )
     ) {
       return defaults()
     }
 
     const skillLevels = Object.fromEntries(
-      CARD_SKILL_FIELDS.map((field) => [field, savedLevels[field] as number[]]),
+      CARD_SKILL_FIELDS.map((field) => [
+        field,
+        (savedLevels[field] as number[] | undefined) ?? [],
+      ]),
     ) as CardSkillLevelSelections
     return normalizePreference(value.fields, skillLevels, availableLevels)
   } catch {

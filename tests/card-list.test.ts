@@ -40,6 +40,7 @@ function card(
     livePassiveSkillId: values.livePassiveSkillId ?? `passive-${id}`,
     liveActiveSkillId: values.liveActiveSkillId ?? `active-${id}`,
     liveSpecialSkillId: values.liveSpecialSkillId ?? `special-${id}`,
+    skillTreeConnectEffectId: values.skillTreeConnectEffectId ?? null,
     characterOrder: values.characterOrder,
     characterAssetId: values.characterAssetId ?? null,
     name: values.name ?? name,

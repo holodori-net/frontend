@@ -41,8 +41,10 @@
       "passiveSkill": "被動技能",
       "activeSkill": "主動技能",
       "specialSkill": "特殊技能",
-      "costume": "隊長服裝技能"
+      "costume": "隊長服裝技能",
+      "connectEffect": "Connect 效果"
     },
+    "connectGraphDescription": "星號標示連結位置，{count} 個方格為效果範圍。",
     "search": "搜尋",
     "searchPlaceholder": "以任一遊戲語言搜尋卡片名稱或角色名稱",
     "character": "角色",

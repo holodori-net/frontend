@@ -7,6 +7,7 @@ export const card = snakeCase.table('Card', {
   livePassiveSkillId: text().notNull(),
   liveActiveSkillId: text().notNull(),
   liveSpecialSkillId: text().notNull(),
+  skillTreeConnectEffectId: text(),
   nameLangId: text().notNull(),
   rarity: integer().notNull(),
   attributeType: integer().notNull(),

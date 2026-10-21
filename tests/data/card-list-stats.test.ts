@@ -24,6 +24,7 @@ function card(
     livePassiveSkillId: 'passive-1',
     liveActiveSkillId: 'active-1',
     liveSpecialSkillId: 'special-1',
+    skillTreeConnectEffectId: null,
     name: names,
     rarity,
     attributeType: 1,

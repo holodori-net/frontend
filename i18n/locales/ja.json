@@ -41,8 +41,10 @@
       "passiveSkill": "パッシブスキル",
       "activeSkill": "アクティブスキル",
       "specialSkill": "スペシャルスキル",
-      "costume": "リーダー衣装スキル"
+      "costume": "リーダー衣装スキル",
+      "connectEffect": "コネクト効果"
     },
+    "connectGraphDescription": "星印がコネクト位置を示し、{count}個のマスが効果範囲です。",
     "search": "検索",
     "searchPlaceholder": "ゲーム内のすべての言語でカード名・キャラクター名を検索",
     "character": "キャラクター",

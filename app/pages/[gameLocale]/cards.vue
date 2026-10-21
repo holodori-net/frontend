@@ -76,6 +76,8 @@ if (payload.value === null || payload.value === undefined) {
 const cardItems = computed(() => payload.value!.cards)
 const costumes = computed(() => payload.value!.costumes)
 const skills = computed(() => payload.value!.skills)
+const connectEffects = computed(() => payload.value!.connectEffects)
+const connectExtents = computed(() => payload.value!.connectExtents)
 const skillCatalog = buildCardSkillFilterCatalog(payload.value)
 const skillKeys = Object.keys(skillCatalog.canonicalKeys)
 const filterOptions = computed(() =>
@@ -108,7 +110,7 @@ const {
   initialized: layoutInitialized,
 } = useCardLayout()
 const availableSkillLevels = computed(() =>
-  getCardSkillAvailableLevels(skills.value),
+  getCardSkillAvailableLevels(skills.value, connectEffects.value),
 )
 const {
   fields,
@@ -854,6 +856,8 @@ function selectedOrder(group: CardListFieldGroup['key']) {
               :card="card"
               :costumes="costumes"
               :skills="skills"
+              :connect-effects="connectEffects"
+              :connect-extents="connectExtents"
               :game-locale="gameLocale"
               :stat-keys="statKeys"
               :layout="layout"

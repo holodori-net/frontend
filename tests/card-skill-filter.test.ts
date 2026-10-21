@@ -39,6 +39,7 @@ function payload(): CardListPayload {
         livePassiveSkillId: 'p1',
         liveActiveSkillId: 'a1',
         liveSpecialSkillId: 's1',
+        skillTreeConnectEffectId: null,
       },
     ],
     costumes: { costume: { name: text, leaderSkillId: 'l1' } },
@@ -278,7 +279,9 @@ function payload(): CardListPayload {
         },
       },
     },
-  } as unknown as CardListPayload
+    connectEffects: {},
+    connectExtents: {},
+  } satisfies CardListPayload
 }
 
 describe('buildCardSkillFilterCatalog', () => {

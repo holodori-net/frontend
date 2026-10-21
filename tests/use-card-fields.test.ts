@@ -12,6 +12,7 @@ const available: CardSkillLevelSelections = {
   passiveSkill: [1, 2, 5],
   activeSkill: [1, 2],
   specialSkill: [1, 3],
+  connectEffect: [1, 2],
 }
 const defaultFields: CardListField[] = [
   'name',
@@ -20,11 +21,13 @@ const defaultFields: CardListField[] = [
   'passiveSkill',
   'activeSkill',
   'costume',
+  'connectEffect',
 ]
 const defaultLevels: CardSkillLevelSelections = {
   passiveSkill: [2],
   activeSkill: [2],
   specialSkill: [],
+  connectEffect: [1, 2],
 }
 
 type TestContext = {
@@ -63,7 +66,22 @@ function mount(contextToMount = context) {
 
 function makeStored(
   fields: CardListField[],
-  skillLevels: CardSkillLevelSelections,
+  skillLevels: Partial<CardSkillLevelSelections>,
+) {
+  return JSON.stringify({
+    fields,
+    skillLevels: {
+      passiveSkill: skillLevels.passiveSkill ?? [],
+      activeSkill: skillLevels.activeSkill ?? [],
+      specialSkill: skillLevels.specialSkill ?? [],
+      connectEffect: skillLevels.connectEffect ?? [],
+    },
+  })
+}
+
+function makeLegacyStored(
+  fields: CardListField[],
+  skillLevels: Omit<CardSkillLevelSelections, 'connectEffect'>,
 ) {
   return JSON.stringify({ fields, skillLevels })
 }
@@ -78,18 +96,22 @@ afterEach(() => {
 describe('card skill field availability', () => {
   it('returns unique ascending levels from all skill groups', () => {
     expect(
-      getCardSkillAvailableLevels({
-        passiveSkills: {
-          a: [{ level: 5 }, { level: 2 }],
-          b: [{ level: 1 }, { level: 2 }],
+      getCardSkillAvailableLevels(
+        {
+          passiveSkills: {
+            a: [{ level: 5 }, { level: 2 }],
+            b: [{ level: 1 }, { level: 2 }],
+          },
+          activeSkills: { a: [{ level: 2 }, { level: 1 }] },
+          specialSkills: { a: [{ level: 3 }, { level: 1 }] },
         },
-        activeSkills: { a: [{ level: 2 }, { level: 1 }] },
-        specialSkills: { a: [{ level: 3 }, { level: 1 }] },
-      }),
+        { a: [{ level: 2 }, { level: 1 }], b: [{ level: 2 }] },
+      ),
     ).toEqual({
       passiveSkill: [1, 2, 5],
       activeSkill: [1, 2],
       specialSkill: [1, 3],
+      connectEffect: [1, 2],
     })
   })
 })
@@ -124,13 +146,23 @@ describe('useCardFields', () => {
       'legacy empty preference',
       '[]',
       [],
-      { passiveSkill: [], activeSkill: [], specialSkill: [] },
+      {
+        passiveSkill: [],
+        activeSkill: [],
+        specialSkill: [],
+        connectEffect: [],
+      },
     ],
     [
       'legacy preference keeps activation order',
       '["costume","activeSkill","name","passiveSkill"]',
       ['costume', 'activeSkill', 'name', 'passiveSkill'],
-      defaultLevels,
+      {
+        passiveSkill: [2],
+        activeSkill: [2],
+        specialSkill: [],
+        connectEffect: [],
+      },
     ],
     [
       'new preference retains selected levels and order',
@@ -140,7 +172,12 @@ describe('useCardFields', () => {
         specialSkill: [3],
       }),
       ['specialSkill', 'name', 'passiveSkill'],
-      { passiveSkill: [1, 5], activeSkill: [], specialSkill: [3] },
+      {
+        passiveSkill: [1, 5],
+        activeSkill: [],
+        specialSkill: [3],
+        connectEffect: [],
+      },
     ],
     ['malformed JSON', '[', defaultFields, defaultLevels],
     ['wrong shape', '"name"', defaultFields, defaultLevels],
@@ -232,6 +269,42 @@ describe('useCardFields', () => {
       passiveSkill: [],
       activeSkill: [2],
       specialSkill: [],
+      connectEffect: [],
+    })
+  })
+
+  it('restores all available connect effect levels from legacy field arrays', () => {
+    start({
+      getItem: vi.fn(() => '["name","connectEffect"]'),
+      setItem: vi.fn(),
+    } as unknown as Storage)
+    const result = useCardFields(available)
+    mount()
+
+    expect(result.fields.value).toEqual(['name', 'connectEffect'])
+    expect(result.skillLevels.value.connectEffect).toEqual([1, 2])
+  })
+
+  it('keeps old object preferences unchanged when connectEffect is absent', () => {
+    start({
+      getItem: vi.fn(() =>
+        makeLegacyStored(['activeSkill', 'name'], {
+          passiveSkill: [5],
+          activeSkill: [1],
+          specialSkill: [],
+        }),
+      ),
+      setItem: vi.fn(),
+    } as unknown as Storage)
+    const result = useCardFields(available)
+    mount()
+
+    expect(result.fields.value).toEqual(['activeSkill', 'name'])
+    expect(result.skillLevels.value).toEqual({
+      passiveSkill: [],
+      activeSkill: [1],
+      specialSkill: [],
+      connectEffect: [],
     })
   })
 
@@ -358,6 +431,28 @@ describe('useCardFields', () => {
     expect(setItem).toHaveBeenCalledTimes(5)
   })
 
+  it('keeps connect effects ordered, preserves partial group position, and re-adds it at the end', () => {
+    start({
+      getItem: vi.fn(() => '[]'),
+      setItem: vi.fn(),
+    } as unknown as Storage)
+    const result = useCardFields(available)
+    mount()
+
+    result.toggleField('name', true)
+    result.toggleSkillLevel('connectEffect', 2, true)
+    expect(result.fields.value).toEqual(['name', 'connectEffect'])
+    expect(result.skillLevels.value.connectEffect).toEqual([2])
+    result.toggleSkillLevel('connectEffect', 1, true)
+    expect(result.skillLevels.value.connectEffect).toEqual([1, 2])
+    result.toggleSkillLevel('connectEffect', 2, false)
+    expect(result.fields.value).toEqual(['name', 'connectEffect'])
+    result.toggleSkillLevel('connectEffect', 1, false)
+    expect(result.fields.value).toEqual(['name'])
+    result.toggleSkillLevel('connectEffect', 2, true)
+    expect(result.fields.value).toEqual(['name', 'connectEffect'])
+  })
+
   it('ignores levels that are not available', () => {
     const setItem = vi.fn()
     start({ getItem: vi.fn(() => '[]'), setItem } as unknown as Storage)
@@ -385,6 +480,7 @@ describe('useCardFields', () => {
       passiveSkill: [1, 2, 5],
       activeSkill: [1, 5],
       specialSkill: [1, 3],
+      connectEffect: [1, 2],
     })
     mount()
 
@@ -407,6 +503,7 @@ describe('useCardFields', () => {
       passiveSkill: [1, 2, 5],
       activeSkill: [1],
       specialSkill: [1, 3],
+      connectEffect: [1, 2],
     })
     mount()
 

@@ -6,10 +6,12 @@ import {
 } from '#shared/language'
 import type {
   CardListCostumeData,
+  CardListConnectEffectLevelData,
   CardListItemData,
   CardListSkillData,
   CardStatKey,
 } from '#shared/game-data/card-list-data'
+import type { ConnectPosition } from '#shared/game-data/skill-tree-connect-effects'
 import {
   composeActiveSkillDescription,
   composeCostumeSkillDescription,
@@ -36,6 +38,8 @@ const props = withDefaults(
     card: CardListItemData
     costumes: Record<string, CardListCostumeData>
     skills: CardListSkillData
+    connectEffects: Record<string, CardListConnectEffectLevelData[]>
+    connectExtents: Record<string, ConnectPosition[]>
     gameLocale: GameLocale
     statKeys: CardStatKey[]
     fields?: readonly CardListField[]
@@ -48,6 +52,7 @@ const props = withDefaults(
       passiveSkill: [2],
       activeSkill: [2],
       specialSkill: [2],
+      connectEffect: [1, 2],
     }),
     layout: 'full',
   },
@@ -159,6 +164,17 @@ const costumeDescription = computed(() => {
     lang: text === null ? locale.value : gameLocaleLanguages[props.gameLocale],
   }
 })
+const connectEffectLevels = computed(() => {
+  const effectId = props.card.skillTreeConnectEffectId
+  if (!effectId) return []
+  return (props.connectEffects[effectId] ?? [])
+    .filter((effect) => props.skillLevels.connectEffect.includes(effect.level))
+    .sort((left, right) => left.level - right.level)
+})
+const connectPositions = computed(() => {
+  const extentGroupId = connectEffectLevels.value[0]?.extentGroupId
+  return extentGroupId ? (props.connectExtents[extentGroupId] ?? []) : []
+})
 const informationHeight = computed(() => {
   if (!hasInformation.value) return '0rem'
   let height = 2
@@ -167,6 +183,8 @@ const informationHeight = computed(() => {
     else if (field === 'characterName') height += 2
     else if (field === 'parameters') height += 5
     else if (field === 'costume' && costume.value) height += 8
+    else if (field === 'connectEffect' && connectEffectLevels.value.length)
+      height += 8 + connectEffectLevels.value.length * 4
     else if (isSkillField(field)) {
       const displayedCount = skillDescriptions.value[field].length
       height += displayedCount ? 4 + displayedCount * 4 : 0
@@ -174,7 +192,9 @@ const informationHeight = computed(() => {
   }
   return `${height}rem`
 })
-function isSkillField(field: CardListField): field is CardSkillField {
+function isSkillField(
+  field: CardListField,
+): field is Exclude<CardSkillField, 'connectEffect'> {
   return (
     field === 'passiveSkill' ||
     field === 'activeSkill' ||
@@ -195,6 +215,7 @@ function fieldGroupStyle(groupIndex: number) {
     : undefined
 }
 function displayedSkillLevels(field: CardSkillField) {
+  if (field === 'connectEffect') return []
   return skillDescriptions.value[field]
 }
 const articleStyle = computed(() => ({
@@ -414,6 +435,18 @@ onMounted(() => {
               :style="fieldStyle(field)"
               :title="t(`cardList.field.${field}`)"
               :levels="displayedSkillLevels(field)"
+            />
+
+            <CardListConnectSection
+              v-else-if="
+                field === 'connectEffect' && connectEffectLevels.length
+              "
+              :class="fieldClass()"
+              :style="fieldStyle(field)"
+              :title="t('cardList.field.connectEffect')"
+              :game-locale="gameLocale"
+              :levels="connectEffectLevels"
+              :positions="connectPositions"
             />
 
             <section

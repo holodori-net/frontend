@@ -9,6 +9,7 @@ import type { CardGrowthData } from '../../shared/game-data/card-growth.ts'
 import type { CharacterData } from '../../shared/game-data/characters.ts'
 import type { LiveSkillData } from '../../shared/game-data/live-skills.ts'
 import type { CardSkillData } from '../../shared/game-data/card-skills.ts'
+import type { SkillTreeConnectData } from '../../shared/game-data/skill-tree-connect-effects.ts'
 import type { LocalizedNames } from '../../shared/game-data/localized-text.ts'
 import { readCardList } from '../../server/data/card-list.ts'
 import { transformCardGrowth } from '../../server/data/converters/card-growth.ts'
@@ -16,6 +17,7 @@ import { transformCards } from '../../server/data/converters/cards.ts'
 import { transformCharacters } from '../../server/data/converters/characters.ts'
 import { transformLiveSkillData } from '../../server/data/converters/live-skills.ts'
 import { transformCardSkillData } from '../../server/data/converters/card-skills.ts'
+import { transformSkillTreeConnectEffects } from '../../server/data/converters/skill-tree-connect-effects.ts'
 
 vi.mock('../../server/data/converters/cards.ts', () => ({
   transformCards: vi.fn(),
@@ -32,12 +34,16 @@ vi.mock('../../server/data/converters/live-skills.ts', () => ({
 vi.mock('../../server/data/converters/card-skills.ts', () => ({
   transformCardSkillData: vi.fn(),
 }))
+vi.mock('../../server/data/converters/skill-tree-connect-effects.ts', () => ({
+  transformSkillTreeConnectEffects: vi.fn(),
+}))
 
 const transformCardsMock = vi.mocked(transformCards)
 const transformCharactersMock = vi.mocked(transformCharacters)
 const transformCardGrowthMock = vi.mocked(transformCardGrowth)
 const transformLiveSkillDataMock = vi.mocked(transformLiveSkillData)
 const transformCardSkillDataMock = vi.mocked(transformCardSkillData)
+const transformConnectDataMock = vi.mocked(transformSkillTreeConnectEffects)
 
 const names: LocalizedNames = {
   jpn: '櫻巫女',
@@ -56,6 +62,7 @@ function createCard(overrides: Partial<CardData> = {}): CardData {
     livePassiveSkillId: 'passive-1',
     liveActiveSkillId: 'active-1',
     liveSpecialSkillId: 'special-1',
+    skillTreeConnectEffectId: null,
     name: names,
     rarity: 5,
     attributeType: 2,
@@ -282,6 +289,31 @@ function captureError(callback: () => unknown): unknown {
   throw new Error('Expected the callback to fail')
 }
 
+function createConnectData(): SkillTreeConnectData {
+  return {
+    effects: {
+      'connect-1': [1, 2].map((level) => ({
+        id: 'connect-1',
+        level,
+        connectEffectType: 1,
+        skillTreeConnectEffectExtentGroupId: 'extent-1',
+        effectPermilUp: level === 1 ? '1100' : '1600',
+        additionalSkillTreeEffectId: null,
+        targetSkillTreeEffectId: null,
+        targetNodeType: null,
+        targetNodeGrade: null,
+        description: names,
+      })),
+    },
+    extents: {
+      'extent-1': [
+        { x: -1, y: 1 },
+        { x: 1, y: 0 },
+      ],
+    },
+  }
+}
+
 describe('card list reader', () => {
   let originalDirectory: string
   let temporaryDirectory: string
@@ -300,8 +332,10 @@ describe('card list reader', () => {
     transformCardGrowthMock.mockReset()
     transformLiveSkillDataMock.mockReset()
     transformCardSkillDataMock.mockReset()
+    transformConnectDataMock.mockReset()
     transformLiveSkillDataMock.mockReturnValue(createLiveSkills())
     transformCardSkillDataMock.mockReturnValue(createCardSkills())
+    transformConnectDataMock.mockReturnValue({ effects: {}, extents: {} })
   })
 
   afterEach(async () => {
@@ -350,6 +384,7 @@ describe('card list reader', () => {
           livePassiveSkillId: 'passive-1',
           liveActiveSkillId: 'active-1',
           liveSpecialSkillId: 'special-1',
+          skillTreeConnectEffectId: null,
           characterOrder: 7,
           characterAssetId: 'character-asset-1',
           name: names,
@@ -370,6 +405,7 @@ describe('card list reader', () => {
           livePassiveSkillId: 'passive-1',
           liveActiveSkillId: 'active-1',
           liveSpecialSkillId: 'special-1',
+          skillTreeConnectEffectId: null,
           characterOrder: 7,
           characterAssetId: null,
           name: names,
@@ -388,6 +424,8 @@ describe('card list reader', () => {
         'costume-1': { name: names, leaderSkillId: null },
         'costume-2': { name: names, leaderSkillId: null },
       },
+      connectEffects: {},
+      connectExtents: {},
       skills: {
         leaderSkills: {},
         passiveSkills: createCardSkills().passiveSkills,
@@ -420,6 +458,7 @@ describe('card list reader', () => {
     expect(transformCardGrowthMock).toHaveBeenCalledOnce()
     expect(transformLiveSkillDataMock).toHaveBeenCalledOnce()
     expect(transformCardSkillDataMock).toHaveBeenCalledOnce()
+    expect(transformConnectDataMock).toHaveBeenCalledOnce()
     expect(closeSpy).toHaveBeenCalledOnce()
   })
 
@@ -440,8 +479,83 @@ describe('card list reader', () => {
     expect(transformCardGrowthMock).not.toHaveBeenCalled()
     expect(transformLiveSkillDataMock).not.toHaveBeenCalled()
     expect(transformCardSkillDataMock).not.toHaveBeenCalled()
+    expect(transformConnectDataMock).not.toHaveBeenCalled()
     expect(closeSpy).toHaveBeenCalledOnce()
   })
+
+  it('projects reachable Connect levels and shares their extent across cards', () => {
+    const setup = new DatabaseSync(
+      resolve(process.cwd(), '.data/master.sqlite'),
+    )
+    setup.close()
+    closeSpy.mockClear()
+    transformCardsMock.mockReturnValue([
+      createCard({ skillTreeConnectEffectId: 'connect-1' }),
+      createCard({ id: 'card-2', skillTreeConnectEffectId: 'connect-1' }),
+      createCard({ id: 'card-3' }),
+    ])
+    transformCharactersMock.mockReturnValue([createCharacter()])
+    transformCardGrowthMock.mockReturnValue(createGrowth())
+    const data = createConnectData()
+    data.effects.unused = data.effects['connect-1']!.map((level) => ({
+      ...level,
+      id: 'unused',
+      skillTreeConnectEffectExtentGroupId: 'unused-extent',
+    }))
+    data.extents['unused-extent'] = [{ x: 3, y: 0 }]
+    transformConnectDataMock.mockReturnValue(data)
+
+    const payload = readCardList()
+    expect(payload.cards.map((card) => card.skillTreeConnectEffectId)).toEqual([
+      'connect-1',
+      'connect-1',
+      null,
+    ])
+    expect(payload.connectEffects).toEqual({
+      'connect-1': [1, 2].map((level) => ({
+        level,
+        extentGroupId: 'extent-1',
+        description: names,
+      })),
+    })
+    expect(payload.connectExtents).toEqual({
+      'extent-1': data.extents['extent-1'],
+    })
+    expect(closeSpy).toHaveBeenCalledOnce()
+  })
+
+  it.each(['effect', 'extent'] as const)(
+    'preserves the source error for a missing Connect %s',
+    (missing) => {
+      const setup = new DatabaseSync(
+        resolve(process.cwd(), '.data/master.sqlite'),
+      )
+      setup.close()
+      closeSpy.mockClear()
+      transformCardsMock.mockReturnValue([
+        createCard({ skillTreeConnectEffectId: 'connect-1' }),
+      ])
+      transformCharactersMock.mockReturnValue([createCharacter()])
+      transformCardGrowthMock.mockReturnValue(createGrowth())
+      const data = createConnectData()
+      if (missing === 'effect') data.effects = {}
+      else data.extents = {}
+      transformConnectDataMock.mockReturnValue(data)
+
+      const error = captureError(readCardList)
+      expect(error).toMatchObject({
+        message: expect.stringContaining('Unable to read card data'),
+        cause: {
+          message: expect.stringContaining(
+            missing === 'effect'
+              ? 'Card card-1 references missing SkillTreeConnectEffect connect-1'
+              : 'SkillTreeConnectEffect connect-1 level 1 references missing SkillTreeConnectEffectExtent extent-1',
+          ),
+        },
+      })
+      expect(closeSpy).toHaveBeenCalledOnce()
+    },
+  )
 
   it('logs each locale failure for an unresolved selected leader skill', () => {
     const setup = new DatabaseSync(
