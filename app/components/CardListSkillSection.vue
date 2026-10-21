@@ -32,7 +32,7 @@ defineProps<{
           {{ $t('cardList.skillLevel', { level: item.level }) }}
         </span>
         <p
-          class="game-text mb-0 min-w-0 text-sm leading-relaxed wrap-anywhere"
+          class="mb-0 min-w-0 text-sm leading-relaxed wrap-anywhere"
           :lang="item.lang"
         >
           <CardListSkillText :text="item.text" :lang="item.lang" />

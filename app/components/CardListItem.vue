@@ -329,7 +329,7 @@ onMounted(() => {
           <template v-for="field in group.fields" :key="field">
             <p
               v-if="field === 'name'"
-              class="game-text mb-0 min-w-0 text-base font-semibold leading-snug wrap-anywhere"
+              class="mb-0 min-w-0 text-base font-semibold leading-snug wrap-anywhere"
               :class="fieldClass()"
               :style="fieldStyle(field)"
               :lang="cardName.lang"
@@ -338,7 +338,7 @@ onMounted(() => {
             </p>
             <p
               v-else-if="field === 'characterName'"
-              class="game-text mb-0 text-sm text-muted-color wrap-anywhere"
+              class="mb-0 text-sm text-muted-color wrap-anywhere"
               :class="fieldClass()"
               :style="fieldStyle(field)"
               :lang="characterName.lang"
@@ -439,14 +439,14 @@ onMounted(() => {
                 >
                   <span>{{ t('cardList.field.costume') }}</span>
                   <span
-                    class="game-text ml-1 text-xs font-normal text-muted-color wrap-anywhere"
+                    class="ml-1 text-xs font-normal text-muted-color wrap-anywhere"
                     :lang="costumeName.lang"
                   >
                     {{ costumeName.text }}
                   </span>
                 </h3>
               </Divider>
-              <p class="game-text mb-0 text-sm leading-relaxed">
+              <p class="mb-0 text-sm leading-relaxed">
                 <CardListSkillText
                   :text="costumeDescription.text"
                   :lang="costumeDescription.lang"

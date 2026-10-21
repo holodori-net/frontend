@@ -311,14 +311,12 @@ function selectedOrder(group: CardListFieldGroup['key']) {
                               size="large"
                               loading-skeleton
                             />
-                            <span class="game-text" :lang="option.lang">{{
-                              option.text
-                            }}</span>
+                            <span :lang="option.lang">{{ option.text }}</span>
                           </div>
                         </template>
                         <template #chip="{ value, removeCallback }">
                           <Chip
-                            class="game-text p-multiselect-chip"
+                            class="p-multiselect-chip"
                             :label="
                               characterOptions.find(
                                 (option) => option.value === value,

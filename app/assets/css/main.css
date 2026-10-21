@@ -54,7 +54,7 @@ svg,
   user-select: none;
 }
 
-.game-text {
+[lang]:not(html) {
   text-autospace: normal;
 }
 

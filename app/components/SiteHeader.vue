@@ -263,7 +263,7 @@ async function chooseGameLocale(value: GameLocale) {
                   :src="theme.assets.avatar"
                   :color="theme.color1"
                 />
-                <span class="game-text truncate" :lang="themeName.lang">{{
+                <span class="truncate" :lang="themeName.lang">{{
                   themeName.text
                 }}</span>
                 <span class="ml-auto flex shrink-0 gap-1" aria-hidden="true">
@@ -296,11 +296,9 @@ async function chooseGameLocale(value: GameLocale) {
                   />
                 </span>
                 <span class="grid min-w-0">
-                  <span
-                    class="game-text truncate"
-                    :lang="slotProps.option.lang"
-                    >{{ slotProps.option.text }}</span
-                  >
+                  <span class="truncate" :lang="slotProps.option.lang">{{
+                    slotProps.option.text
+                  }}</span>
                   <span class="truncate text-xs text-muted-color">{{
                     slotProps.option.id
                   }}</span>

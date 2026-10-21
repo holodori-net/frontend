@@ -68,7 +68,7 @@ const fallbackTextColor = computed(() =>
         </span>
       </div>
       <p
-        class="game-text m-0 w-full text-center text-sm leading-snug"
+        class="m-0 w-full text-center text-sm leading-snug"
         :lang="displayName.lang"
       >
         {{ displayName.text }}
