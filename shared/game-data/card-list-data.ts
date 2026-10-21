@@ -1,6 +1,6 @@
 import type { LocalizedNames, LocalizedText } from './localized-text.ts'
 import type { CardSkillDescriptionData } from './live-skill-description.ts'
-import type { LiveLeaderSkillData } from './live-skills.ts'
+import type { LiveLeaderSkillData, SkillDescription } from './live-skills.ts'
 import type {
   LiveActiveSkillLevelData,
   LivePassiveSkillLevelData,
@@ -35,11 +35,32 @@ export interface CardListCostumeData {
   leaderSkillId: string | null
 }
 
-export interface CardListSkillData extends CardSkillDescriptionData {
+export interface CardListSkillData extends Omit<
+  CardSkillDescriptionData,
+  'effects' | 'activeEffects'
+> {
   leaderSkills: Record<string, LiveLeaderSkillData>
   passiveSkills: Record<string, LivePassiveSkillLevelData[]>
   activeSkills: Record<string, LiveActiveSkillLevelData[]>
   specialSkills: Record<string, LiveSpecialSkillLevelData[]>
+  effects: Readonly<
+    Record<
+      string,
+      readonly {
+        type: number
+        description: SkillDescription | null
+      }[]
+    >
+  >
+  activeEffects: Readonly<
+    Record<
+      string,
+      readonly {
+        type: number
+        description: SkillDescription | null
+      }[]
+    >
+  >
 }
 
 export interface CardListPayload {

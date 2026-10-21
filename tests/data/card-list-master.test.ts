@@ -149,12 +149,17 @@ describe.skipIf(!existsSync(sourcePath))(
         for (const groups of [
           payload.skills.effects,
           payload.skills.activeEffects,
-          payload.skills.triggers,
         ]) {
           for (const rows of Object.values(groups)) {
             for (const row of rows) {
-              expect(Object.keys(row)).toEqual(['description'])
+              expect(Object.keys(row).sort()).toEqual(['description', 'type'])
+              expect(typeof row.type).toBe('number')
             }
+          }
+        }
+        for (const rows of Object.values(payload.skills.triggers)) {
+          for (const row of rows) {
+            expect(Object.keys(row)).toEqual(['description'])
           }
         }
         for (const target of payload.skills.targets) {

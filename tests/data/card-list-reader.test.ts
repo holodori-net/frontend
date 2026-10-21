@@ -393,10 +393,10 @@ describe('card list reader', () => {
         passiveSkills: createCardSkills().passiveSkills,
         activeSkills: createCardSkills().activeSkills,
         specialSkills: createCardSkills().specialSkills,
-        effects: { 'p-effect': [{ description: null }] },
+        effects: { 'p-effect': [{ type: 0, description: null }] },
         activeEffects: {
-          'a-effect': [{ description: null }],
-          's-effect': [{ description: null }],
+          'a-effect': [{ type: 0, description: null }],
+          's-effect': [{ type: 0, description: null }],
         },
         triggers: {},
         targets: [],
@@ -510,7 +510,7 @@ describe('card list reader', () => {
 
     expect(payload.cards[0]?.costumeId).toBe('costume-1')
     expect(payload.skills.effects['effect-group']).toEqual([
-      { description: null },
+      { type: 1, description: null },
     ])
     expect(warning).toHaveBeenCalledTimes(6)
     expect(warning).toHaveBeenCalledWith(

@@ -13,6 +13,11 @@ import type {
 } from './card-skills.ts'
 
 export interface SkillDescriptionData {
+  formatSummaryValue?: (
+    field: string,
+    value: string,
+    locale: GameLocale,
+  ) => string | undefined
   catalog: {
     templates: Readonly<
       Record<string, Pick<DescriptionTemplate, 'parameters' | 'text'>>
@@ -24,7 +29,10 @@ export interface SkillDescriptionData {
 
 export interface CostumeSkillDescriptionData extends SkillDescriptionData {
   effects: Readonly<
-    Record<string, readonly { description: SkillDescription | null }[]>
+    Record<
+      string,
+      readonly { type?: number; description: SkillDescription | null }[]
+    >
   >
   triggers: Readonly<
     Record<string, readonly { description: SkillDescription | null }[]>
@@ -33,7 +41,10 @@ export interface CostumeSkillDescriptionData extends SkillDescriptionData {
 
 export interface CardSkillDescriptionData extends CostumeSkillDescriptionData {
   activeEffects: Readonly<
-    Record<string, readonly { description: SkillDescription | null }[]>
+    Record<
+      string,
+      readonly { type?: number; description: SkillDescription | null }[]
+    >
   >
 }
 
@@ -66,7 +77,14 @@ export function renderSkillDescription(
       if (value === null || value === undefined) return null
 
       if (typeof value === 'number' || typeof value === 'string') {
-        values.set(name, String(value))
+        values.set(
+          name,
+          data.formatSummaryValue?.(
+            `${current.templateId}:${name}`,
+            String(value),
+            locale,
+          ) ?? String(value),
+        )
         continue
       }
 
@@ -381,18 +399,21 @@ function probabilityLabel(
   }
   const label =
     data.catalog.labels.probability?.[String(probability)]?.[locale] ?? null
-  return label === null ? null : stripHighlight(label)
+  const resolved = label === null ? null : stripHighlight(label)
+  return resolved === null
+    ? null
+    : (data.formatSummaryValue?.('probabilityLabel', resolved, locale) ??
+        resolved)
 }
 
 function activeMainSegment(
   effectText: string,
-  skill: LiveActiveSkillLevelData,
   duration: string | null,
   probability: string,
   locale: GameLocale,
   format: 'source' | 'display',
+  coolTime: string,
 ): string {
-  const coolTime = durationSeconds(skill.coolTimeMillisecond)!
   const chance = probability
   switch (locale) {
     case 'jpn':
@@ -465,26 +486,33 @@ export function composeActiveSkillDescription(
     true,
   )
   if (!effect) return fail('卡片主動技能主要效果缺少資料或不是單列')
-  const duration =
+  const rawDuration =
     skill.effectDurationMillisecond === null
       ? null
       : durationSeconds(skill.effectDurationMillisecond)
-  if (skill.effectDurationMillisecond !== null && duration === null) {
+  if (skill.effectDurationMillisecond !== null && rawDuration === null) {
     return fail('卡片主動技能效果時間無法解析')
   }
-  const coolTime = durationSeconds(skill.coolTimeMillisecond)
-  if (coolTime === null) return fail('卡片主動技能冷卻時間無法解析')
+  const duration =
+    rawDuration === null
+      ? null
+      : (data.formatSummaryValue?.('effectDuration', rawDuration, locale) ??
+        rawDuration)
+  const rawCoolTime = durationSeconds(skill.coolTimeMillisecond)
+  if (rawCoolTime === null) return fail('卡片主動技能冷卻時間無法解析')
+  const coolTime =
+    data.formatSummaryValue?.('coolTime', rawCoolTime, locale) ?? rawCoolTime
   const probability = probabilityLabel(skill, data, locale)
   if (probability === null) return fail('卡片主動技能發動機率尚未確認')
   const effectText = renderCardSkillRow(effect, data, locale)
   if (effectText === null) return fail('卡片主動技能效果描述無法解析')
   const main = activeMainSegment(
     effectText,
-    skill,
     duration,
     probability,
     locale,
     format,
+    coolTime,
   )
 
   if (skill.additionalLiveActiveSkillEffectGroupId === null) return main.trim()
@@ -598,8 +626,11 @@ export function composeSpecialSkillDescription(
     true,
   )
   if (!effect) return fail('卡片特殊技能主要效果缺少資料或不是單列')
-  const duration = durationSeconds(skill.effectDurationMillisecond)
-  if (duration === null) return fail('卡片特殊技能效果時間無法解析')
+  const rawDuration = durationSeconds(skill.effectDurationMillisecond)
+  if (rawDuration === null) return fail('卡片特殊技能效果時間無法解析')
+  const duration =
+    data.formatSummaryValue?.('effectDuration', rawDuration, locale) ??
+    rawDuration
   const effectText = renderCardSkillRow(effect, data, locale)
   if (effectText === null) return fail('卡片特殊技能效果描述無法解析')
   const main = specialMainSegment(effectText, duration, locale, format)

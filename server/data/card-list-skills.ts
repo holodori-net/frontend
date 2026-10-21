@@ -165,12 +165,12 @@ export function projectCardListSkills(
         triggers.add(row.additionalLiveSkillTriggerGroupId)
     }
 
-  const effectGroups = projectGroups(
+  const effectGroups = projectEffectGroups(
     effects,
     cardSkills.effects,
     'LivePassiveSkillEffect',
   )
-  const activeEffectGroups = projectGroups(
+  const activeEffectGroups = projectEffectGroups(
     activeEffects,
     cardSkills.activeEffects,
     'LiveActiveSkillEffect',
@@ -254,7 +254,13 @@ export function projectCardListSkills(
       const template = cardSkills.catalog.templates[id]
       if (!template)
         throw new Error(`Missing description template ${id} in skill catalog`)
-      return [id, { parameters: template.parameters, text: template.text }]
+      return [
+        id,
+        {
+          parameters: template.parameters,
+          text: template.text,
+        },
+      ]
     }),
   )
   const labelProjection = Object.fromEntries(
@@ -351,6 +357,25 @@ function projectGroups<T extends { description: SkillDescription | null }>(
           `Missing ${kind} group ${id} referenced by a card skill`,
         )
       return [id, rows.map(({ description }) => ({ description }))]
+    }),
+  )
+}
+
+function projectEffectGroups<
+  T extends { type: number; description: SkillDescription | null },
+>(
+  ids: Set<string>,
+  source: Record<string, T[]>,
+  kind: string,
+): Record<string, { type: number; description: SkillDescription | null }[]> {
+  return Object.fromEntries(
+    [...ids].map((id) => {
+      const rows = source[id]
+      if (!rows?.length)
+        throw new Error(
+          `Missing ${kind} group ${id} referenced by a card skill`,
+        )
+      return [id, rows.map(({ type, description }) => ({ type, description }))]
     }),
   )
 }

@@ -241,7 +241,10 @@ describe('projectCardListSkills', () => {
     expect(Object.keys(result.skills.leaderSkills)).toEqual(['skill-1'])
     expect(result.skills.effects).toEqual({
       'effect-group': [
-        { description: data().effects['effect-group']![0]!.description },
+        {
+          type: 1,
+          description: data().effects['effect-group']![0]!.description,
+        },
       ],
     })
     expect(result.skills.targets.map(({ id }) => id)).toEqual(['target-1'])
@@ -335,7 +338,7 @@ describe('projectCardListSkills', () => {
     expect(Object.keys(result.skills.passiveSkills)).toEqual(['passive-1'])
     expect(result.skills.catalog.labels.probability).toEqual({ '370': text })
     expect(result.skills.activeEffects).toEqual({
-      'active-effect': [{ description: null }],
+      'active-effect': [{ type: 8, description: null }],
     })
     expect(result.skills.effects['unused-group']).toBeUndefined()
     expect(result.skills).not.toHaveProperty('pendingDescriptions')
@@ -346,7 +349,7 @@ describe('projectCardListSkills', () => {
     source.effects['effect-group']![0]!.description = null
     const result = project(source)
     expect(result.skills.effects['effect-group']).toEqual([
-      { description: null },
+      { type: 1, description: null },
     ])
     expect(result.skills.targets).toEqual([])
     expect(result.skills.catalog.templates).toEqual({})

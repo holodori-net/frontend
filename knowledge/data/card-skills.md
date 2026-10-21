@@ -8,7 +8,7 @@
 
 `Card.live_passive_skill_id`、`live_active_skill_id`、`live_special_skill_id` 均為非 nullable 的 TEXT，由 `transformCards()` 分別回傳 `livePassiveSkillId`、`liveActiveSkillId`、`liveSpecialSkillId`。各自關聯 `LivePassiveSkill.id`、`LiveActiveSkill.id`、`LiveSpecialSkill.id`；這三張 ID 表皆只有非 nullable TEXT 主鍵 `id`。
 
-各類技能的全部等級來自對應 `*SkillLevel` 表，包含未直接被卡片引用的主動技能。轉換保留來源等級，不選取最高等級。列表保留卡片的三類技能 ID，按 ID 共用被引用技能的全部等級及可達描述依賴。主動效果以獨立的 `activeEffects` 字典保存精簡描述；服裝與卡片技能共用模板、Target 與實體標籤，機率標籤依選中主動技能各等級的原始機率值收集。技能等級保留組合所需欄位，效果的原始欄位及待確認診斷留在 server。
+各類技能的全部等級來自對應 `*SkillLevel` 表，包含未直接被卡片引用的主動技能。轉換保留來源等級，不選取最高等級。列表保留卡片的三類技能 ID，按 ID 共用被引用技能的全部等級及可達描述依賴。主動效果以獨立的 `activeEffects` 字典保存精簡描述；服裝與卡片技能共用模板、Target 與實體標籤，機率標籤依選中主動技能各等級的原始機率值收集。技能等級保留組合所需欄位，效果的 type 與描述保留於列表，其餘原始欄位及待確認診斷留在 server。
 
 ## LivePassiveSkillLevel
 
@@ -107,10 +107,18 @@
 
 首次使用開啟一般資訊，三類卡片技能只選 Lv. 2。`holodori-card-fields` 以 `{ fields, skillLevels }` 保存資訊順序與等級；既有偏好保留選取項目，基礎資訊依最早出現項目歸組並保留組內順序；舊版有效陣列的已選技能使用 Lv. 2。「重設顯示」恢復目前版本的預設版型、資訊項目、技能等級與順序並儲存偏好；技能使用可用的 Lv. 2。清空某類技能的等級會移除整個區塊及間距。個別卡片缺少已選等級時不顯示空標題，但保留完整卡圖的共用列位置及直式清單的欄位位置。描述無法組合時保留該等級並顯示本地化提示；缺少必要技能或等級來源使生成失敗。
 
+## 技能篩選資料
+
+`buildCardSkillFilterCatalog(payload)` 從列表資料建立四類技能的共用選項，保留來源識別、等價來源對照、卡片關聯與六語摘要。同類型的全部等級、條件、效果、目標及時間／機率結構相同時合併，使用排序最前的來源識別作為選項 key；實體以來源 ID 識別。無法解析的描述保留獨立來源。
+
+列表效果保留 `type` 與 `description`；其他原始效果欄位留在 server。被動效果 4／5／6／8／10 對應表現力提升、技巧提升、品味提升、全能力提升與分數加成效果提升；主動效果 1／5／6／8／9 對應分數提升、分數加成效果提升、技能發動機率提升、生命值回復與判定強化。各效果依配對的主要或附加 Trigger 判定條件，發動間隔與機率沿用技能描述。
+
+摘要由結構化參數組合，各等級不同數值依來源等級順序以 `/` 串接；全部相同時只顯示一次。有差異的重複值保留完整序列，例如 `35/40/35%`。實體名稱及屬性標記保留。無法共用句型時，同一選項保存各等級完整描述。篩選不依賴卡片顯示的已選等級。
+
 ## 觀察與驗證
 
 2026-10-20 本機快照 `master_version=452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`：196 個被動技能／392 列等級、198 個主動技能／395 列等級、196 個特殊技能／392 列等級；有 2 個主動技能未被卡片直接引用。主動效果共 55 筆（type 1：22、5：22、6：6、8：3、9：2）。
 
-**CONFIRMED**：此快照的列表投影包含 196 張卡片、三類技能各 392 列等級。`JSON.stringify(readCardList())` 為 848,532 bytes，以 Node.js `gzipSync` 預設設定壓縮為 70,185 bytes；Nuxt 生成的 payload 使用自己的序列化格式。
+**CONFIRMED**：此快照的列表投影包含 196 張卡片、三類技能各 392 列等級；784 個來源技能識別合併為 368 個篩選選項。`JSON.stringify(readCardList())` 為 850,771 bytes，以 Node.js `gzipSync` 預設設定壓縮為 70,185 bytes；Nuxt 生成的 payload 使用自己的序列化格式。
 
 `tests/data/card-skills-master.test.ts` 驗證全部 330 個主動效果六語描述與 7,074 個完整技能描述。自動歸納比對只移除來源 `[highlight]` 標記及首尾空白；已確認模板另驗證完整組合，允許獨立文案。共用的 Indonesia Target 因人數為 null 保持待確認，詳見 [服裝技能](costume-live-skills.md#描述-catalog-與確認流程)。記憶體 SQLite 測試涵蓋欄位保留、排序、錯誤與轉換入口的資料表邊界；列表投影測試驗證全部被引用等級的六語組合與完整 converter 一致、移除未引用資料及缺少必要等級時的錯誤。指令見 [CONTRIBUTING.md](../../CONTRIBUTING.md)。
