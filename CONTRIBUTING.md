@@ -43,6 +43,12 @@ Confirmed templates live in `server/data/live-skill-description-templates.ts`, g
 
 When assigning parallel work, keep each domain's transform, types, tests, and data dictionary under one owner. Coordinate changes to shared helpers, readers, and the knowledge index with the integration owner. Data typecheck includes all domain source and test files. Data modules use explicit `.ts` relative import paths and `import type` for types. Runtime imports from the shared directory use `#shared`; Nuxt and Vitest resolve the alias, and `package.json` maps it through Node's `imports` field for build scripts.
 
+## GitHub Pages deployment
+
+GitHub Pages uses the **GitHub Actions** source and the `holodori.net` custom domain. The `github-pages` environment is restricted to the `main` branch. Pushes to `main` run the deployment workflow; it can also be started manually from Actions on `main`.
+
+The workflow installs dependencies, downloads the latest SQLite release, runs typecheck, lint, format, tests, and static generation, then deploys `.output/public` with the built-in `GITHUB_TOKEN`. A failed check or build prevents deployment, leaving the current website in place.
+
 ## Checks
 
 Run the checks before submitting changes:

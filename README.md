@@ -68,3 +68,5 @@ Production builds use the GA4 web data stream Measurement ID `G-3Z3154J0WR` by d
 In the GA4 web data stream's **Enhanced measurement → Page views** settings, enable **Page changes based on browser history events** to track in-app navigation.
 
 The output is written to `.output/public`. It includes the language entry pages at `/`, `/cards`, `/characters`, and `/settings`, each configured language combination for the home, cards, characters, and settings pages, along with the sitemap, robots file, web manifest, and service worker. The sitemap lists the localized home, cards, and characters pages. Deploy the contents of that directory to a static host configured to serve generated paths and `404.html` fallback behavior. The service worker and install prompt require HTTPS in production.
+
+Pushes to `main` build and deploy the site to GitHub Pages. You can also run **Deploy to GitHub Pages** manually from GitHub Actions on `main`.
