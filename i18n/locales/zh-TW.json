@@ -1,6 +1,11 @@
 {
   "siteName": "Holodori 資料庫",
-  "tagline": "查詢遊戲資訊的資料庫。",
+  "homePage": {
+    "description": "瀏覽卡片與角色，查找你需要的遊戲資訊。",
+    "explore": "探索資料庫",
+    "cards": "瀏覽卡面、能力、技能與 Connect，依條件搜尋與篩選。",
+    "characters": "依所屬團體瀏覽角色，查看各語言名稱。"
+  },
   "home": "首頁",
   "cards": "卡片",
   "characters": "角色",

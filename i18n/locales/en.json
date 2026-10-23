@@ -1,6 +1,11 @@
 {
   "siteName": "Holodori Database",
-  "tagline": "A database for exploring game information.",
+  "homePage": {
+    "description": "Browse cards and characters to find the game information you need.",
+    "explore": "Explore the database",
+    "cards": "Browse card art, stats, skills, and Connect effects. Search and filter by your criteria.",
+    "characters": "Browse characters by group and view their names in each language."
+  },
   "home": "Home",
   "cards": "Cards",
   "characters": "Characters",

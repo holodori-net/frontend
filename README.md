@@ -6,6 +6,8 @@ Holodori Database is a static Nuxt site for browsing game reference data. The si
 
 Pages use `/{site-language}/{game-language}`. For example, `/zh-TW/jpn/cards` displays the card page with a Traditional Chinese interface and Japanese game content. Site languages are `ja`, `en`, and `zh-TW`; game content languages are `jpn`, `eng`, `ind`, `kor`, `cht`, and `chs`.
 
+The home page links to **Cards** and **Characters**. Select the site title in the header to return home.
+
 The pages `/`, `/cards`, `/characters`, and `/settings` select languages from saved manual preferences first, then browser languages, then Japanese defaults. A complete language URL is shown as written. When it differs from a previously selected language, the site asks whether to use the saved preferences or keep the linked languages. Dismissing this prompt by clicking outside keeps the linked languages for the current visit without saving preferences.
 
 Changing either language keeps the current page, query parameters, and fragment.
