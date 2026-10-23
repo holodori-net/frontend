@@ -1,39 +1,36 @@
 <script setup lang="ts">
 import { isGameLocale, type GameLocale } from '#shared/language'
 import type { CardListPayload } from '#shared/game-data/card-list-data'
+import { pageDataPaths } from '#shared/page-data'
 
 const route = useRoute()
 const { t } = useI18n()
+const runtimeConfig = useRuntimeConfig()
+const gameLocale = computed(() => String(route.params.gameLocale) as GameLocale)
 useHead(() => ({ title: `${t('cards')} | ${t('siteName')}` }))
 
 definePageMeta({
   validate: (pageRoute) => isGameLocale(String(pageRoute.params.gameLocale)),
 })
 
-const gameLocale = computed(() => String(route.params.gameLocale) as GameLocale)
-const { data: payload, error } = await useAsyncData<CardListPayload>(
+const {
+  data: payload,
+  error,
+  status,
+  refresh,
+} = useLazyAsyncData<CardListPayload>(
   'card-list',
-  async () => {
-    if (import.meta.server) {
-      const { readCardList } = await import('~~/server/data/card-list')
-      return readCardList()
-    }
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Card data is unavailable',
-      fatal: true,
-    })
-  },
+  (_nuxtApp, { signal }) =>
+    $fetch<CardListPayload>(pageDataPaths.cards, {
+      signal,
+      query: { _b: runtimeConfig.app.buildId },
+      retry: 0,
+    }),
+  { server: false },
 )
-if (error.value) throw error.value
-if (payload.value === null || payload.value === undefined) {
-  throw createError({
-    statusCode: 500,
-    statusMessage: 'Card data is unavailable',
-    fatal: true,
-  })
-}
+watch(error, (value) => {
+  if (value) console.error('Holodori card data loading failed', value)
+})
 </script>
 
 <template>
@@ -50,11 +47,29 @@ if (payload.value === null || payload.value === undefined) {
       </div>
 
       <noscript>{{ t('cardList.requiresJavaScript') }}</noscript>
-      <CardListView
-        v-if="payload"
-        :payload="payload"
-        :game-locale="gameLocale"
-      />
+      <Suspense v-if="payload">
+        <LazyCardListView :payload="payload" :game-locale="gameLocale" />
+        <template #fallback>
+          <p class="py-16 text-center text-sm text-muted-color" role="status">
+            {{ t('pageLoading') }}
+          </p>
+        </template>
+      </Suspense>
+      <section
+        v-else-if="status === 'error'"
+        class="mx-auto w-full max-w-[100rem] py-16 text-center"
+        role="alert"
+      >
+        <p class="mb-4 text-sm text-muted-color">{{ t('pageLoadFailed') }}</p>
+        <Button type="button" :label="t('retry')" @click="refresh()" />
+      </section>
+      <p
+        v-else
+        class="py-16 text-center text-sm text-muted-color"
+        role="status"
+      >
+        {{ t('pageLoading') }}
+      </p>
     </main>
   </div>
 </template>

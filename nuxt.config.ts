@@ -5,6 +5,7 @@ import {
   sitePages,
 } from './shared/language'
 import { primeVueComponents } from './shared/primevue'
+import { pageDataPaths } from './shared/page-data'
 import {
   defaultThemeId,
   memberThemeFaviconKey,
@@ -37,6 +38,7 @@ const contentPages = sitePages.map((page) =>
 )
 
 const prerenderRoutes = [
+  ...Object.values(pageDataPaths),
   ...siteLocales.flatMap((siteLocale) =>
     gameLocales.flatMap((gameLocale) =>
       contentPages.map((page) => `/${siteLocale}/${gameLocale}${page}`),

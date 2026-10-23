@@ -13,6 +13,7 @@ import {
   siteLanguageMetadata,
 } from '../shared/language'
 import { fetchWithProgress, mapConcurrent } from './transfer'
+import { pageDataPaths } from '../shared/page-data'
 
 declare const self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: Array<{ revision?: string | null; url: string }>
@@ -22,6 +23,7 @@ const CORE_CACHE = 'holodori-core-v1'
 const PAGE_CACHE_PREFIX = 'holodori-selected-pages-'
 const SELECTION_URL = new URL('/__offline-selection__', self.location.origin)
 const PAGE_NAMES = new Set<string>(offlinePageKinds)
+const PAGE_DATA_PATHS = new Set<string>(Object.values(pageDataPaths))
 const CONCURRENCY = 4
 const precacheEntries = self.__WB_MANIFEST.map((entry) =>
   typeof entry === 'string' ? { url: entry } : entry,
@@ -101,7 +103,12 @@ async function syncSelection(
       : pagePath(siteLocale, gameLocale, page),
   )
   const resources = [
-    ...new Set(routes.flatMap((route) => [route, payloadPath(route)])),
+    ...new Set([
+      ...routes.flatMap((route) => [route, payloadPath(route)]),
+      ...Object.entries(pageDataPaths)
+        .filter(([page]) => pages.includes(page))
+        .map(([, path]) => path),
+    ]),
   ]
   const stagingName = `${PAGE_CACHE_PREFIX}${siteLocale}-${gameLocale}-${crypto.randomUUID()}`
   const staging = await caches.open(stagingName)
@@ -213,6 +220,7 @@ self.addEventListener('fetch', (event) => {
     url.origin !== self.location.origin ||
     (request.mode !== 'navigate' &&
       !url.pathname.endsWith('/_payload.json') &&
+      !PAGE_DATA_PATHS.has(url.pathname) &&
       !snapshotAsset)
   )
     return
@@ -249,7 +257,10 @@ self.addEventListener('fetch', (event) => {
           const rootPage = await core.match('/')
           if (rootPage) return rootPage
         }
-        if (url.pathname.endsWith('/_payload.json'))
+        if (
+          url.pathname.endsWith('/_payload.json') ||
+          PAGE_DATA_PATHS.has(url.pathname)
+        )
           return new Response(
             JSON.stringify({ error: 'Offline payload is not available' }),
             {

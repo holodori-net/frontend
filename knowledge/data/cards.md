@@ -249,7 +249,9 @@ ORDER BY extent.position_y, extent.position_x;
 
 ### 列表 payload
 
-`readCardList()` 重用卡片、角色與成長 converter，回傳 `CardListPayload`，包含 `cards`、依 ID 共用的 `costumes` 與精簡 `skills`。卡片列保留角色順序、角色素材 ID、名稱、卡圖素材、篩選欄位、已計算的滿養成三圍、`costumeId` 及三類卡片技能 ID。`skills` 依技能 ID 保存被引用技能的全部來源等級，並共用條件、效果、Target、模板與標籤；主動效果使用獨立的 `activeEffects` 字典。`characterAssetId` 取自 `Character.assetId`；角色篩選選項以 `img_chr_icon_normal_${characterAssetId}` 素材顯示名稱旁圖示，保留素材 ID 前導零，缺圖時保留名稱。頁面 payload 保存角色順序與六語卡名及角色名；角色排序依 `Character.order`，角色篩選選項依其遞增排列。同順序時角色選項依 ID 遞增，卡片排序則依卡片 `order` 遞減及 ID 遞增排列。角色下拉選單可搜尋所有已設定遊戲語言的名稱，選項與已選標籤仍依目前遊戲語言顯示。六語名稱支援跨語搜尋，成長表保留於生成階段。三圍公式、特化判定與固定案例見 [卡片成長資料](card-growth.md#列表的滿養成三圍)。
+**CONFIRMED**：Nitro 於建置時將 `CardListPayload` 產生為共用靜態 `/data/cards.json`。卡片頁以 client-side `useLazyAsyncData` 先顯示頁首、標題與載入狀態，再取得列表資料；`CardListView` 於資料就緒後初始化網址條件、顯示偏好及技能／Connect 索引。失敗時提供重試，離線同步將此 JSON 與卡片頁保存於同一份快照。
+
+`readCardList()` 重用卡片、角色與成長 converter，回傳 `CardListPayload`，包含 `cards`、依 ID 共用的 `costumes` 與精簡 `skills`。卡片列保留角色順序、角色素材 ID、名稱、卡圖素材、篩選欄位、已計算的滿養成三圍、`costumeId` 及三類卡片技能 ID。`skills` 依技能 ID 保存被引用技能的全部來源等級，並共用條件、效果、Target、模板與標籤；主動效果使用獨立的 `activeEffects` 字典。`characterAssetId` 取自 `Character.assetId`；角色篩選選項以 `img_chr_icon_normal_${characterAssetId}` 素材顯示名稱旁圖示，保留素材 ID 前導零，缺圖時保留名稱。列表資料保存角色順序與六語卡名及角色名；角色排序依 `Character.order`，角色篩選選項依其遞增排列。同順序時角色選項依 ID 遞增，卡片排序則依卡片 `order` 遞減及 ID 遞增排列。角色下拉選單可搜尋所有已設定遊戲語言的名稱，選項與已選標籤仍依目前遊戲語言顯示。六語名稱支援跨語搜尋，成長表保留於生成階段。三圍公式、特化判定與固定案例見 [卡片成長資料](card-growth.md#列表的滿養成三圍)。
 
 `searchTextByCardId` 依卡片 ID 保存建置時產生的完整搜尋文字，來源為六語卡名、角色名、服裝名、全部等級的被動／主動／特殊技能、隊長服裝技能及 Connect 描述。技能沿用既有 `display` composer，已知屬性標記保留可見文字，highlight 標記移除，未解析描述略過。完整文字片段轉為小寫、去重後以換行串接。查詢依空白分詞並要求全部關鍵字符合，可跨欄位及語言比對；空查詢不限。索引獨立於資訊顯示、技能等級選擇及元件載入，列表與技能／Connect 篩選數量共用搜尋結果，離線沿用相同 payload。
 

@@ -8,7 +8,7 @@
 
 ## 角色列表 payload
 
-角色列表 reader 選取 `id`、`name`、`productionId`、`assetId`、`isPlayable`、`order` 與 `color1`，回傳 `CharacterListItemData[]`。保留全部角色與六語名稱；頁面透過 `useAsyncData` 將列表資料保存為 Nuxt payload。
+角色列表 reader 選取 `id`、`name`、`productionId`、`assetId`、`isPlayable`、`order` 與 `color1`，回傳 `CharacterListItemData[]`。保留全部角色與六語名稱；Nitro 於建置時產生共用靜態 `/data/characters.json`。角色頁以 `onServerPrefetch` 讀取初始資料，透過 `useState` 將資料保存在 HTML 的 Nuxt state，預設角色列表直接生成於 HTML。Hydration 透過 `getCachedData` 重用初始資料；從其他頁面切入時，以 `useLazyAsyncData` 先顯示頁首、標題與載入狀態，再取得靜態 JSON，失敗時提供重試。離線同步將此資料與角色頁保存於同一份快照。
 
 ## 成員主題 payload
 

@@ -13,8 +13,19 @@ class MemoryCache {
   private key(input: RequestInfo | URL) {
     return input instanceof Request ? input.url : String(input)
   }
-  async match(input: RequestInfo | URL) {
-    return this.values.get(this.key(input))?.clone()
+  async match(input: RequestInfo | URL, options?: CacheQueryOptions) {
+    const key = this.key(input)
+    if (options?.ignoreSearch) {
+      const requested = new URL(key)
+      requested.search = ''
+      for (const [url, response] of this.values) {
+        const candidate = new URL(url)
+        candidate.search = ''
+        if (candidate.href === requested.href) return response.clone()
+      }
+      return undefined
+    }
+    return this.values.get(key)?.clone()
   }
   async put(input: RequestInfo | URL, response: Response) {
     this.values.set(this.key(input), response.clone())
@@ -112,6 +123,13 @@ describe('offline service worker selection', () => {
       replies.some((reply) => (reply as { type?: string }).type === 'progress'),
     ).toBe(true)
     expect(replies.at(-1)).toMatchObject({ type: 'result', success: true })
+    const status = await message({ type: 'GET_OFFLINE_STATUS' })
+    expect(status.at(-1)).toMatchObject({
+      urls: expect.arrayContaining(['/data/cards.json']),
+    })
+    expect((status.at(-1) as { urls: string[] }).urls).not.toContain(
+      '/data/characters.json',
+    )
   })
 
   it('stores the character page and payload at their localized paths', async () => {
@@ -136,50 +154,83 @@ describe('offline service worker selection', () => {
     expect(downloaded).toContain(
       'https://example.test/zh-TW/cht/characters/_payload.json',
     )
+    expect(downloaded).toContain('https://example.test/data/characters.json')
+    expect(downloaded).not.toContain('https://example.test/data/cards.json')
   })
 
-  it('keeps the previous selection when a staged page fails', async () => {
-    const core = await caches.open('holodori-core-v1')
-    const selectionUrl = 'https://example.test/__offline-selection__'
-    await core.put(
-      selectionUrl,
-      new Response(
-        JSON.stringify({
-          cacheName: 'holodori-selected-pages-ja-jpn-old',
-          siteLocale: 'ja',
-          gameLocale: 'jpn',
-          pages: ['home'],
+  it.each(['/_payload.json', '/data/characters.json'])(
+    'keeps the previous selection when downloading %s fails',
+    async (failedResource) => {
+      const core = await caches.open('holodori-core-v1')
+      const selectionUrl = 'https://example.test/__offline-selection__'
+      await core.put(
+        selectionUrl,
+        new Response(
+          JSON.stringify({
+            cacheName: 'holodori-selected-pages-ja-jpn-old',
+            siteLocale: 'ja',
+            gameLocale: 'jpn',
+            pages: ['home'],
+          }),
+        ),
+      )
+      await caches.open('holodori-selected-pages-ja-jpn-old')
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async (input: RequestInfo | URL) => {
+          const url = input instanceof Request ? input.url : String(input)
+          return url.endsWith(failedResource)
+            ? new Response('failure', { status: 503 })
+            : new Response('page')
         }),
-      ),
-    )
-    await caches.open('holodori-selected-pages-ja-jpn-old')
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (input: RequestInfo | URL) => {
-        const url = input instanceof Request ? input.url : String(input)
-        return url.endsWith('/_payload.json')
-          ? new Response('failure', { status: 503 })
-          : new Response('page')
-      }),
-    )
-    const replies = await message({
-      type: 'SYNC_OFFLINE_PAGES',
-      siteLocale: 'ja',
-      gameLocale: 'jpn',
-      pages: ['characters'],
-    })
-    expect(replies.at(-1)).toMatchObject({ type: 'result', success: false })
-    expect(await (await core.match(selectionUrl))?.json()).toMatchObject({
-      cacheName: 'holodori-selected-pages-ja-jpn-old',
-    })
-    expect(
-      [...memoryCaches.keys()].some(
-        (name) =>
-          /holodori-selected-pages-ja-jpn-/.test(name) &&
-          name !== 'holodori-selected-pages-ja-jpn-old',
-      ),
-    ).toBe(false)
-  })
+      )
+      const replies = await message({
+        type: 'SYNC_OFFLINE_PAGES',
+        siteLocale: 'ja',
+        gameLocale: 'jpn',
+        pages: ['characters'],
+      })
+      expect(replies.at(-1)).toMatchObject({ type: 'result', success: false })
+      expect(await (await core.match(selectionUrl))?.json()).toMatchObject({
+        cacheName: 'holodori-selected-pages-ja-jpn-old',
+      })
+      expect(
+        [...memoryCaches.keys()].some(
+          (name) =>
+            /holodori-selected-pages-ja-jpn-/.test(name) &&
+            name !== 'holodori-selected-pages-ja-jpn-old',
+        ),
+      ).toBe(false)
+    },
+  )
+
+  it.each(['/data/cards.json', '/data/characters.json'])(
+    'serves saved %s offline with a build query after an app update',
+    async (path) => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async () => Response.json({ saved: path })),
+      )
+      await message({
+        type: 'SYNC_OFFLINE_PAGES',
+        siteLocale: 'ja',
+        gameLocale: 'jpn',
+        pages: ['cards', 'characters'],
+      })
+      await loadWorker('/_nuxt/new.js')
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async () => Promise.reject(new Error('offline'))),
+      )
+      let response: Promise<Response> | undefined
+      listeners.get('fetch')!({
+        request: new Request(`https://example.test${path}?_b=saved-build`),
+        respondWith: (value) => (response = value),
+      })
+      expect(response).toBeDefined()
+      await expect((await response)?.json()).resolves.toEqual({ saved: path })
+    },
+  )
 
   it('pins required application assets in the selected page snapshot', async () => {
     vi.stubGlobal(
@@ -250,19 +301,23 @@ describe('offline service worker selection', () => {
     expect(html).toContain('此頁面尚未儲存供離線使用。')
     expect(html).toContain('href="/" lang="en">Home</a>')
 
-    let payloadResponse: Promise<Response> | undefined
-    listeners.get('fetch')!({
-      request: new Request(
-        'https://example.test/zh-TW/jpn/cards/_payload.json',
-      ),
-      respondWith: (response) => (payloadResponse = response),
-    })
-    const payload = await payloadResponse!
-    expect(payload.status).toBe(503)
-    expect(payload.headers.get('Content-Type')).toContain('application/json')
-    await expect(payload.json()).resolves.toEqual({
-      error: 'Offline payload is not available',
-    })
+    for (const path of [
+      '/zh-TW/jpn/cards/_payload.json',
+      '/data/cards.json',
+      '/data/characters.json',
+    ]) {
+      let payloadResponse: Promise<Response> | undefined
+      listeners.get('fetch')!({
+        request: new Request(`https://example.test${path}`),
+        respondWith: (response) => (payloadResponse = response),
+      })
+      const payload = await payloadResponse!
+      expect(payload.status).toBe(503)
+      expect(payload.headers.get('Content-Type')).toContain('application/json')
+      await expect(payload.json()).resolves.toEqual({
+        error: 'Offline payload is not available',
+      })
+    }
   })
 
   it('preserves the active cache when a same-locale retry fails in the same millisecond', async () => {

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { isGameLocale, type GameLocale } from '#shared/language'
+import { pageDataPaths } from '#shared/page-data'
 import type { CharacterListItemData } from '#shared/game-data/characters'
 import { getCharacterSections } from '#shared/game-data/character-list'
 
 const route = useRoute()
 const { t } = useI18n()
+const runtimeConfig = useRuntimeConfig()
 useHead(() => ({ title: `${t('characters')} | ${t('siteName')}` }))
 
 definePageMeta({
@@ -13,32 +15,45 @@ definePageMeta({
 
 const gameLocale = computed(() => String(route.params.gameLocale) as GameLocale)
 const showUnplayableCharacters = ref(false)
-const { data: characters, error } = await useAsyncData<CharacterListItemData[]>(
-  'character-list',
-  async () => {
-    if (import.meta.server) {
-      const { readCharacterList } =
-        await import('~~/server/data/character-list')
-      return readCharacterList()
-    }
-
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Character data is unavailable',
-      fatal: true,
-    })
-  },
+const prerenderedCharacters = useState<CharacterListItemData[] | null>(
+  'prerendered-character-list',
+  () => null,
 )
-if (error.value) throw error.value
-if (characters.value === null || characters.value === undefined) {
-  throw createError({
-    statusCode: 500,
-    statusMessage: 'Character data is unavailable',
-    fatal: true,
+if (import.meta.server) {
+  onServerPrefetch(async () => {
+    const { readCharacterList } = await import('~~/server/data/character-list')
+    prerenderedCharacters.value = readCharacterList()
   })
 }
+const {
+  data: fetchedCharacters,
+  error,
+  status,
+  refresh,
+} = useLazyAsyncData<CharacterListItemData[]>(
+  'character-list',
+  (_nuxtApp, { signal }) =>
+    $fetch<CharacterListItemData[]>(pageDataPaths.characters, {
+      signal,
+      query: { _b: runtimeConfig.app.buildId },
+      retry: 0,
+    }),
+  {
+    server: false,
+    getCachedData: (_key, _nuxtApp, { cause }) =>
+      cause === 'initial'
+        ? (prerenderedCharacters.value ?? undefined)
+        : undefined,
+  },
+)
+const characters = computed(
+  () => fetchedCharacters.value ?? prerenderedCharacters.value,
+)
+watch(error, (value) => {
+  if (value) console.error('Holodori character data loading failed', value)
+})
 const visibleCharacters = computed(() =>
-  characters.value!.filter(
+  (characters.value ?? []).filter(
     (character) => showUnplayableCharacters.value || character.isPlayable,
   ),
 )
@@ -65,17 +80,33 @@ const hasCharacters = computed(() =>
           <ToggleSwitch
             v-model="showUnplayableCharacters"
             input-id="show-unplayable-characters"
+            :disabled="!characters"
           />
         </div>
       </div>
 
+      <div
+        v-if="status === 'error'"
+        class="py-16 text-center text-sm text-muted-color"
+        role="alert"
+      >
+        <p class="mb-4">{{ t('pageLoadFailed') }}</p>
+        <Button type="button" :label="t('retry')" @click="refresh()" />
+      </div>
+      <div
+        v-else-if="!characters"
+        class="py-16 text-center text-sm text-muted-color"
+        role="status"
+      >
+        <p class="mb-4">{{ t('pageLoading') }}</p>
+      </div>
       <p
-        v-if="!hasCharacters"
+        v-else-if="!hasCharacters"
         class="py-16 text-center text-sm text-muted-color"
       >
         {{ t('charactersEmpty') }}
       </p>
-      <div v-else class="space-y-9">
+      <div v-else-if="characters" class="space-y-9">
         <section
           v-for="section in sections"
           :key="section.id"

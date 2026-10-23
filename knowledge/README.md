@@ -17,7 +17,7 @@
 - Schema：[holodori-net/android-protos](https://github.com/holodori-net/android-protos)，相關 entity.master 與 enums 定義。
 - 資料：[holodori-net/android-database](https://github.com/holodori-net/android-database) 的 [master.sqlite](https://github.com/holodori-net/android-database/releases/latest/download/master.sqlite)，本機位於 `.data/master.sqlite`。
 - 欄位與關聯的可重現來源：SQLite 的 `PRAGMA table_info`、`logical_fields` 與 `declared_foreign_keys`。
-- 轉換依據：[Drizzle schema](../server/data/schema/)、[轉換模組](../server/data/converters/)、[資料型別](../shared/game-data/)。Schema 手動維護查詢所需欄位，透過 `snakeCase.table` 將 camelCase 屬性自動映射為 SQLite 的 snake_case 欄位名稱。Converter 接收 `GameDatabase`，[卡片 reader](../server/data/card-list.ts)、[角色 reader](../server/data/character-list.ts) 與 [主題 reader](../server/data/member-themes.ts) 管理唯讀連線並選取所需欄位，交由 Nuxt 保存為 payload。
+- 轉換依據：[Drizzle schema](../server/data/schema/)、[轉換模組](../server/data/converters/)、[資料型別](../shared/game-data/)。Schema 手動維護查詢所需欄位，透過 `snakeCase.table` 將 camelCase 屬性自動映射為 SQLite 的 snake_case 欄位名稱。Converter 接收 `GameDatabase`，[卡片 reader](../server/data/card-list.ts)、[角色 reader](../server/data/character-list.ts) 與 [主題 reader](../server/data/member-themes.ts) 管理唯讀連線並選取所需欄位。卡片與角色列表由 Nitro 產生共用靜態 JSON；角色頁的初始列表另保存在 HTML 的 Nuxt state，主題資料由 Nuxt 保存為 payload。
 
 卡片文件觀察日期為 2026-10-20，master_version 為 `452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`，此快照包含 196 張卡片與 1176 筆 LangCard。角色文件觀察日期為 2026-10-12，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 62 位角色與 2412 筆 LangCharacter。角色群組文件觀察日期為 2026-10-11，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 16 個 CharacterGrouping 與 192 筆 LangCharacterGrouping。來源更新後，重新驗證受影響的欄位、枚舉與結論。
 
