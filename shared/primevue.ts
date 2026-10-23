@@ -8,6 +8,7 @@ export const primeVueComponents = [
   'Checkbox',
   'Chip',
   'Dialog',
+  'DeferredContent',
   'Divider',
   'InputText',
   'InputGroup',

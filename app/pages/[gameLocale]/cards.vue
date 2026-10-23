@@ -43,9 +43,10 @@ import {
 import { useCardListConditions } from '~/composables/useCardListConditions'
 import { useCardLayout } from '~/composables/useCardLayout'
 import { useCardFields } from '~/composables/useCardFields'
+import { useCardDeferredContent } from '~/composables/useCardDeferredContent'
 
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 useHead(() => ({ title: `${t('cards')} | ${t('siteName')}` }))
 
 definePageMeta({
@@ -139,6 +140,15 @@ const ready = computed(
     conditionsReady.value && layoutInitialized.value && fieldsInitialized.value,
 )
 const openPanels = ref<string[]>(['filters', 'display'])
+const cardListElement = ref<HTMLElement | null>(null)
+const { revision: deferRevision, scheduleRecheck } =
+  useCardDeferredContent(cardListElement)
+const accordionContentPt = {
+  transition: {
+    onAfterEnter: scheduleRecheck,
+    onAfterLeave: scheduleRecheck,
+  },
+}
 const visibleCards = computed(() =>
   filterAndSortCards(
     cardItems.value,
@@ -166,6 +176,19 @@ const connectCounts = computed(() =>
     connectCountCards.value.map(({ id }) => id),
     connectCatalog.cardExtents,
   ),
+)
+watch(
+  [
+    () => visibleCardIds.value.join('\n'),
+    layout,
+    fields,
+    skillLevels,
+    gameLocale,
+    locale,
+    openPanels,
+  ],
+  () => scheduleRecheck(),
+  { deep: true, flush: 'post' },
 )
 const characterOptions = computed(() => {
   const characters = new Map(
@@ -304,7 +327,7 @@ function selectedOrder(group: CardListFieldGroup['key']) {
                   />
                 </Button>
               </div>
-              <AccordionContent>
+              <AccordionContent :pt="accordionContentPt">
                 <div class="space-y-4">
                   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <label class="col-span-full block min-w-0">
@@ -607,7 +630,7 @@ function selectedOrder(group: CardListFieldGroup['key']) {
                   />
                 </Button>
               </div>
-              <AccordionContent>
+              <AccordionContent :pt="accordionContentPt">
                 <div class="flex flex-col gap-5 sm:flex-row sm:items-start">
                   <fieldset class="w-full border-0 p-0 sm:w-52">
                     <legend class="mb-1.5 text-sm font-medium">
@@ -879,6 +902,7 @@ function selectedOrder(group: CardListFieldGroup['key']) {
           "
         >
           <ul
+            ref="cardListElement"
             class="grid list-none p-0"
             :class="
               layout === 'full'
@@ -904,6 +928,8 @@ function selectedOrder(group: CardListFieldGroup['key']) {
               :layout="layout"
               :fields="fields"
               :skill-levels="skillLevels"
+              :defer-revision="deferRevision"
+              @content-loaded="scheduleRecheck"
             />
           </ul>
         </div>

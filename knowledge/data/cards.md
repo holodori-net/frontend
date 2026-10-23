@@ -251,7 +251,7 @@ ORDER BY extent.position_y, extent.position_x;
 
 `readCardList()` 重用卡片、角色與成長 converter，回傳 `CardListPayload`，包含 `cards`、依 ID 共用的 `costumes` 與精簡 `skills`。卡片列保留角色順序、角色素材 ID、名稱、卡圖素材、篩選欄位、已計算的滿養成三圍、`costumeId` 及三類卡片技能 ID。`skills` 依技能 ID 保存被引用技能的全部來源等級，並共用條件、效果、Target、模板與標籤；主動效果使用獨立的 `activeEffects` 字典。`characterAssetId` 取自 `Character.assetId`；角色篩選選項以 `img_chr_icon_normal_${characterAssetId}` 素材顯示名稱旁圖示，保留素材 ID 前導零，缺圖時保留名稱。頁面 payload 保存角色順序與六語卡名及角色名；角色排序依 `Character.order`，角色篩選選項依其遞增排列。同順序時角色選項依 ID 遞增，卡片排序則依卡片 `order` 遞減及 ID 遞增排列。角色下拉選單可搜尋所有已設定遊戲語言的名稱，選項與已選標籤仍依目前遊戲語言顯示。六語名稱支援跨語搜尋，成長表保留於生成階段。三圍公式、特化判定與固定案例見 [卡片成長資料](card-growth.md#列表的滿養成三圍)。
 
-`searchTextByCardId` 依卡片 ID 保存建置時產生的完整搜尋文字，來源為六語卡名、角色名、服裝名、全部等級的被動／主動／特殊技能、隊長服裝技能及 Connect 描述。技能沿用既有 `display` composer，已知屬性標記保留可見文字，highlight 標記移除，未解析描述略過。完整文字片段轉為小寫、去重後以換行串接。查詢依空白分詞並要求全部關鍵字符合，可跨欄位及語言比對；空查詢不限。索引獨立於資訊顯示、技能等級選擇，列表與技能／Connect 篩選數量共用搜尋結果，離線沿用相同 payload。
+`searchTextByCardId` 依卡片 ID 保存建置時產生的完整搜尋文字，來源為六語卡名、角色名、服裝名、全部等級的被動／主動／特殊技能、隊長服裝技能及 Connect 描述。技能沿用既有 `display` composer，已知屬性標記保留可見文字，highlight 標記移除，未解析描述略過。完整文字片段轉為小寫、去重後以換行串接。查詢依空白分詞並要求全部關鍵字符合，可跨欄位及語言比對；空查詢不限。索引獨立於資訊顯示、技能等級選擇及元件載入，列表與技能／Connect 篩選數量共用搜尋結果，離線沿用相同 payload。
 
 `potential_alternative_reward` 與 `acquire_reward` 的結構型別為 `common.Reward`，包含 resource_type、resource_id、quantity；資源種類決定 resource_id 的解讀，schema 未將此欄宣告為單一表的外鍵。獎勵發放條件尚未確認。
 
@@ -342,3 +342,5 @@ ORDER BY extent.position_y, extent.position_x;
 頁面組合條件與效果時，繁簡中文使用 `，`、日文使用 `、`、英文／韓文／印尼文使用逗號加空格；主要與附加技能間，繁簡中文及日文使用 `、`，其餘語言使用分號加空格。組合時整理片段邊界的空白及分隔標點，保留描述內文與文字標記。
 
 完整卡圖共用列數為一列卡圖加上已選資訊項目數，卡名與角色名各自一列，每種技能使用一列；各卡片技能區塊內的已選等級自然排列。關閉選項時移除對應列及間距；個別卡片缺少服裝或已選技能等級時保留其列位置，後續區塊維持對齊。`li`、`article` 與資訊容器使用巢狀 row subgrid；完整卡圖停用 layout containment，直式版型保留 `content-visibility: auto`，資訊列使用 24rem 初始高度估算。純卡圖估算依限制為最大 256px 的卡片寬度計算。
+
+`CardListItem` 立即建立列表項目、可存取卡名與靜態佔位，PrimeVue `DeferredContent` 在位置進入可見範圍後建立完整的 `CardListContent`，並保留至該項目卸載。完整卡圖的 DeferredContent 容器延續 row subgrid。佔位依卡圖比例及所選來源等級數估算高度，載入前不組合技能描述。結果順序、版型、資訊與等級選擇、語言、面板收合、列表寬度、卡片載入及字型就緒後，於 DOM 更新後合併重檢尚未載入的容器；已載入內容保留元件狀態。站內搜尋直接比對完整索引。

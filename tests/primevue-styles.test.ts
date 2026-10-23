@@ -17,6 +17,7 @@ describe('PrimeVue shared styles', () => {
       'inputicon',
       'tab',
       'tablist',
+      'deferredcontent',
     ]
     const expectedComponentStyles = primeVueComponents
       .map((component) => `${component.toLowerCase()}-style`)
@@ -38,6 +39,7 @@ describe('PrimeVue shared styles', () => {
     expect(result.css).toContain('.p-tab')
     expect(result.styleIds).not.toContain('tab-style')
     expect(result.styleIds).not.toContain('tablist-style')
+    expect(result.styleIds).not.toContain('deferredcontent-style')
     expect(new Set(result.styleIds).size).toBe(result.styleIds.length)
     expect(result.styleIds.indexOf('checkbox-style')).toBeLessThan(
       result.styleIds.indexOf('button-style'),
