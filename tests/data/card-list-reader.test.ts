@@ -426,6 +426,10 @@ describe('card list reader', () => {
       },
       connectEffects: {},
       connectExtents: {},
+      searchTextByCardId: {
+        'card-1': '櫻巫女\nsakura miko\n사쿠라 미코\n樱巫女',
+        'card-2': '櫻巫女\nsakura miko\n사쿠라 미코\n樱巫女',
+      },
       skills: {
         leaderSkills: {},
         passiveSkills: createCardSkills().passiveSkills,

@@ -77,4 +77,5 @@ export interface CardListPayload {
   skills: CardListSkillData
   connectEffects: Record<string, CardListConnectEffectLevelData[]>
   connectExtents: Record<string, ConnectPosition[]>
+  searchTextByCardId: Record<string, string>
 }

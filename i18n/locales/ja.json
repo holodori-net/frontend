@@ -46,7 +46,7 @@
     },
     "connectGraphDescription": "星印がコネクト位置を示し、{count}個のマスが効果範囲です。",
     "search": "検索",
-    "searchPlaceholder": "ゲーム内のすべての言語でカード名・キャラクター名を検索",
+    "searchPlaceholder": "ゲーム内のすべての言語でカード名・キャラクター名・衣装名・スキル説明を検索",
     "character": "キャラクター",
     "allCharacters": "すべてのキャラクター",
     "rarity": "レアリティ",

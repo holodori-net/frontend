@@ -318,7 +318,7 @@ function sameSelection<T>(selection: readonly T[], options: readonly T[]) {
   )
 }
 
-function searchText(card: CardListItemData) {
+function nameSearchText(card: CardListItemData) {
   return [...Object.values(card.name), ...Object.values(card.characterName)]
     .join('\n')
     .toLowerCase()
@@ -334,8 +334,9 @@ export function filterAndSortCards(
   cardSkills: Readonly<Record<string, readonly string[]>> = {},
   canonicalKeys: Readonly<Record<string, string>> = {},
   cardExtents: Readonly<Record<string, readonly string[]>> = {},
+  searchTextByCardId?: Readonly<Record<string, string>>,
 ): CardListItemData[] {
-  const needle = conditions.q.trim().toLowerCase()
+  const tokens = conditions.q.trim().toLowerCase().split(/\s+/u).filter(Boolean)
   const direction = conditions.direction === 'asc' ? 1 : -1
   const selectedSkills = new Set(
     conditions.skill.map((key) => canonicalKeys[key] ?? key),
@@ -344,7 +345,10 @@ export function filterAndSortCards(
 
   return cards
     .filter((card) => {
-      if (needle && !searchText(card).includes(needle)) return false
+      if (tokens.length) {
+        const searchText = searchTextByCardId?.[card.id] ?? nameSearchText(card)
+        if (!tokens.every((token) => searchText.includes(token))) return false
+      }
       if (
         selectedSkills.size &&
         !cardSkills[card.id]?.some((key) => selectedSkills.has(key))

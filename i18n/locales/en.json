@@ -46,7 +46,7 @@
     },
     "connectGraphDescription": "The star marks the connection point; {count} squares show the affected cells.",
     "search": "Search",
-    "searchPlaceholder": "Search card or character names in any game language",
+    "searchPlaceholder": "Search card, character, costume, and skill descriptions in any game language",
     "character": "Character",
     "allCharacters": "All characters",
     "rarity": "Rarity",

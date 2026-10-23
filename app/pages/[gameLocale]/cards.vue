@@ -82,6 +82,7 @@ const costumes = computed(() => payload.value!.costumes)
 const skills = computed(() => payload.value!.skills)
 const connectEffects = computed(() => payload.value!.connectEffects)
 const connectExtents = computed(() => payload.value!.connectExtents)
+const searchTextByCardId = computed(() => payload.value!.searchTextByCardId)
 const skillCatalog = buildCardSkillFilterCatalog(payload.value)
 const connectCatalog = buildCardConnectFilterCatalog(payload.value)
 const skillKeys = Object.keys(skillCatalog.canonicalKeys)
@@ -145,6 +146,7 @@ const visibleCards = computed(() =>
     skillCatalog.cardSkills,
     skillCatalog.canonicalKeys,
     connectCatalog.cardExtents,
+    searchTextByCardId.value,
   ),
 )
 const visibleCardIds = computed(() => visibleCards.value.map(({ id }) => id))
@@ -155,6 +157,7 @@ const connectCountCards = computed(() =>
     skillCatalog.cardSkills,
     skillCatalog.canonicalKeys,
     connectCatalog.cardExtents,
+    searchTextByCardId.value,
   ),
 )
 const connectCounts = computed(() =>

@@ -154,6 +154,72 @@ describe('card list', () => {
     ).toEqual(['c-01', 'c-03'])
   })
 
+  it('matches every query token against the indexed text with AND semantics', () => {
+    const defaults = createCardListConditions(getCardFilterOptions(cards))
+    const index = {
+      'c-01': 'card eng sakura performance up',
+      'c-02': 'card eng costume sakura song',
+      'c-03': 'card eng special skill amber bird',
+    }
+    expect(
+      filterAndSortCards(
+        cards,
+        { ...defaults, q: '  AMBER   bird  ' },
+        {},
+        {},
+        {},
+        index,
+      ).map(({ id }) => id),
+    ).toEqual(['c-03'])
+    expect(
+      filterAndSortCards(
+        cards,
+        { ...defaults, q: 'song bird' },
+        {},
+        {},
+        {},
+        index,
+      ),
+    ).toEqual([])
+    expect(
+      filterAndSortCards(
+        cards,
+        { ...defaults, q: 'sakura' },
+        {},
+        {},
+        {},
+        index,
+      ).map(({ id }) => id),
+    ).toEqual(['c-01', 'c-02'])
+  })
+
+  it('combines cross-field search tokens with rarity, skill, and Connect filters', () => {
+    const defaults = createCardListConditions(getCardFilterOptions(cards))
+    const conditions: CardListConditions = {
+      ...defaults,
+      q: 'sakura burst',
+      rarity: [5],
+      skill: ['skill-a'],
+      connect: ['extent-a'],
+    }
+    const index = {
+      'c-01': 'card sakura burst score skill',
+      'c-02': 'sakura burst score skill',
+      'c-03': 'sakura burst score skill',
+    }
+
+    expect(
+      filterAndSortCards(
+        cards,
+        conditions,
+        { 'c-01': ['skill-a'], 'c-02': ['skill-a'] },
+        {},
+        { 'c-01': ['extent-a'], 'c-03': ['extent-a'] },
+        index,
+      ).map(({ id }) => id),
+    ).toEqual(['c-01'])
+  })
+
   it('combines filter groups with AND and values within each group with OR', () => {
     const conditions: CardListConditions = {
       ...createCardListConditions(getCardFilterOptions(cards)),

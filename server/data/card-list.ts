@@ -7,6 +7,7 @@ import type {
 } from '#shared/game-data/card-list-data'
 import { gameLocales } from '#shared/language'
 import { composeCostumeSkillDescription } from '#shared/game-data/live-skill-description'
+import { buildCardSearchTextById } from '#shared/game-data/card-list-search'
 import { transformCardGrowth } from './converters/card-growth.ts'
 import { transformCards } from './converters/cards.ts'
 import { transformCharacters } from './converters/characters.ts'
@@ -37,6 +38,7 @@ export function readCardList(): CardListPayload {
         skills: emptySkills(),
         connectEffects: {},
         connectExtents: {},
+        searchTextByCardId: {},
       }
     }
 
@@ -147,10 +149,21 @@ export function readCardList(): CardListPayload {
         ...calculateCardListStats(card, levelRow.parameterBaseValue, growth),
       }
     })
+    const searchTextByCardId = buildCardSearchTextById({
+      cards: cardList,
+      ...projected,
+      connectEffects,
+    })
     console.info(
-      `Loaded ${cardList.length} cards, ${Object.keys(projected.costumes).length} costumes, ${Object.keys(projected.skills.leaderSkills).length} leader skills, ${Object.keys(projected.skills.passiveSkills).length} passive skills, ${Object.keys(projected.skills.activeSkills).length} active skills, ${Object.keys(projected.skills.specialSkills).length} special skills, ${Object.keys(connectEffects).length} connect effects, ${Object.keys(connectExtents).length} connect extents`,
+      `Loaded ${cardList.length} cards, ${Object.keys(projected.costumes).length} costumes, ${Object.keys(projected.skills.leaderSkills).length} leader skills, ${Object.keys(projected.skills.passiveSkills).length} passive skills, ${Object.keys(projected.skills.activeSkills).length} active skills, ${Object.keys(projected.skills.specialSkills).length} special skills, ${Object.keys(connectEffects).length} connect effects, ${Object.keys(connectExtents).length} connect extents, ${Object.keys(searchTextByCardId).length} search indexes`,
     )
-    return { cards: cardList, ...projected, connectEffects, connectExtents }
+    return {
+      cards: cardList,
+      ...projected,
+      connectEffects,
+      connectExtents,
+      searchTextByCardId,
+    }
   } catch (cause) {
     const error = new Error(`Unable to read card data from ${databasePath}`, {
       cause,

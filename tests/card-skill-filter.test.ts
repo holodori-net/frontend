@@ -281,6 +281,7 @@ function payload(): CardListPayload {
     },
     connectEffects: {},
     connectExtents: {},
+    searchTextByCardId: {},
   } satisfies CardListPayload
 }
 

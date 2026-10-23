@@ -46,7 +46,7 @@
     },
     "connectGraphDescription": "星號標示連結位置，{count} 個方格為效果範圍。",
     "search": "搜尋",
-    "searchPlaceholder": "以任一遊戲語言搜尋卡片名稱或角色名稱",
+    "searchPlaceholder": "以任一遊戲語言搜尋卡片、角色、服裝名稱與技能描述",
     "character": "角色",
     "allCharacters": "所有角色",
     "rarity": "稀有度",

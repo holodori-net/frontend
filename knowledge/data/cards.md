@@ -251,6 +251,8 @@ ORDER BY extent.position_y, extent.position_x;
 
 `readCardList()` 重用卡片、角色與成長 converter，回傳 `CardListPayload`，包含 `cards`、依 ID 共用的 `costumes` 與精簡 `skills`。卡片列保留角色順序、角色素材 ID、名稱、卡圖素材、篩選欄位、已計算的滿養成三圍、`costumeId` 及三類卡片技能 ID。`skills` 依技能 ID 保存被引用技能的全部來源等級，並共用條件、效果、Target、模板與標籤；主動效果使用獨立的 `activeEffects` 字典。`characterAssetId` 取自 `Character.assetId`；角色篩選選項以 `img_chr_icon_normal_${characterAssetId}` 素材顯示名稱旁圖示，保留素材 ID 前導零，缺圖時保留名稱。頁面 payload 保存角色順序與六語卡名及角色名；角色排序依 `Character.order`，角色篩選選項依其遞增排列。同順序時角色選項依 ID 遞增，卡片排序則依卡片 `order` 遞減及 ID 遞增排列。角色下拉選單可搜尋所有已設定遊戲語言的名稱，選項與已選標籤仍依目前遊戲語言顯示。六語名稱支援跨語搜尋，成長表保留於生成階段。三圍公式、特化判定與固定案例見 [卡片成長資料](card-growth.md#列表的滿養成三圍)。
 
+`searchTextByCardId` 依卡片 ID 保存建置時產生的完整搜尋文字，來源為六語卡名、角色名、服裝名、全部等級的被動／主動／特殊技能、隊長服裝技能及 Connect 描述。技能沿用既有 `display` composer，已知屬性標記保留可見文字，highlight 標記移除，未解析描述略過。完整文字片段轉為小寫、去重後以換行串接。查詢依空白分詞並要求全部關鍵字符合，可跨欄位及語言比對；空查詢不限。索引獨立於資訊顯示、技能等級選擇，列表與技能／Connect 篩選數量共用搜尋結果，離線沿用相同 payload。
+
 `potential_alternative_reward` 與 `acquire_reward` 的結構型別為 `common.Reward`，包含 resource_type、resource_id、quantity；資源種類決定 resource_id 的解讀，schema 未將此欄宣告為單一表的外鍵。獎勵發放條件尚未確認。
 
 篩選區於寬螢幕採三欄：搜尋獨占第一列，第二列依序為稀有度、屬性、特化，第三列依序為角色、技能、Connect；排序位於下方。窄螢幕搜尋仍獨占全寬，其餘控制項依空間縮減欄數並保留順序。
