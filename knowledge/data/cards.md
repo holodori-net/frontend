@@ -251,7 +251,7 @@ ORDER BY extent.position_y, extent.position_x;
 
 `potential_alternative_reward` 與 `acquire_reward` 的結構型別為 `common.Reward`，包含 resource_type、resource_id、quantity；資源種類決定 resource_id 的解讀，schema 未將此欄宣告為單一表的外鍵。獎勵發放條件尚未確認。
 
-篩選區於寬螢幕採兩列三欄：第一列依序為搜尋、角色、技能，第二列依序為稀有度、屬性、特化，排序位於下方。窄螢幕依空間縮減欄數並保留順序。
+篩選區於寬螢幕採三欄：搜尋獨占第一列，第二列依序為稀有度、屬性、特化，第三列依序為角色、技能、Connect；排序位於下方。窄螢幕搜尋仍獨占全寬，其餘控制項依空間縮減欄數並保留順序。
 
 ### 技能篩選
 

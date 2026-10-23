@@ -57,7 +57,7 @@ const dialogPt = {
       type="button"
       severity="secondary"
       outlined
-      class="w-full justify-between sm:w-52"
+      class="w-full justify-between"
       :aria-controls="dialogId"
       :aria-expanded="dialogVisible"
       aria-haspopup="dialog"

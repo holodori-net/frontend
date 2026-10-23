@@ -304,7 +304,7 @@ function selectedOrder(group: CardListFieldGroup['key']) {
               <AccordionContent>
                 <div class="space-y-4">
                   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <label class="block min-w-0">
+                    <label class="col-span-full block min-w-0">
                       <span class="mb-1.5 block text-sm font-medium">{{
                         t('cardList.search')
                       }}</span>
@@ -315,80 +315,6 @@ function selectedOrder(group: CardListFieldGroup['key']) {
                         :aria-label="t('cardList.search')"
                       />
                     </label>
-                    <label class="block min-w-0">
-                      <span class="mb-1.5 block text-sm font-medium">{{
-                        t('cardList.character')
-                      }}</span>
-                      <MultiSelect
-                        v-model="conditions.character"
-                        class="w-full"
-                        :options="characterOptions"
-                        option-label="label"
-                        option-value="value"
-                        :placeholder="t('cardList.allCharacters')"
-                        :aria-label="t('cardList.character')"
-                        filter
-                        :filter-fields="['searchNames', 'value']"
-                        display="chip"
-                      >
-                        <template #option="{ option }">
-                          <div class="flex items-center gap-2">
-                            <CardListIcon
-                              :src="option.icon"
-                              label=""
-                              size="large"
-                              loading-skeleton
-                            />
-                            <span :lang="option.lang">{{ option.text }}</span>
-                          </div>
-                        </template>
-                        <template #chip="{ value, removeCallback }">
-                          <Chip
-                            class="p-multiselect-chip"
-                            :label="
-                              characterOptions.find(
-                                (option) => option.value === value,
-                              )?.text ?? value
-                            "
-                            :lang="
-                              characterOptions.find(
-                                (option) => option.value === value,
-                              )?.lang
-                            "
-                            removable
-                            @remove="removeCallback($event, value)"
-                          />
-                        </template>
-                      </MultiSelect>
-                    </label>
-                    <fieldset class="min-w-0">
-                      <legend class="mb-1.5 text-sm font-medium">
-                        {{ t('cardList.skills.label') }}
-                      </legend>
-                      <Message
-                        v-if="!skillQuerySupported"
-                        severity="warn"
-                        :closable="false"
-                        class="mb-2"
-                      >
-                        {{ t('cardList.skills.unsupported') }}
-                      </Message>
-                      <Message
-                        v-else-if="skillQueryError"
-                        severity="warn"
-                        :closable="false"
-                        class="mb-2"
-                      >
-                        {{ t(`cardList.skills.queryError.${skillQueryError}`) }}
-                      </Message>
-                      <CardListSkillFilter
-                        v-model="selectedSkillKeys"
-                        :catalog="skillCatalog"
-                        :game-locale="gameLocale"
-                        :visible-card-ids="visibleCardIds"
-                        :disabled="!skillQuerySupported"
-                      />
-                    </fieldset>
                     <fieldset class="min-w-0">
                       <legend class="mb-1.5 text-sm font-medium">
                         {{ t('cardList.rarity') }}
@@ -467,19 +393,93 @@ function selectedOrder(group: CardListFieldGroup['key']) {
                         </label>
                       </div>
                     </fieldset>
-                  </div>
 
-                  <fieldset class="min-w-0">
-                    <legend class="mb-1.5 text-sm font-medium">
-                      {{ t('cardList.connectFilter.label') }}
-                    </legend>
-                    <CardListConnectFilter
-                      v-model="conditions.connect"
-                      :catalog="connectCatalog"
-                      :counts="connectCounts"
-                      :visible-card-count="visibleCards.length"
-                    />
-                  </fieldset>
+                    <label class="block min-w-0">
+                      <span class="mb-1.5 block text-sm font-medium">{{
+                        t('cardList.character')
+                      }}</span>
+                      <MultiSelect
+                        v-model="conditions.character"
+                        class="w-full"
+                        :options="characterOptions"
+                        option-label="label"
+                        option-value="value"
+                        :placeholder="t('cardList.allCharacters')"
+                        :aria-label="t('cardList.character')"
+                        filter
+                        :filter-fields="['searchNames', 'value']"
+                        display="chip"
+                      >
+                        <template #option="{ option }">
+                          <div class="flex items-center gap-2">
+                            <CardListIcon
+                              :src="option.icon"
+                              label=""
+                              size="large"
+                              loading-skeleton
+                            />
+                            <span :lang="option.lang">{{ option.text }}</span>
+                          </div>
+                        </template>
+                        <template #chip="{ value, removeCallback }">
+                          <Chip
+                            class="p-multiselect-chip"
+                            :label="
+                              characterOptions.find(
+                                (option) => option.value === value,
+                              )?.text ?? value
+                            "
+                            :lang="
+                              characterOptions.find(
+                                (option) => option.value === value,
+                              )?.lang
+                            "
+                            removable
+                            @remove="removeCallback($event, value)"
+                          />
+                        </template>
+                      </MultiSelect>
+                    </label>
+                    <fieldset class="min-w-0">
+                      <legend class="mb-1.5 text-sm font-medium">
+                        {{ t('cardList.skills.label') }}
+                      </legend>
+                      <Message
+                        v-if="!skillQuerySupported"
+                        severity="warn"
+                        :closable="false"
+                        class="mb-2"
+                      >
+                        {{ t('cardList.skills.unsupported') }}
+                      </Message>
+                      <Message
+                        v-else-if="skillQueryError"
+                        severity="warn"
+                        :closable="false"
+                        class="mb-2"
+                      >
+                        {{ t(`cardList.skills.queryError.${skillQueryError}`) }}
+                      </Message>
+                      <CardListSkillFilter
+                        v-model="selectedSkillKeys"
+                        :catalog="skillCatalog"
+                        :game-locale="gameLocale"
+                        :visible-card-ids="visibleCardIds"
+                        :disabled="!skillQuerySupported"
+                      />
+                    </fieldset>
+                    <fieldset class="min-w-0">
+                      <legend class="mb-1.5 text-sm font-medium">
+                        {{ t('cardList.connectFilter.label') }}
+                      </legend>
+                      <CardListConnectFilter
+                        v-model="conditions.connect"
+                        :catalog="connectCatalog"
+                        :counts="connectCounts"
+                        :visible-card-count="visibleCards.length"
+                      />
+                    </fieldset>
+                  </div>
 
                   <div class="flex flex-wrap items-end gap-3">
                     <label class="min-w-48 flex-1 sm:flex-none">
