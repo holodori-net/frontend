@@ -3,9 +3,11 @@ import {
   siteLocales,
   siteLanguageMetadata,
   sitePages,
+  buildCardDetailPath,
 } from './shared/language'
 import { primeVueComponents } from './shared/primevue'
-import { pageDataPaths } from './shared/page-data'
+import { cardDetailDataPath, pageDataPaths } from './shared/page-data'
+import { readCardDetailIndex } from './server/data/card-detail'
 import {
   defaultThemeId,
   memberThemeFaviconKey,
@@ -29,6 +31,7 @@ const prerenderWorkerCount = getPrerenderWorkerCount(
 )
 const gaId = (process.env.NUXT_PUBLIC_GA_ID ?? 'G-3Z3154J0WR').trim()
 const memberThemes = readMemberThemes()
+const { cardIds } = readCardDetailIndex()
 const defaultThemePalette = createMemberThemePalette(
   resolveMemberTheme(memberThemes, defaultThemeId),
 )
@@ -39,10 +42,15 @@ const contentPages = sitePages.map((page) =>
 
 const prerenderRoutes = [
   ...Object.values(pageDataPaths),
+  ...cardIds.flatMap((id) => [
+    cardDetailDataPath(id),
+    `/cards/${encodeURIComponent(id)}`,
+  ]),
   ...siteLocales.flatMap((siteLocale) =>
-    gameLocales.flatMap((gameLocale) =>
-      contentPages.map((page) => `/${siteLocale}/${gameLocale}${page}`),
-    ),
+    gameLocales.flatMap((gameLocale) => [
+      ...contentPages.map((page) => `/${siteLocale}/${gameLocale}${page}`),
+      ...cardIds.map((id) => buildCardDetailPath(siteLocale, gameLocale, id)),
+    ]),
   ),
 ]
 let languageEntryPaths: string[] = []
@@ -85,6 +93,7 @@ export default defineNuxtConfig({
       await generateSiteSeo(
         fileURLToPath(new URL('.', import.meta.url)),
         process.env.NUXT_PUBLIC_SITE_URL || 'https://holodori.net',
+        cardIds,
       )
     },
   },

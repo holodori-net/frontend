@@ -7,13 +7,16 @@ import {
 } from 'workbox-precaching'
 import { googleFontsCache } from 'workbox-recipes'
 import {
+  buildCardDetailPath,
   isGameLocale,
   isSiteLocale,
   offlinePageKinds,
   siteLanguageMetadata,
+  type GameLocale,
+  type SiteLocale,
 } from '../shared/language'
 import { fetchWithProgress, mapConcurrent } from './transfer'
-import { pageDataPaths } from '../shared/page-data'
+import { cardDetailDataPath, pageDataPaths } from '../shared/page-data'
 
 declare const self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: Array<{ revision?: string | null; url: string }>
@@ -94,10 +97,13 @@ async function syncSelection(
   port?: MessagePort,
 ) {
   if (!validSelection(data)) throw new Error('Invalid offline page selection')
-  const siteLocale = data.siteLocale as string
-  const gameLocale = data.gameLocale as string
+  const siteLocale = data.siteLocale as SiteLocale
+  const gameLocale = data.gameLocale as GameLocale
   const pages = [...new Set(data.pages as string[])]
-  const routes = [...new Set([...pages, 'settings'])].map((page) =>
+  const includesCardDetails = pages.includes('cardDetails')
+  const routes = [
+    ...new Set([...pages.filter((page) => page !== 'cardDetails'), 'settings']),
+  ].map((page) =>
     page === 'settings'
       ? `/${siteLocale}/${gameLocale}/settings/`
       : pagePath(siteLocale, gameLocale, page),
@@ -106,30 +112,74 @@ async function syncSelection(
     ...new Set([
       ...routes.flatMap((route) => [route, payloadPath(route)]),
       ...Object.entries(pageDataPaths)
-        .filter(([page]) => pages.includes(page))
+        .filter(([page]) => pages.includes(page) && page !== 'cardDetails')
         .map(([, path]) => path),
     ]),
   ]
   const stagingName = `${PAGE_CACHE_PREFIX}${siteLocale}-${gameLocale}-${crypto.randomUUID()}`
   const staging = await caches.open(stagingName)
-  const total = resources.length + PRECACHE_ASSET_URLS.length
+  let total = includesCardDetails
+    ? 1
+    : resources.length + PRECACHE_ASSET_URLS.length
   let completed = 0
   const report = (url: string) =>
     port?.postMessage({ type: 'progress', completed, total, url })
   let committed = false
 
   try {
-    await mapConcurrent(resources, CONCURRENCY, async (path) => {
+    const detailPaths: string[] = []
+    if (includesCardDetails) {
+      const path = pageDataPaths.cardDetails
       const request = new Request(new URL(path, self.location.origin), {
         cache: 'reload',
       })
       const response = await fetchWithProgress(request, () => report(path))
       if (!response.ok || response.type === 'opaque')
         throw new Error(`Unable to download ${path}`)
+      const index: unknown = await response.clone().json()
+      if (
+        !index ||
+        typeof index !== 'object' ||
+        !Array.isArray((index as { cardIds?: unknown }).cardIds) ||
+        !(index as { cardIds: unknown[] }).cardIds.every(
+          (id) => typeof id === 'string',
+        )
+      )
+        throw new Error(`Invalid card detail index: ${path}`)
+      const cardIds = [...new Set((index as { cardIds: string[] }).cardIds)]
       await staging.put(request, response)
       completed += 1
+      for (const id of cardIds) {
+        const detailRoute = `${buildCardDetailPath(siteLocale, gameLocale, id)}/`
+        detailPaths.push(
+          detailRoute,
+          payloadPath(detailRoute),
+          cardDetailDataPath(id),
+        )
+      }
+      total =
+        completed +
+        resources.length +
+        detailPaths.length +
+        PRECACHE_ASSET_URLS.length
       report(path)
-    })
+    }
+
+    await mapConcurrent(
+      [...resources, ...detailPaths],
+      CONCURRENCY,
+      async (path) => {
+        const request = new Request(new URL(path, self.location.origin), {
+          cache: 'reload',
+        })
+        const response = await fetchWithProgress(request, () => report(path))
+        if (!response.ok || response.type === 'opaque')
+          throw new Error(`Unable to download ${path}`)
+        await staging.put(request, response)
+        completed += 1
+        report(path)
+      },
+    )
 
     await mapConcurrent(PRECACHE_ASSET_URLS, CONCURRENCY, async (assetUrl) => {
       const cacheKey = new URL(
@@ -215,12 +265,14 @@ self.addEventListener('fetch', (event) => {
     url.origin === self.location.origin &&
     /^\/(?:_nuxt|_i18n)\//.test(url.pathname) &&
     !PRECACHED_URLS.has(url.href)
+  const cardDetailData = /^\/data\/cards\/[^/]+\.json$/.test(url.pathname)
   if (
     request.method !== 'GET' ||
     url.origin !== self.location.origin ||
     (request.mode !== 'navigate' &&
       !url.pathname.endsWith('/_payload.json') &&
       !PAGE_DATA_PATHS.has(url.pathname) &&
+      !cardDetailData &&
       !snapshotAsset)
   )
     return
@@ -259,7 +311,8 @@ self.addEventListener('fetch', (event) => {
         }
         if (
           url.pathname.endsWith('/_payload.json') ||
-          PAGE_DATA_PATHS.has(url.pathname)
+          PAGE_DATA_PATHS.has(url.pathname) ||
+          cardDetailData
         )
           return new Response(
             JSON.stringify({ error: 'Offline payload is not available' }),

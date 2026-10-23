@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import {
+  buildCardDetailPath,
   gameLocaleLanguages,
   resolveLocalizedName,
   type GameLocale,
+  type SiteLocale,
 } from '#shared/language'
 import type {
   CardListCostumeData,
@@ -30,6 +32,7 @@ import {
   type CardListField,
   type CardListLayout,
 } from '#shared/game-data/card-list'
+import { NuxtLink } from '#components'
 
 type CardSkillSelections = Readonly<Record<CardSkillField, readonly number[]>>
 
@@ -45,6 +48,8 @@ const props = withDefaults(
     fields?: readonly CardListField[]
     skillLevels?: CardSkillSelections
     layout?: CardListLayout
+    imageSize?: 'thumbnail' | 'original'
+    linked?: boolean
   }>(),
   {
     fields: () => CARD_LIST_FIELDS,
@@ -55,12 +60,15 @@ const props = withDefaults(
       connectEffect: [1, 2],
     }),
     layout: 'full',
+    imageSize: 'thumbnail',
+    linked: true,
   },
 )
 
 const { t, locale } = useI18n()
+const route = useRoute()
 const imageUrl = computed(() =>
-  getCardImageUrl(props.card.assetId, props.layout),
+  getCardImageUrl(props.card.assetId, props.layout, props.imageSize),
 )
 const {
   status: imageStatus,
@@ -230,6 +238,15 @@ const articleStyle = computed(() => ({
 const characterName = computed(() =>
   resolveLocalizedName(props.card.characterName, props.gameLocale),
 )
+const detailLink = computed(() => ({
+  path: buildCardDetailPath(
+    locale.value as SiteLocale,
+    props.gameLocale,
+    props.card.id,
+  ),
+  state: { cardListFullPath: route.fullPath },
+}))
+const contentWrapper = computed(() => (props.linked ? NuxtLink : 'div'))
 </script>
 
 <template>
@@ -249,58 +266,65 @@ const characterName = computed(() =>
     ]"
     :style="{ ...articleStyle, ...fullSubgridStyle }"
   >
-    <div
-      class="card-list-art relative overflow-hidden bg-surface-100 dark:bg-surface-800"
-      :class="
-        layout === 'vertical' && hasInformation
-          ? 'aspect-[256/366] w-24 shrink-0'
-          : layout === 'vertical'
-            ? 'aspect-[256/366] w-full'
-            : 'aspect-video w-full'
-      "
+    <component
+      :is="contentWrapper"
+      :to="linked ? detailLink : undefined"
+      class="contents card-list-detail-link text-inherit no-underline"
+      :aria-label="linked ? cardName.text : undefined"
     >
-      <Skeleton
-        v-if="hasImage && imageStatus === 'loading'"
-        class="card-image-skeleton absolute inset-0"
-        width="100%"
-        height="100%"
-        border-radius="0"
-      />
-      <img
-        v-if="hasImage"
-        ref="imageElement"
-        :key="imageUrl!"
-        :src="imageUrl!"
-        alt=""
-        class="relative size-full object-contain"
-        draggable="false"
-        loading="lazy"
-        decoding="async"
-        @load="onLoad"
-        @error="onError"
-      />
-      <span
-        v-else
-        class="absolute inset-0 grid place-items-center px-3 text-center text-xs text-muted-color"
+      <div
+        class="card-list-art relative overflow-hidden bg-surface-100 dark:bg-surface-800"
+        :class="
+          layout === 'vertical' && hasInformation
+            ? 'aspect-[256/366] w-24 shrink-0'
+            : layout === 'vertical'
+              ? 'aspect-[256/366] w-full'
+              : 'aspect-video w-full'
+        "
       >
-        {{ t('cardList.imageUnavailable') }}
-      </span>
+        <Skeleton
+          v-if="hasImage && imageStatus === 'loading'"
+          class="card-image-skeleton absolute inset-0"
+          width="100%"
+          height="100%"
+          border-radius="0"
+        />
+        <img
+          v-if="hasImage"
+          ref="imageElement"
+          :key="imageUrl!"
+          :src="imageUrl!"
+          alt=""
+          class="relative size-full object-contain"
+          draggable="false"
+          loading="lazy"
+          decoding="async"
+          @load="onLoad"
+          @error="onError"
+        />
+        <span
+          v-else
+          class="absolute inset-0 grid place-items-center px-3 text-center text-xs text-muted-color"
+        >
+          {{ t('cardList.imageUnavailable') }}
+        </span>
 
-      <div class="absolute left-1 top-1">
-        <CardListIcon
-          :src="getCardAttributeIconUrl(card.attributeType)"
-          :label="t(`cardList.attribute${card.attributeType}`)"
-          size="large"
-        />
+        <div class="absolute left-1 top-1">
+          <CardListIcon
+            :src="getCardAttributeIconUrl(card.attributeType)"
+            :label="t(`cardList.attribute${card.attributeType}`)"
+            size="large"
+          />
+        </div>
+        <div class="absolute bottom-1 left-1 top-11">
+          <CardListRarity
+            :count="card.rarity"
+            :label="t('cardList.rarityOption', { count: card.rarity })"
+            vertical
+          />
+        </div>
       </div>
-      <div class="absolute bottom-1 left-1 top-11">
-        <CardListRarity
-          :count="card.rarity"
-          :label="t('cardList.rarityOption', { count: card.rarity })"
-          vertical
-        />
-      </div>
-    </div>
+    </component>
 
     <div
       v-if="hasInformation"
@@ -329,7 +353,14 @@ const characterName = computed(() =>
             :style="fieldStyle(field)"
             :lang="cardName.lang"
           >
-            {{ cardName.text }}
+            <NuxtLink
+              v-if="linked"
+              :to="detailLink"
+              class="card-list-name-link text-inherit underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              :lang="cardName.lang"
+              >{{ cardName.text }}</NuxtLink
+            >
+            <span v-else>{{ cardName.text }}</span>
           </p>
           <p
             v-else-if="field === 'characterName'"
@@ -463,6 +494,16 @@ const characterName = computed(() =>
 </template>
 
 <style scoped>
+.card-list-detail-link:focus-visible .card-list-art {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 2px;
+}
+
+.card-list-name-link:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 2px;
+}
+
 .card-list-content {
   content-visibility: auto;
   contain-intrinsic-block-size: auto 24rem;
@@ -504,6 +545,11 @@ const characterName = computed(() =>
 
 .card-list-art {
   grid-row: 1;
+}
+
+.card-list-detail-link:focus-visible .card-list-art {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: -3px;
 }
 
 .card-list-info--full-subgrid {

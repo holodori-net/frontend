@@ -2,6 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import {
   buildLocalizedPath,
+  buildCardDetailPath,
   gameLocales,
   sitePages,
   siteLocales,
@@ -16,13 +17,16 @@ export function escapeXml(value: string) {
     .replaceAll("'", '&apos;')
 }
 
-export function getSiteSeoRoutes() {
+export function getSiteSeoRoutes(cardIds: readonly string[] = []) {
   return siteLocales.flatMap((siteLocale) =>
-    gameLocales.flatMap((gameLocale) =>
-      sitePages
+    gameLocales.flatMap((gameLocale) => [
+      ...sitePages
         .filter((page) => page !== 'settings')
         .map((page) => `${buildLocalizedPath(siteLocale, gameLocale, page)}/`),
-    ),
+      ...cardIds.map(
+        (id) => `${buildCardDetailPath(siteLocale, gameLocale, id)}/`,
+      ),
+    ]),
   )
 }
 
@@ -48,11 +52,15 @@ function parseSiteOrigin(value: string) {
   return url.origin
 }
 
-export async function generateSiteSeo(root: string, siteUrl: string) {
+export async function generateSiteSeo(
+  root: string,
+  siteUrl: string,
+  cardIds: readonly string[] = [],
+) {
   const origin = parseSiteOrigin(siteUrl)
   const publicRoot = join(root, 'public')
   await mkdir(publicRoot, { recursive: true })
-  const entries = getSiteSeoRoutes()
+  const entries = getSiteSeoRoutes(cardIds)
     .map(
       (path) =>
         `  <url><loc>${escapeXml(new URL(path, origin).href)}</loc></url>`,

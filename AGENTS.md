@@ -4,17 +4,17 @@
 
 - hololive Dreams 非官方資料庫使用 Nuxt 4、Vue 3、TypeScript、PrimeVue、Tailwind CSS、Nuxt i18n 與自訂 PWA Service Worker。
 - Node.js 24+ 與 pnpm 為開發環境；開發及驗證指令見 [CONTRIBUTING.md](CONTRIBUTING.md)，網站操作及部署見 [README.md](README.md)。
-- 網站使用檔案路由與靜態生成，部署內容為 `.output/public`。目前提供首頁、卡片列表、角色列表及設定頁。
+- 網站使用檔案路由與靜態生成，部署內容為 `.output/public`。目前提供首頁、卡片列表與詳細頁、歌曲列表、角色列表及設定頁。
 - 語言、主題、頁面清單及素材用途由對應設定管理；數量從設定推導。
 
 ## 語言、網址與 SEO
 
 - `shared/language.ts` 集中管理網站語言、遊戲語言、顯示名稱、瀏覽器語言對照與 fallback。Nuxt、選單、路由驗證及 Service Worker 共用此設定。
 - 網站語言與遊戲語言獨立；日文 fallback 分別為 `ja` 與 `jpn`，保留遊戲語言的原始代碼。
-- 路徑格式為 `/{siteLocale}/{gameLocale}/...`。`/`、`/cards`、`/characters` 與 `/settings` 依已儲存偏好、瀏覽器語言及日文 fallback 選擇語言。
+- 路徑格式為 `/{siteLocale}/{gameLocale}/...`。`/`、`/cards`、`/songs`、`/characters` 與 `/settings` 依已儲存偏好、瀏覽器語言及日文 fallback 選擇語言。
 - 完整語言網址先依網址顯示；與已儲存偏好衝突時提供確認。切換語言須保留目前頁面、實體 ID、query 與 hash。
 - 新增網站語言需提供介面翻譯；新增遊戲語言需驗證來源文字。語言測試涵蓋設定一致性、實際組合及 fallback。
-- Sitemap 收錄已設定語言組合的首頁、cards 與 characters 入口；設定頁不列入 sitemap。網站網址由 `NUXT_PUBLIC_SITE_URL` 設定。
+- Sitemap 收錄已設定語言組合的首頁、cards、songs 與 characters 入口，以及全部卡片詳細頁；設定頁不列入 sitemap。網站網址由 `NUXT_PUBLIC_SITE_URL` 設定。
 - 靜態生成保留明確路由並啟用連結發現；任一路由生成失敗時，建置應失敗。
 
 ## 主題與素材
@@ -26,7 +26,8 @@
 - 主題四色來自角色資料，缺少選填色時使用主色；`color1` 衍生頁面、surface 與 topbar 底色、`color2/3` 裝飾與色票、`color4` 互動色、topbar 品牌文字與顯示設定圖示。共用規則生成亮暗色階，主要文字及按鈕文字須維持 4.5:1 對比。
 - CSS 與 PWA manifest 直接使用同一 reader；主題資料沿用 Nuxt payload。選單名稱跟隨遊戲語言並支援六語搜尋；離線切換保留配色並提供遠端素材 fallback。
 - 角色列表的 production 分區與 `icon` 素材用途集中在 `shared/game-data/character-list.ts`；圖示缺失時保留角色名稱與占位。
-- 遊戲資料層位於 `server/data/`，共用資料型別位於 `shared/game-data/`。卡片與角色資料路由於 prerender 時直接唯讀讀取 `.data/master.sqlite`；converter 回傳完整資料，reader 選取列表欄位並產生共用靜態 `/data/cards.json` 與 `/data/characters.json`，路徑集中於 `shared/page-data.ts`。站內切頁以 client-side `useLazyAsyncData` 先顯示頁首、標題及載入狀態，再取得資料；請求附上 Nuxt build ID，失敗時提供重試並記錄來源錯誤。角色頁以 `onServerPrefetch` 讀取初始列表，透過 `useState` 保存於 HTML 並供 hydration 重用；預設列表可在停用 JavaScript 時顯示。卡片資料就緒後由 `CardListView` 初始化篩選與顯示偏好。生成失敗時須保留來源錯誤。
+- 遊戲資料層位於 `server/data/`，共用資料型別位於 `shared/game-data/`。卡片、歌曲與角色資料路由於 prerender 時直接唯讀讀取 `.data/master.sqlite`；converter 回傳完整資料，reader 選取列表欄位並產生共用靜態 `/data/cards.json`、`/data/songs.json` 與 `/data/characters.json`，路徑集中於 `shared/page-data.ts`。站內切頁以 client-side `useLazyAsyncData` 先顯示頁首、標題及載入狀態，再取得資料；請求附上 Nuxt build ID，失敗時提供重試並記錄來源錯誤。角色頁以 `onServerPrefetch` 讀取初始列表，透過 `useState` 保存於 HTML 並供 hydration 重用；預設列表可在停用 JavaScript 時顯示。卡片資料就緒後由 `CardListView` 初始化篩選與顯示偏好。生成失敗時須保留來源錯誤。
+- 卡片詳細頁位於 `/{siteLocale}/{gameLocale}/cards/{id}`，使用獨立版面與單卡 `/data/cards/{id}.json`，索引為 `/data/card-details.json`。靜態 HTML 顯示滿養成資訊與卡片 SEO；三個養成控制即時計算自身三圍並連動技能與 Connect 等級，共用 `shared/game-data/card-stats.ts` 的 float32 公式。選擇只在當次頁面記憶體保存，同卡切換語言保留，離開、換卡或重整回到滿養成。全部卡片與語言組合及 `/cards/{id}` 入口明確生成。離線 `cardDetails` 與列表 `cards` 分開選擇，詳細頁選項保存目前語言組合的全部詳細頁、payload、單卡 JSON 及應用資源，預設不選。
 - 卡片列表採滿等、滿特訓、滿綻放的自身三圍，以 float32 逐項計算並向上取整；特化依來源權重最高項判定。搜尋、複選篩選與排序保存於 query；舊 query 的 `layout` 忽略，下次寫入篩選網址時移除。控制面板分為可獨立收合的「篩選與排序」與「卡片顯示」，預設皆展開，收合狀態保存在頁面記憶體。標題列右側各有同樣式的 `RotateCcw` 圖示按鈕，分別重設篩選或顯示設定，保留本地化提示與可存取名稱，收合時仍可使用。重設按鈕寬 56px，填滿標題列高度且至少 44px 高；圖示為 20px。標題與控制面板置中，最大寬度為 100rem。篩選區於寬螢幕採三欄：第一列搜尋獨占全寬，第二列依序為稀有度、屬性、特化，第三列依序為角色、技能、Connect；排序位於下方。窄螢幕搜尋仍獨占全寬，其餘控制項保留順序並依空間縮減欄數。結果數量位於收合區外。
 - 卡片全文搜尋索引 `searchTextByCardId` 在建置階段產生，涵蓋六語卡名、角色名、服裝名、全部等級的被動／主動／特殊與隊長服裝技能，以及 Connect 描述；移除已知顯示標記並保留實際文字。查詢忽略大小寫、依空白分詞，以 AND 跨欄位比對，獨立於顯示偏好與延後載入，列表與篩選數量共用相同索引。
 - 卡片顯示包含 `full`／`vertical` 版型及基礎資訊、被動技能、主動技能、特殊技能、隊長服裝技能、Connect 六個資訊群組；基礎資訊包含可獨立選取的卡名、角色名、三圍與合計。預設 `full`、一般資訊全開，三類卡片技能只顯示 Lv. 2，Connect 全選可用等級。資訊選項使用緊湊的小圓角 PrimeVue Button，選取時使用 primary 色，未選時使用 secondary outlined 樣式，並以 aria-pressed 表達狀態。各群組標題左側以圓形 Badge 顯示共用排序號，未選時顯示「−」。基礎資訊、三類卡片技能與 Connect 使用 PrimeVue InputGroup 將名稱、排序號與子項按鈕相連；群組內高度、字級與內距一致，只有外側保留小圓角。所有選項在同一層靠上對齊，基本高度為 32px；基礎資訊子項依內容寬度排列，空間不足時換行。技能群組整組換行，窄螢幕允許名稱折行並維持等級並排。所有群組依選取先後排列；基礎資訊共用一個排序位置，組內保留子項選取順序，技能組內等級由低到高排列。新增部分子項保留群組位置，清空群組後再選取移至最後。`useCardLayout` 與 `useCardFields` 分別保存於 `localStorage` 的 `holodori-card-layout` 與 `holodori-card-fields`，跨語言共用；資訊偏好以 `{ fields, skillLevels }` JSON 物件保存，`fields` 保存群組及組內選取順序，基礎資訊成員連續排列，空陣列表示純卡圖；既有偏好以最早的基礎資訊項目決定群組位置，保留組內順序，舊版陣列的三類技能使用 Lv. 2、已選 Connect 使用全部可用等級。缺少 `skillLevels.connectEffect` 的舊 JSON 補空選取並保留原有欄位、順序與技能等級。變更立即套用，保留網址、瀏覽紀錄及篩選；「重設篩選」重設篩選與排序並保留顯示偏好與收合狀態；「重設顯示」恢復目前版本的預設版型、資訊項目、技能等級與順序，保存偏好並保留篩選、網址與收合狀態。靜態 HTML 與首次 hydration 保留頁首、標題及可存取的中性 loading，完成偏好初始化與網址條件套用後一次顯示控制項與列表，不等待圖片；停用 JavaScript 時顯示提示。偏好缺失、無效或讀取失敗使用預設值；讀寫例外記錄警告，寫入失敗保留當次記憶體選擇。
@@ -39,12 +40,13 @@
 - 卡片與稀有度選項共用 `CardListRarity`，每顆星以單一 `<img>` 播放 APK 生成的透明動畫 WebP，播放交由瀏覽器管理。稀有度選項載入時顯示 Skeleton，快取圖片於 mount 時確認載入狀態；圖片載入失敗時顯示星級文字。
 - 完整卡圖的 `src` 使用 `.thumb-640-v1.webp` 的 640×360 縮圖；直式卡圖使用 256×366 素材。卡圖共用 `useImageLoading`，載入時顯示 Skeleton，失敗時顯示占位，並於 mount 與來源變更時確認快取圖片的載入狀態。
 - 卡片頁兩種版型皆使用完整可用寬度，左右各保留 1rem 頁邊。完整卡圖網格以 350px 最小欄寬自動換行，較窄螢幕縮至容器寬度；直式版型每列一張。完整卡圖版型以 16:9 卡圖呈現；直式版型以 256:366、96px 寬卡圖置左，資訊置於右側。兩種版型皆使用水平三圍加總算式。預設資訊順序為卡名、角色名、三圍、被動、主動、特殊、隊長服裝技能與 Connect；兩種版型皆依資訊選取順序呈現。卡片技能只列出已選等級，以小型等級標籤搭配完整描述；各技能類型共用一個區塊標題。完整卡圖以 row subgrid 對齊同排卡片的名稱、數值與技能，各區塊依同排最長內容決定列高並靠上排列，區塊內的等級自然排列；卡名與角色名各占一列。直式資訊靠上，各群組依選取順序在同一橫列等寬排列，基礎資訊的已選子項集中於同一欄。每欄至少 12rem、欄距 1rem，空間足夠時等分餘寬；個別卡片缺少資料時保留其欄位位置。整個列表共用可鍵盤操作的橫向捲動區，維持上下卡片的欄位對齊。技能標題以靠左的 PrimeVue `Divider` 與粗體小標呈現，服裝名稱以較小、較灰的副標置於小標旁。技能屬性圖示使用 CSS `::before` 並保持前後等距，缺圖時移除圖示及間距，選取文字保留屬性名稱。關閉資訊項目時移除對應內容與間距；全部關閉時，卡圖依所選比例填滿卡片寬度並保留可存取卡名；直式純卡圖靠左，卡片最大寬度為 256px。屬性與垂直星星列位於卡圖左側。合計以一般文字色及粗體呈現，特化數值使用主題文字色；窄螢幕與缺圖文字按數值項目換行，須保持亮暗主題可讀及 fallback 不溢出。
+- 歌曲列表採正方形封面網格，沿用卡片頁的篩選、顯示、重設與網址同步流程。完整來源資料保留未來歌曲，頁面每次進入時以裝置時間判斷一次 `startTime`，排除教學與未到收錄時間的歌曲，再推導篩選選項與數量。六語搜尋涵蓋讀音、演唱成員、製作人員、解鎖與 MV 文字。難度與等級區間採任一譜面符合，譜面排序取符合資料中的最高值。顯示偏好保存於 `holodori-song-fields`，預設基礎資訊、四種譜面與製作人員；進階群組直接顯示來源計分、解鎖、MV 與版權資訊。選填文字保留逐語言 null；封面共用圖片載入狀態及原生延後載入。
 - 主題背景須維持亮暗模式可讀、低對比且不遮擋內容。樣式生成流程與 PrimeVue 元件相依設定見 CONTRIBUTING。
 
 ## PWA 與離線
 
 - 進站檢查時套用已就緒的更新，最多自動 reload 一次；站內導覽途中不強制更新。
-- 離線選擇可保存目前語言組合的首頁、cards 與 characters 頁面；設定頁及必要的 scripts、styles、語言資源一併保存。卡圖與角色圖示由 CDN 載入，離線時提供占位；卡片資料可離線搜尋、篩選與排序。
+- 離線選擇可分別保存目前語言組合的首頁、卡片列表、全部卡片詳細頁、歌曲列表與角色列表；設定頁及必要的 scripts、styles、語言資源一併保存。卡圖與角色圖示由 CDN 載入，離線時提供占位；卡片列表支援離線搜尋、篩選與排序，詳細頁支援離線養成計算。
 - 完整下載成功後才替換已儲存的選擇；選取頁面的共用靜態列表 JSON 與 HTML、payload、應用資源保存在同一快照，失敗時保留原本可用的頁面與資源。
 - Service Worker 共用語言驗證，依序處理同步請求；下載使用有限併發及停滯逾時。
 - 通訊協定須區分進度與完成訊息；持續收到進度時更新等待期限，傳送 Vue 狀態前先建立可複製的資料。

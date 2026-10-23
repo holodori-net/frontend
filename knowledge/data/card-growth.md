@@ -76,6 +76,12 @@ CardPotentialEffectType 的 schema 定義如下（**CONFIRMED**）：
 
 來源：`.data/master.sqlite` 的 `Card`、`CardLevel`、`CardLevelLimit`、`CardPotential`；客戶端 `../extraction/work/decompile/05-annotate-decompiled-code/annotated-csharp/Vision.Common.Core/Vision/Common/Data/CardStatus.cs` 的建構式及 `GetPotentialUpgradeBonusPermil`。`../extraction/work/decompile/05-annotate-decompiled-code/methods.json` 記錄該建構式 RVA `0xE7B8C98`（file offset `0xE7B4C98`）。精度與向上取整可由對應 ARM64 `libil2cpp.so` 的單精度算術與 `FRINTP` 指令重現；反編譯 C# 含未還原指令，數值計算以原生指令順序為準。跨系統研究見 [組隊與分數模擬](../../../knowledge/team-simulator.md)。
 
+## 詳細頁的養成計算
+
+`shared/game-data/card-stats.ts` 共用列表與詳細頁的 float32 三圍公式。`CardDetailGrowthData` 投影單卡權重、各等級基礎值、特訓階段上限與全部綻放效果。`CardGrowthSelection` 指定等級、特訓次數及綻放階段；等級限制於目前特訓上限，降低特訓會將超出上限的等級降至上限。
+
+計算只套用 `upgradeCount` 小於或等於選取階段的綻放效果。`effectType=4` 的三圍加成累加；主動、被動、特殊與 Connect 等級分別取 `effectType=1/2/3/5` 已解鎖效果值的最大值，沒有升級效果時為 Lv. 1。技能效果值代表目標等級。此規則由客戶端 `CardUtility.GetCurrent*Level` 的初始值 1、對應效果值與 `Enumerable.Max` 確認（**CONFIRMED**）。
+
 ## CardPotentialUpgradeItem
 
 每筆記錄一種卡片稀有度對應的綻放道具 ID。轉換至 `potentialUpgradeItems`，以 rarity 的十進位字串為 key，值為 `{ itemId }`；SQL 依 rarity 排序並保留來源列。已確認的來源資料包含 rarity 5 對應 `item-card-potential-upgrade-cmn`。

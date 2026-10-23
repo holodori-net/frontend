@@ -132,33 +132,118 @@ describe('offline service worker selection', () => {
     )
   })
 
-  it('stores the character page and payload at their localized paths', async () => {
-    const fetchPage = vi.fn(
-      async (request: Request) => new Response(request.url),
-    )
-    vi.stubGlobal('fetch', fetchPage)
+  it('downloads card details independently and includes detail pages, payloads, and data', async () => {
+    const fetchResource = vi.fn(async (input: RequestInfo | URL) => {
+      const url = input instanceof Request ? input.url : String(input)
+      if (url.endsWith('/data/card-details.json'))
+        return Response.json({ cardIds: ['card-1', 'card/2'] })
+      return new Response(url)
+    })
+    vi.stubGlobal('fetch', fetchResource)
     const replies = await message({
       type: 'SYNC_OFFLINE_PAGES',
-      siteLocale: 'zh-TW',
-      gameLocale: 'cht',
-      pages: ['characters'],
+      siteLocale: 'ja',
+      gameLocale: 'jpn',
+      pages: ['cardDetails'],
     })
     expect(replies.at(-1)).toMatchObject({
       success: true,
-      pages: ['characters'],
+      pages: ['cardDetails'],
     })
-    const downloaded = fetchPage.mock.calls.map(
+    const downloaded = fetchResource.mock.calls.map(
       ([request]) => (request as Request).url,
     )
-    expect(downloaded).toContain('https://example.test/zh-TW/cht/characters/')
+    expect(downloaded).toContain('https://example.test/data/card-details.json')
+    expect(downloaded).toContain('https://example.test/ja/jpn/cards/card-1/')
     expect(downloaded).toContain(
-      'https://example.test/zh-TW/cht/characters/_payload.json',
+      'https://example.test/ja/jpn/cards/card-1/_payload.json',
     )
-    expect(downloaded).toContain('https://example.test/data/characters.json')
+    expect(downloaded).toContain('https://example.test/data/cards/card-1.json')
+    expect(downloaded).toContain('https://example.test/ja/jpn/cards/card%2F2/')
+    expect(downloaded).toContain(
+      'https://example.test/data/cards/card%2F2.json',
+    )
     expect(downloaded).not.toContain('https://example.test/data/cards.json')
+    expect(downloaded).not.toContain('https://example.test/ja/jpn/cards/')
   })
 
-  it.each(['/_payload.json', '/data/characters.json'])(
+  it('downloads card list data without fetching the detail index', async () => {
+    const fetchResource = vi.fn(
+      async (input: RequestInfo | URL) =>
+        new Response(input instanceof Request ? input.url : String(input)),
+    )
+    vi.stubGlobal('fetch', fetchResource)
+    const replies = await message({
+      type: 'SYNC_OFFLINE_PAGES',
+      siteLocale: 'ja',
+      gameLocale: 'jpn',
+      pages: ['cards'],
+    })
+    expect(replies.at(-1)).toMatchObject({ success: true })
+    const downloaded = fetchResource.mock.calls.map(
+      ([request]) => (request as Request).url,
+    )
+    expect(downloaded).toContain('https://example.test/data/cards.json')
+    expect(downloaded).not.toContain(
+      'https://example.test/data/card-details.json',
+    )
+    expect(
+      downloaded.some((url) => /\/data\/cards\/[^/]+\.json$/.test(url)),
+    ).toBe(false)
+  })
+
+  it('downloads list and detail resources together', async () => {
+    const fetchResource = vi.fn(async (input: RequestInfo | URL) => {
+      const url = input instanceof Request ? input.url : String(input)
+      return url.endsWith('/data/card-details.json')
+        ? Response.json({ cardIds: ['card-1'] })
+        : new Response(url)
+    })
+    vi.stubGlobal('fetch', fetchResource)
+    const replies = await message({
+      type: 'SYNC_OFFLINE_PAGES',
+      siteLocale: 'ja',
+      gameLocale: 'jpn',
+      pages: ['cards', 'cardDetails'],
+    })
+    expect(replies.at(-1)).toMatchObject({ success: true })
+    const downloaded = fetchResource.mock.calls.map(
+      ([request]) => (request as Request).url,
+    )
+    expect(downloaded).toContain('https://example.test/data/cards.json')
+    expect(downloaded).toContain('https://example.test/data/cards/card-1.json')
+  })
+
+  it.each(['characters', 'songs'])(
+    'stores the %s page and payload at their localized paths',
+    async (page) => {
+      const fetchPage = vi.fn(
+        async (request: Request) => new Response(request.url),
+      )
+      vi.stubGlobal('fetch', fetchPage)
+      const replies = await message({
+        type: 'SYNC_OFFLINE_PAGES',
+        siteLocale: 'zh-TW',
+        gameLocale: 'cht',
+        pages: [page],
+      })
+      expect(replies.at(-1)).toMatchObject({
+        success: true,
+        pages: [page],
+      })
+      const downloaded = fetchPage.mock.calls.map(
+        ([request]) => (request as Request).url,
+      )
+      expect(downloaded).toContain(`https://example.test/zh-TW/cht/${page}/`)
+      expect(downloaded).toContain(
+        `https://example.test/zh-TW/cht/${page}/_payload.json`,
+      )
+      expect(downloaded).toContain(`https://example.test/data/${page}.json`)
+      expect(downloaded).not.toContain('https://example.test/data/cards.json')
+    },
+  )
+
+  it.each(['/_payload.json', '/data/characters.json', '/data/songs.json'])(
     'keeps the previous selection when downloading %s fails',
     async (failedResource) => {
       const core = await caches.open('holodori-core-v1')
@@ -188,7 +273,7 @@ describe('offline service worker selection', () => {
         type: 'SYNC_OFFLINE_PAGES',
         siteLocale: 'ja',
         gameLocale: 'jpn',
-        pages: ['characters'],
+        pages: ['characters', 'songs'],
       })
       expect(replies.at(-1)).toMatchObject({ type: 'result', success: false })
       expect(await (await core.match(selectionUrl))?.json()).toMatchObject({
@@ -204,7 +289,58 @@ describe('offline service worker selection', () => {
     },
   )
 
-  it.each(['/data/cards.json', '/data/characters.json'])(
+  it.each(['/data/card-details.json', '/data/cards/card-1.json'])(
+    'keeps the previous snapshot when card detail download %s fails',
+    async (failedResource) => {
+      const core = await caches.open('holodori-core-v1')
+      const selectionUrl = 'https://example.test/__offline-selection__'
+      await core.put(
+        selectionUrl,
+        new Response(
+          JSON.stringify({
+            cacheName: 'holodori-selected-pages-ja-jpn-old',
+            siteLocale: 'ja',
+            gameLocale: 'jpn',
+            pages: ['home'],
+          }),
+        ),
+      )
+      await caches.open('holodori-selected-pages-ja-jpn-old')
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async (input: RequestInfo | URL) => {
+          const url = input instanceof Request ? input.url : String(input)
+          if (url.endsWith('/data/card-details.json')) {
+            return url.endsWith(failedResource)
+              ? new Response('failure', { status: 503 })
+              : Response.json({ cardIds: ['card-1'] })
+          }
+          return url.endsWith(failedResource)
+            ? new Response('failure', { status: 503 })
+            : new Response('downloaded')
+        }),
+      )
+      const replies = await message({
+        type: 'SYNC_OFFLINE_PAGES',
+        siteLocale: 'ja',
+        gameLocale: 'jpn',
+        pages: ['cardDetails'],
+      })
+      expect(replies.at(-1)).toMatchObject({ type: 'result', success: false })
+      expect(await (await core.match(selectionUrl))?.json()).toMatchObject({
+        cacheName: 'holodori-selected-pages-ja-jpn-old',
+      })
+      expect(
+        [...memoryCaches.keys()].some(
+          (name) =>
+            name !== 'holodori-selected-pages-ja-jpn-old' &&
+            name.startsWith('holodori-selected-pages-'),
+        ),
+      ).toBe(false)
+    },
+  )
+
+  it.each(['/data/cards.json', '/data/characters.json', '/data/songs.json'])(
     'serves saved %s offline with a build query after an app update',
     async (path) => {
       vi.stubGlobal(
@@ -215,7 +351,7 @@ describe('offline service worker selection', () => {
         type: 'SYNC_OFFLINE_PAGES',
         siteLocale: 'ja',
         gameLocale: 'jpn',
-        pages: ['cards', 'characters'],
+        pages: ['cards', 'characters', 'songs'],
       })
       await loadWorker('/_nuxt/new.js')
       vi.stubGlobal(
@@ -231,6 +367,83 @@ describe('offline service worker selection', () => {
       await expect((await response)?.json()).resolves.toEqual({ saved: path })
     },
   )
+
+  it('serves per-card JSON offline when the request includes a query string', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = input instanceof Request ? input.url : String(input)
+        return url.endsWith('/data/card-details.json')
+          ? Response.json({ cardIds: ['card-1'] })
+          : new Response(url)
+      }),
+    )
+    await message({
+      type: 'SYNC_OFFLINE_PAGES',
+      siteLocale: 'ja',
+      gameLocale: 'jpn',
+      pages: ['cardDetails'],
+    })
+    await loadWorker('/_nuxt/new.js')
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Promise.reject(new Error('offline'))),
+    )
+    let response: Promise<Response> | undefined
+    listeners.get('fetch')!({
+      request: new Request(
+        'https://example.test/data/cards/card-1.json?_b=saved-build',
+      ),
+      respondWith: (value) => (response = value),
+    })
+    expect(await (await response)?.text()).toBe(
+      'https://example.test/data/cards/card-1.json',
+    )
+  })
+
+  it('serves a saved card detail route and payload on direct navigation and reload', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = input instanceof Request ? input.url : String(input)
+        return url.endsWith('/data/card-details.json')
+          ? Response.json({ cardIds: ['card-1'] })
+          : new Response(url)
+      }),
+    )
+    await message({
+      type: 'SYNC_OFFLINE_PAGES',
+      siteLocale: 'ja',
+      gameLocale: 'jpn',
+      pages: ['cardDetails'],
+    })
+    await loadWorker('/_nuxt/new.js')
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Promise.reject(new Error('offline'))),
+    )
+    const routeRequest = new Request('https://example.test/ja/jpn/cards/card-1')
+    Object.defineProperty(routeRequest, 'mode', { value: 'navigate' })
+    let routeResponse: Promise<Response> | undefined
+    listeners.get('fetch')!({
+      request: routeRequest,
+      respondWith: (value) => (routeResponse = value),
+    })
+    expect(await (await routeResponse)?.text()).toBe(
+      'https://example.test/ja/jpn/cards/card-1/',
+    )
+
+    let payloadResponse: Promise<Response> | undefined
+    listeners.get('fetch')!({
+      request: new Request(
+        'https://example.test/ja/jpn/cards/card-1/_payload.json',
+      ),
+      respondWith: (value) => (payloadResponse = value),
+    })
+    expect(await (await payloadResponse)?.text()).toBe(
+      'https://example.test/ja/jpn/cards/card-1/_payload.json',
+    )
+  })
 
   it('pins required application assets in the selected page snapshot', async () => {
     vi.stubGlobal(

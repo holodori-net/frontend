@@ -4,6 +4,14 @@
 
 欄位名稱、SQLite 型別、主鍵、schema 宣告的關聯與轉換對應均為 **CONFIRMED**。用途尚未完整追蹤者另以信心標籤標示；宣告的關聯不等同 SQLite 外鍵約束。`✓` 表示已直接轉換或經查表產生回傳值，空白表示尚未轉換。
 
+## 卡片詳細頁
+
+`readCardDetailIndex()` 回傳 `{ cardIds: string[] }`，`readCardDetail(id)` 回傳該卡的 `CardDetailPayload`；未找到 ID 時回傳 null。索引輸出為 `/data/card-details.json`，單卡資料輸出為 `/data/cards/{id}.json`。Reader 在每個 process 重用轉換來源，並只投影該卡所需的六語名稱、技能、服裝、Connect 與養成資料。
+
+詳細頁路徑為 `/{siteLocale}/{gameLocale}/cards/{id}`，預生成滿養成資訊與卡片 SEO。卡圖使用原尺寸的 `img_card_full_{assetId}.webp`。養成選擇在頁面記憶體中保存；同卡切換語言保留選擇，重新載入、換卡或離開後重新進入使用滿養成。三圍與技能等級計算見 [卡片成長資料](card-growth.md#詳細頁的養成計算)。
+
+離線設定的 `cards` 保存列表，`cardDetails` 獨立保存選定語言組合的全部詳細頁、Nuxt payload 與單卡計算資料。兩者可分別選擇；下載成功後替換快照，失敗保留既有快照。
+
 ## Card
 
 每筆代表一張卡片。角色 ID 指向角色表；名稱依文字 ID 與遊戲語言查找。成長組別指向一組等級或養成階段資料。

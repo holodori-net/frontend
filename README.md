@@ -6,9 +6,9 @@ This is an unofficial static Nuxt database for hololive Dreams. It is not affili
 
 Pages use `/{site-language}/{game-language}`. For example, `/zh-TW/jpn/cards` displays the card page with a Traditional Chinese interface and Japanese game content. Site languages are `ja`, `en`, and `zh-TW`; game content languages are `jpn`, `eng`, `ind`, `kor`, `cht`, and `chs`.
 
-The home page links to **Cards** and **Characters**. Select the site title in the header to return home.
+The home page links to **Cards**, **Songs**, and **Characters**. Select the site title in the header to return home.
 
-The pages `/`, `/cards`, `/characters`, and `/settings` select languages from saved manual preferences first, then browser languages, then Japanese defaults. A complete language URL is shown as written. When it differs from a previously selected language, the site asks whether to use the saved preferences or keep the linked languages. Dismissing this prompt by clicking outside keeps the linked languages for the current visit without saving preferences.
+The pages `/`, `/cards`, `/songs`, `/characters`, and `/settings` select languages from saved manual preferences first, then browser languages, then Japanese defaults. A complete language URL is shown as written. When it differs from a previously selected language, the site asks whether to use the saved preferences or keep the linked languages. Dismissing this prompt by clicking outside keeps the linked languages for the current visit without saving preferences.
 
 Changing either language keeps the current page, query parameters, and fragment.
 
@@ -26,11 +26,27 @@ Search, filters, and sorting are saved in the URL and restored when reloading, c
 
 The page shows a loading message until it restores display preferences and URL conditions. Cards outside the view show placeholders until you scroll to them, then retain their details. JavaScript is required to browse cards. Card art and icons load from `assets.holodori.net`. Loading card art shows a skeleton placeholder; reduced motion disables its shimmer. Unavailable card art shows a text placeholder while retaining card details; unavailable attribute and stat icons show their names. Stars play as animated WebP images managed by the browser; if star images are unavailable, rarity text appears.
 
+### Card details
+
+Select a card's image or name to open its detail page at `/{site-language}/{game-language}/cards/{card-id}`. The page shows full-size art, card information, current skill levels, the leader outfit skill, and Connect effects.
+
+Use **Level**, **Special training**, and **Bloom** to calculate the card's own stats and skill levels immediately. The page starts at maximum growth. Lowering special training also lowers the selected level when it exceeds the new limit. **Reset to maximum growth** restores all three controls. Growth choices stay in page memory across language changes; reloading, opening another card, or returning after leaving starts at maximum growth. The return link restores the card list's filters when opened from the list.
+
+The default card information is available without JavaScript. Enable JavaScript to use the growth simulator.
+
+## Songs
+
+Open **Songs** to browse square jacket images, song names, performers, chart levels and note counts, and production credits. Search covers all game languages, including readings, credits, descriptions, unlock information, and music video names. Space-separated keywords must all match. Combine member, original/cover, singer type, difficulty, and level range filters. Any selected chart within the level range can match a song; chart sorting uses the highest matching level or note count. Member selections match the source's explicit member list.
+
+**Song display** controls the information shown beneath each jacket. Basic information, all four chart difficulties, and credits are enabled by default. Additional groups show availability and descriptions, acquisition and unlock conditions, solo/multiplayer score thresholds and Combo bonuses, music video versions and official links, and copyright. Select information in the order you want it displayed, or clear every group to show jackets only. Display preferences are saved in this browser across languages; filters and sorting are saved in the URL. The two panels have independent reset actions.
+
+Songs are checked against the device time whenever you enter the page. Tutorial songs and songs whose source availability time has not arrived are hidden. Reopen or reload the page after the availability time to see a song already included in the site's data. Dates are displayed in JST. JavaScript is required to browse songs. Jackets load on demand from `assets.holodori.net`; unavailable images retain a placeholder and the song name.
+
 ## Characters
 
 Open **Characters** to browse members grouped by production. Only playable characters are shown by default; turn on **Show unplayable characters** to include the others. Names follow the selected game content language. The default character list is available without JavaScript. Character icons load from `assets.holodori.net`; unavailable icons show a placeholder while retaining the character's name.
 
-Cards and characters show a loading status while their data downloads. If loading fails, select **Retry** to try again.
+Cards, songs, and characters show a loading status while their data downloads. If loading fails, select **Retry** to try again.
 
 ## Theme and appearance
 
@@ -40,7 +56,9 @@ Member themes use official character colors, avatars, and motifs. Names follow t
 
 ## Install and use offline
 
-The site can be installed from a supported browser when served over HTTPS (or localhost). The close button remembers your choice in this browser until you clear its site data; you can still install from the browser menu. Open **Settings** for a language combination to choose whether its home, cards, and characters pages should be available offline. The current language combination is kept offline; switching to another combination replaces its saved pages after the new selection downloads successfully. The settings page and app resources remain available to manage offline content. Saved card lists support searching, filtering, and sorting offline. Unselected pages, card art, star animations, attribute and stat icons, and character icons require a network connection.
+The site can be installed from a supported browser when served over HTTPS (or localhost). The close button remembers your choice in this browser until you clear its site data; you can still install from the browser menu. Open **Settings** for a language combination to choose whether its home, cards, songs, and characters pages should be available offline. The current language combination is kept offline; switching to another combination replaces its saved pages after the new selection downloads successfully. The settings page and app resources remain available to manage offline content. Saved card and song lists support searching, filtering, and sorting offline. Unselected pages, card art, song jackets, star animations, attribute and stat icons, and character icons require a network connection.
+
+**Card list** and **Card details** are separate offline choices. Selecting **Card details** saves every card detail page for the current language combination, including the data needed for growth calculations. Detail pages can then be opened and reloaded offline. The detail option is initially unselected. Card art and icons use their offline placeholders.
 
 Settings displays download progress. If synchronization fails, the previous offline selection remains available.
 
@@ -73,6 +91,6 @@ Production builds use the GA4 web data stream Measurement ID `G-3Z3154J0WR` by d
 
 In the GA4 web data stream's **Enhanced measurement → Page views** settings, enable **Page changes based on browser history events** to track in-app navigation.
 
-The output is written to `.output/public`. It includes the language entry pages at `/`, `/cards`, `/characters`, and `/settings`, each configured language combination for the home, cards, characters, and settings pages, along with the sitemap, robots file, web manifest, and service worker. The sitemap lists the localized home, cards, and characters pages. Deploy the contents of that directory to a static host configured to serve generated paths and `404.html` fallback behavior. The service worker and install prompt require HTTPS in production.
+The output is written to `.output/public`. It includes the language entry pages and each configured language combination for all pages, including individual card details, along with the sitemap, robots file, web manifest, and service worker. The sitemap lists the localized public pages and every card detail page. Deploy the contents of that directory to a static host configured to serve generated paths and `404.html` fallback behavior. The service worker and install prompt require HTTPS in production.
 
 Pushes to `main` build and deploy the site to GitHub Pages. You can also run **Deploy to GitHub Pages** manually from GitHub Actions on `main`.

@@ -576,6 +576,9 @@ describe('card list', () => {
       'https://assets.holodori.net/cdn/img_card_full_04014-5-uniq-0094-00/Texture2D/img_card_full_04014-5-uniq-0094-00.thumb-640-v1.webp'
     expect(getCardImageUrl('04014-5-uniq-0094-00')).toBe(fullImageUrl)
     expect(getCardImageUrl('04014-5-uniq-0094-00', 'full')).toBe(fullImageUrl)
+    expect(getCardImageUrl('04014-5-uniq-0094-00', 'full', 'original')).toBe(
+      'https://assets.holodori.net/cdn/img_card_full_04014-5-uniq-0094-00/Texture2D/img_card_full_04014-5-uniq-0094-00.webp',
+    )
     expect(getCardImageUrl('00015', 'vertical')).toBe(
       'https://assets.holodori.net/cdn/img_card_vert_00015/Texture2D/img_card_vert_00015.webp',
     )

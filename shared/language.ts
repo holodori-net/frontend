@@ -71,9 +71,21 @@ export function resolveLocalizedName(
   return { text: '', lang: gameLocaleLanguages[selectedLocale] }
 }
 
-export const sitePages = ['home', 'cards', 'characters', 'settings'] as const
+export const sitePages = [
+  'home',
+  'cards',
+  'songs',
+  'characters',
+  'settings',
+] as const
 export type PageKind = (typeof sitePages)[number]
-export const offlinePageKinds = ['home', 'cards', 'characters'] as const
+export const offlinePageKinds = [
+  'home',
+  'cards',
+  'cardDetails',
+  'songs',
+  'characters',
+] as const
 
 const browserLanguageAliases: Record<string, SiteLocale> = {
   ja: 'ja',
@@ -163,6 +175,14 @@ export function buildLocalizedPath(
 ) {
   const suffix = page === 'home' ? '' : `/${page}`
   return `/${siteLocale}/${gameLocale}${suffix}`
+}
+
+export function buildCardDetailPath(
+  siteLocale: SiteLocale,
+  gameLocale: GameLocale,
+  id: string,
+) {
+  return `/${siteLocale}/${gameLocale}/cards/${encodeURIComponent(id)}`
 }
 
 export function getManualPreferenceConflict(

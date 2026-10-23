@@ -15,7 +15,7 @@ describe('language entry routes', () => {
         children: [
           {
             path: 'cards',
-            file: '/project/app/pages/[gameLocale]/cards.vue',
+            file: '/project/app/pages/[gameLocale]/cards/index.vue',
             meta: { validate: () => true },
             children: [
               {
@@ -24,6 +24,11 @@ describe('language entry routes', () => {
                 meta: { validate: () => true },
               },
             ],
+          },
+          {
+            path: 'songs',
+            file: '/project/app/pages/[gameLocale]/songs.vue',
+            meta: { validate: () => true },
           },
           {
             path: 'characters',
@@ -46,6 +51,7 @@ describe('language entry routes', () => {
       '/',
       '/cards',
       '/cards/:id()',
+      '/songs',
       '/characters',
       '/settings',
     ])
@@ -53,6 +59,7 @@ describe('language entry routes', () => {
       'language-entry-home',
       'language-entry-cards',
       'language-entry-cards-id',
+      'language-entry-songs',
       'language-entry-characters',
       'language-entry-settings',
     ])
@@ -64,7 +71,7 @@ describe('language entry routes', () => {
         ...routes.map(({ path }) => path),
         '/cards-:id()',
       ]),
-    ).toEqual(['/', '/cards', '/characters', '/settings'])
+    ).toEqual(['/', '/cards', '/songs', '/characters', '/settings'])
   })
 
   it('keeps generated names unique when paths normalize to the same name', () => {
