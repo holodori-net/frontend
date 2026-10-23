@@ -11,6 +11,7 @@ export function useMemberTheme() {
     'selected-member-theme-id',
     () => defaultThemeId,
   )
+  const initialized = useState<boolean>('member-theme-initialized', () => false)
   const theme = computed(() =>
     resolveMemberTheme(themes.value ?? [], themeId.value),
   )
@@ -23,5 +24,5 @@ export function useMemberTheme() {
     themeId.value = resolveMemberTheme(themes.value ?? [], id).id
   }
 
-  return { themes, theme, selectedThemeId, setTheme }
+  return { themes, theme, selectedThemeId, setTheme, initialized }
 }

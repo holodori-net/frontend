@@ -1,6 +1,7 @@
 import type { LocalizedNames } from './game-data/localized-text.ts'
 
 export const defaultThemeId = 'chr-00015'
+export const memberThemeCookieName = 'holodori-theme-id'
 export const memberThemesDataKey = 'member-themes'
 
 export interface MemberTheme {

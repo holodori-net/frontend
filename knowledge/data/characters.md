@@ -18,7 +18,7 @@
 
 素材用途由 `shared/theme.ts` 定義，保留 `assetId` 前導零：頭像為 `img_chr_icon_normal_${assetId}`，motif 使用 `img_chr_motif_icon_default_main_${assetId}` 與 `img_chr_motif_icon_light_main_${assetId}`；網址為 `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.webp`。背景交錯排列兩種 motif，並以主題色套用透明遮罩；缺少素材時保留背景漸層與底色。
 
-Nuxt plugin 以 `useAsyncData('member-themes', ...)` 保存主題 payload。靜態 HTML 使用預設主題，hydration 後套用 cookie 偏好；配色生成與 PWA manifest 直接使用同一 reader。
+Nuxt plugin 以 `useAsyncData('member-themes', ...)` 保存主題 payload。靜態 HTML 預設使用みこ；head 同步腳本使用同一 reader 提供的有效主題 ID，在首次繪製前套用 cookie 偏好。Hydration 保留已套用的配色，mounted 後同步 Vue 選擇並顯示背景圖案。偏好缺失、無效或讀取失敗使用預設；配色生成與 PWA manifest 直接使用同一 reader。
 
 ## Character
 

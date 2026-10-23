@@ -10,7 +10,7 @@ import {
 const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n()
-const { theme } = useMemberTheme()
+const { theme, initialized } = useMemberTheme()
 useHead({
   htmlAttrs: {
     lang: computed(() => siteLocaleLanguages[locale.value as SiteLocale]),
@@ -80,6 +80,7 @@ async function keepLinkedLanguages() {
 
 <template>
   <svg
+    v-if="initialized"
     class="member-theme-background"
     aria-hidden="true"
     focusable="false"

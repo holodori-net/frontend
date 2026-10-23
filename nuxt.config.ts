@@ -11,6 +11,7 @@ import { readMemberThemes } from './server/data/member-themes'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
 import { generateSiteSeo } from './scripts/site-seo'
+import { renderMemberThemeBootstrap } from './scripts/member-theme-bootstrap'
 import { getPrerenderWorkerCount } from './scripts/prerender/worker-count'
 import {
   getLanguageEntryRoutes,
@@ -21,8 +22,9 @@ const prerenderWorkerCount = getPrerenderWorkerCount(
   process.env.NUXT_PRERENDER_WORKERS,
 )
 const gaId = (process.env.NUXT_PUBLIC_GA_ID ?? 'G-3Z3154J0WR').trim()
+const memberThemes = readMemberThemes()
 const defaultThemePalette = createMemberThemePalette(
-  resolveMemberTheme(readMemberThemes(), defaultThemeId),
+  resolveMemberTheme(memberThemes, defaultThemeId),
 )
 
 const contentPages = sitePages.map((page) =>
@@ -81,8 +83,13 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      script:
-        process.env.NODE_ENV === 'production' && gaId
+      script: [
+        {
+          key: 'member-theme-init',
+          innerHTML: renderMemberThemeBootstrap(memberThemes),
+          tagPriority: -20,
+        },
+        ...(process.env.NODE_ENV === 'production' && gaId
           ? [
               {
                 async: true,
@@ -97,7 +104,8 @@ export default defineNuxtConfig({
                 ].join('\n'),
               },
             ]
-          : [],
+          : []),
+      ],
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         {
