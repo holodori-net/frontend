@@ -132,7 +132,43 @@
         "additional": "Multiple effects"
       }
     },
-    "total": "Total"
+    "total": "Total",
+    "connectFilter": {
+      "label": "Connect range",
+      "title": "Connect range",
+      "unlimited": "Any range",
+      "selectedCount": "{count} ranges selected",
+      "visibleCardCount": "{count} matching cards",
+      "selectAll": "Select all",
+      "clear": "Clear",
+      "done": "Done",
+      "close": "Close",
+      "unknownPattern": "Range {number} · {count} cells",
+      "shape": {
+        "rectangle": "Rectangle with side cell",
+        "halfDiamond": "Half diamond",
+        "ray": "One-way line",
+        "corner": "L shape",
+        "cross": "Offset cross",
+        "diamond": "Diamond",
+        "line": "Two-way line"
+      },
+      "direction": {
+        "left": "Left",
+        "right": "Right",
+        "up": "Up",
+        "down": "Down",
+        "upLeft": "Up and left",
+        "downLeft": "Down and left",
+        "downRight": "Down and right",
+        "upRight": "Up and right",
+        "vertical": "Vertical",
+        "all": "All directions",
+        "leftBias": "Left-biased",
+        "rightBias": "Right-biased"
+      },
+      "optionCount": "{count} cards"
+    }
   },
   "languagePreferenceTitle": "Confirm language settings",
   "languagePreferenceDescription": "This link uses different languages from your saved preferences. Which should we use?",

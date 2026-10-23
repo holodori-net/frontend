@@ -71,6 +71,7 @@ const renderer = createRenderer<HostNode, HostNode>({
 const options: CardFilterOptions = {
   character: ['chr-a', 'chr-b'],
   skill: ['passive:p1', 'active:a1'],
+  connect: ['extent-a', 'extent-b'],
   rarity: [3, 4, 5],
   attribute: [1, 2, 3],
   specialization: ['performance', 'technique', 'sense'],
@@ -163,6 +164,7 @@ describe('useCardListConditions', () => {
       q: 'Sakura',
       character: [],
       skill: [],
+      connect: [],
       rarity: [5],
       attribute: [1, 2, 3],
       specialization: ['performance', 'technique', 'sense'],
@@ -208,6 +210,7 @@ describe('useCardListConditions', () => {
       q: '',
       character: [],
       skill: [],
+      connect: [],
       rarity: [3, 4, 5],
       attribute: [1, 2, 3],
       specialization: ['performance', 'technique', 'sense'],
@@ -264,6 +267,41 @@ describe('useCardListConditions', () => {
       options.specialization,
     )
     expect(context.push).toHaveBeenCalledWith({ query: {}, hash: '' })
+    context.app.unmount()
+  })
+
+  it('parses Connect query values and writes Connect changes immediately while preserving hash', async () => {
+    const context = mountComposable({
+      connect: ['extent-b', 'unknown', 'extent-a', 'extent-b'],
+    })
+    context.route.hash = '#connect'
+    await settle()
+    expect(context.result.conditions.value.connect).toEqual([
+      'extent-b',
+      'extent-a',
+    ])
+
+    context.result.conditions.value.connect = ['extent-b', 'extent-a']
+    expect(context.push).toHaveBeenCalledWith({
+      query: { connect: ['extent-a', 'extent-b'] },
+      hash: '#connect',
+    })
+    context.app.unmount()
+  })
+
+  it('does not classify Connect changes as debounced search-only changes', async () => {
+    vi.useFakeTimers()
+    const context = mountComposable()
+    await nextTick()
+    await Promise.resolve()
+
+    context.result.conditions.value.q = 'card'
+    context.result.conditions.value.connect = ['extent-a']
+    expect(context.push).toHaveBeenCalledWith({
+      query: { q: 'card', connect: ['extent-a'] },
+      hash: '',
+    })
+    expect(context.replace).not.toHaveBeenCalled()
     context.app.unmount()
   })
 

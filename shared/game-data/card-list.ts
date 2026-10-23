@@ -94,6 +94,7 @@ export interface CardListConditions {
   q: string
   character: string[]
   skill: string[]
+  connect: string[]
   rarity: number[]
   attribute: number[]
   specialization: CardStatKey[]
@@ -104,6 +105,7 @@ export interface CardListConditions {
 export interface CardFilterOptions {
   character: string[]
   skill?: string[]
+  connect?: string[]
   rarity: number[]
   attribute: number[]
   specialization: CardStatKey[]
@@ -121,6 +123,7 @@ const queryKeys = new Set<string>([
   'q',
   'character',
   'skill',
+  'connect',
   'rarity',
   'attribute',
   'specialization',
@@ -137,6 +140,7 @@ export function createCardListConditions(
     q: '',
     character: [],
     skill: [],
+    connect: [],
     rarity: [...options.rarity],
     attribute: [...options.attribute],
     specialization: [...options.specialization],
@@ -148,6 +152,7 @@ export function createCardListConditions(
 export function getCardFilterOptions(
   cards: readonly CardListItemData[],
   skillKeys?: readonly string[],
+  connectKeys?: readonly string[],
 ): CardFilterOptions {
   const characterOrders = new Map<string, number>()
   for (const card of cards) {
@@ -158,6 +163,7 @@ export function getCardFilterOptions(
 
   return {
     ...(skillKeys ? { skill: [...new Set(skillKeys)].sort() } : {}),
+    ...(connectKeys ? { connect: [...new Set(connectKeys)].sort() } : {}),
     character: [...characterOrders]
       .sort(
         ([aId, aOrder], [bId, bOrder]) =>
@@ -233,6 +239,11 @@ export function parseCardListQuery(
     options.skill ?? [],
     (value) => value,
   )
+  conditions.connect = uniqueValid(
+    queryValues(query.connect),
+    options.connect ?? [],
+    (value) => value,
+  )
   conditions.rarity = parseCheckboxSelection(
     query.rarity,
     options.rarity,
@@ -276,6 +287,8 @@ export function toCardListQuery(
     query.character = [...new Set(conditions.character)]
   if (conditions.skill.length)
     query.skill = [...new Set(conditions.skill)].sort()
+  if (conditions.connect.length)
+    query.connect = [...new Set(conditions.connect)].sort()
   if (!sameSelection(conditions.rarity, options.rarity)) {
     query.rarity = conditions.rarity.length
       ? [...new Set(conditions.rarity)].map(String)
@@ -320,12 +333,14 @@ export function filterAndSortCards(
   conditions: CardListConditions,
   cardSkills: Readonly<Record<string, readonly string[]>> = {},
   canonicalKeys: Readonly<Record<string, string>> = {},
+  cardExtents: Readonly<Record<string, readonly string[]>> = {},
 ): CardListItemData[] {
   const needle = conditions.q.trim().toLowerCase()
   const direction = conditions.direction === 'asc' ? 1 : -1
   const selectedSkills = new Set(
     conditions.skill.map((key) => canonicalKeys[key] ?? key),
   )
+  const selectedConnectExtents = new Set(conditions.connect)
 
   return cards
     .filter((card) => {
@@ -333,6 +348,14 @@ export function filterAndSortCards(
       if (
         selectedSkills.size &&
         !cardSkills[card.id]?.some((key) => selectedSkills.has(key))
+      ) {
+        return false
+      }
+      if (
+        selectedConnectExtents.size &&
+        !cardExtents[card.id]?.some((extentId) =>
+          selectedConnectExtents.has(extentId),
+        )
       ) {
         return false
       }

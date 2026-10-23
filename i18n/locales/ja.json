@@ -132,7 +132,43 @@
         "additional": "複数効果"
       }
     },
-    "total": "合計"
+    "total": "合計",
+    "connectFilter": {
+      "label": "コネクト範囲",
+      "title": "コネクト範囲",
+      "unlimited": "すべての範囲",
+      "selectedCount": "{count}種類を選択中",
+      "visibleCardCount": "該当カード {count} 枚",
+      "selectAll": "すべて選択",
+      "clear": "クリア",
+      "done": "完了",
+      "close": "閉じる",
+      "unknownPattern": "範囲 {number}・{count}マス",
+      "shape": {
+        "rectangle": "側面マス付き長方形",
+        "halfDiamond": "半菱形",
+        "ray": "一方向の直線",
+        "corner": "L字",
+        "cross": "外側の十字",
+        "diamond": "菱形",
+        "line": "双方向の直線"
+      },
+      "direction": {
+        "left": "左",
+        "right": "右",
+        "up": "上",
+        "down": "下",
+        "upLeft": "左上",
+        "downLeft": "左下",
+        "downRight": "右下",
+        "upRight": "右上",
+        "vertical": "上下",
+        "all": "全方向",
+        "leftBias": "左寄り",
+        "rightBias": "右寄り"
+      },
+      "optionCount": "カード {count} 枚"
+    }
   },
   "languagePreferenceTitle": "言語設定を確認",
   "languagePreferenceDescription": "このリンクの言語と保存済みの設定が異なります。どちらを使用しますか？",

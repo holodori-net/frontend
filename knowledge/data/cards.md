@@ -140,6 +140,12 @@ ORDER BY extent.position_y, extent.position_x;
 | `leader_area-002`          | 單向直線   | 下     | 3    |
 | `leader_area-003`          | L 形       | 右＋上 | 4    |
 
+### 範圍圖篩選
+
+**CONFIRMED**：`buildCardConnectFilterCatalog(payload)` 依卡片引用效果的全部等級建立範圍索引，按完整 extent group ID 去重排序，保留圖形方向；已知範圍提供形狀與方向標籤，未命名範圍仍顯示圖形、編號及格數。Connect 篩選以 PrimeVue Dialog 提供圖案複選，重用固定 5×5 預覽；320px 使用兩欄，網格獨立捲動，全選、清除與完成操作保持可見。勾選即時套用，關閉保留選取。
+
+圖案之間採 OR，與其他篩選採 AND；未選圖案不限，全選圖案只保留有 Connect 的卡片。每張卡任一來源等級符合所選範圍即保留，與顯示等級及資訊開關獨立。各圖案數量套用其他篩選、排除 Connect 自身，以唯一卡片計數；零張選項仍可選，視窗底部顯示目前結果總數。`CardListConditions.connect` 保存所選完整 extent group ID；重複的 `connect` query 參數依 ID 排序去重，忽略未知值，空選取省略。網址重載、瀏覽紀錄、語言切換與離線使用沿用共用條件流程；重設篩選清除 Connect 選取並保留顯示偏好。
+
 ## LangCard
 
 每筆代表一個文字 ID 在一種遊戲語言的卡片名稱。轉換時以 Card.name_lang_id 和 language 查找 text。

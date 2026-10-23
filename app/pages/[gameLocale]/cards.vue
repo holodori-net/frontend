@@ -18,6 +18,10 @@ import type {
 } from '#shared/game-data/card-list-data'
 import { buildCardSkillFilterCatalog } from '#shared/game-data/card-skill-filter'
 import {
+  buildCardConnectFilterCatalog,
+  countCardConnectOptions,
+} from '#shared/game-data/card-connect-filter'
+import {
   getCardAttributeIconUrl,
   getCardStatIconUrl,
 } from '#shared/game-data/card-icons'
@@ -79,9 +83,14 @@ const skills = computed(() => payload.value!.skills)
 const connectEffects = computed(() => payload.value!.connectEffects)
 const connectExtents = computed(() => payload.value!.connectExtents)
 const skillCatalog = buildCardSkillFilterCatalog(payload.value)
+const connectCatalog = buildCardConnectFilterCatalog(payload.value)
 const skillKeys = Object.keys(skillCatalog.canonicalKeys)
 const filterOptions = computed(() =>
-  getCardFilterOptions(cardItems.value, skillKeys),
+  getCardFilterOptions(
+    cardItems.value,
+    skillKeys,
+    connectCatalog.options.map(({ key }) => key),
+  ),
 )
 const {
   conditions,
@@ -135,9 +144,26 @@ const visibleCards = computed(() =>
     conditions.value,
     skillCatalog.cardSkills,
     skillCatalog.canonicalKeys,
+    connectCatalog.cardExtents,
   ),
 )
 const visibleCardIds = computed(() => visibleCards.value.map(({ id }) => id))
+const connectCountCards = computed(() =>
+  filterAndSortCards(
+    cardItems.value,
+    { ...conditions.value, connect: [] },
+    skillCatalog.cardSkills,
+    skillCatalog.canonicalKeys,
+    connectCatalog.cardExtents,
+  ),
+)
+const connectCounts = computed(() =>
+  countCardConnectOptions(
+    connectCatalog.options,
+    connectCountCards.value.map(({ id }) => id),
+    connectCatalog.cardExtents,
+  ),
+)
 const characterOptions = computed(() => {
   const characters = new Map(
     cardItems.value.map((card) => [card.characterId, card]),
@@ -442,6 +468,18 @@ function selectedOrder(group: CardListFieldGroup['key']) {
                       </div>
                     </fieldset>
                   </div>
+
+                  <fieldset class="min-w-0">
+                    <legend class="mb-1.5 text-sm font-medium">
+                      {{ t('cardList.connectFilter.label') }}
+                    </legend>
+                    <CardListConnectFilter
+                      v-model="conditions.connect"
+                      :catalog="connectCatalog"
+                      :counts="connectCounts"
+                      :visible-card-count="visibleCards.length"
+                    />
+                  </fieldset>
 
                   <div class="flex flex-wrap items-end gap-3">
                     <label class="min-w-48 flex-1 sm:flex-none">

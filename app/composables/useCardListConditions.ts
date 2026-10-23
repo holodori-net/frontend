@@ -184,6 +184,7 @@ export function useCardListConditions(options: ComputedRef<CardFilterOptions>) {
       attribute: [...conditions.value.attribute],
       specialization: [...conditions.value.specialization],
       skill: [...conditions.value.skill],
+      connect: [...conditions.value.connect],
     }),
     (next, previous) => {
       if (!ready.value || applyingRoute || suppressConditionWatch) return
@@ -195,6 +196,7 @@ export function useCardListConditions(options: ComputedRef<CardFilterOptions>) {
         next.attribute.join('\0') === previous.attribute.join('\0') &&
         next.specialization.join('\0') === previous.specialization.join('\0') &&
         next.skill.join('\0') === previous.skill.join('\0') &&
+        next.connect.join('\0') === previous.connect.join('\0') &&
         next.sort === previous.sort &&
         next.direction === previous.direction
 

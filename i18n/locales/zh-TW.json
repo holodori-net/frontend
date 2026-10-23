@@ -132,7 +132,43 @@
         "additional": "多重加成效果"
       }
     },
-    "total": "合計"
+    "total": "合計",
+    "connectFilter": {
+      "label": "Connect 範圍",
+      "title": "Connect 範圍",
+      "unlimited": "不限範圍",
+      "selectedCount": "已選 {count} 種",
+      "visibleCardCount": "符合條件 {count} 張卡片",
+      "selectAll": "全選",
+      "clear": "清除",
+      "done": "完成",
+      "close": "關閉",
+      "unknownPattern": "範圍 {number}・{count} 格",
+      "shape": {
+        "rectangle": "矩形加側格",
+        "halfDiamond": "半菱形",
+        "ray": "單向直線",
+        "corner": "L 形",
+        "cross": "外側十字",
+        "diamond": "菱形",
+        "line": "雙向直線"
+      },
+      "direction": {
+        "left": "左",
+        "right": "右",
+        "up": "上",
+        "down": "下",
+        "upLeft": "左＋上",
+        "downLeft": "左＋下",
+        "downRight": "右＋下",
+        "upRight": "右＋上",
+        "vertical": "上＋下",
+        "all": "全周",
+        "leftBias": "偏左",
+        "rightBias": "偏右"
+      },
+      "optionCount": "{count} 張卡片"
+    }
   },
   "languagePreferenceTitle": "確認語言設定",
   "languagePreferenceDescription": "此連結的語言與已儲存的設定不同，請選擇要使用的語言。",

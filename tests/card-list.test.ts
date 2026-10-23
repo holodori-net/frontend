@@ -104,6 +104,7 @@ describe('card list', () => {
       q: '',
       character: [],
       skill: [],
+      connect: [],
       rarity: [3, 4, 5],
       attribute: [1, 2, 3],
       specialization: ['performance', 'technique', 'sense'],
@@ -204,6 +205,38 @@ describe('card list', () => {
     expect(ids(defaults)).toHaveLength(cards.length)
   })
 
+  it('filters Connect extents with OR, combines them with other filters, and leaves null cards unrestricted', () => {
+    const cardsWithNull = [
+      ...cards,
+      card('c-null', {
+        characterId: 'c-a',
+        characterOrder: 1,
+        order: 5,
+        specializations: ['performance'],
+        skillTreeConnectEffectId: null,
+      }),
+    ]
+    const extentByCard = {
+      'c-01': ['extent-a'],
+      'c-02': ['extent-b'],
+      'c-03': ['extent-a', 'extent-b'],
+    }
+    const defaults = createCardListConditions(getCardFilterOptions(cards))
+    const ids = (connect: string[], rarity = defaults.rarity) =>
+      filterAndSortCards(
+        cardsWithNull,
+        { ...defaults, connect, rarity },
+        {},
+        {},
+        extentByCard,
+      ).map(({ id }) => id)
+
+    expect(ids([])).toHaveLength(cardsWithNull.length)
+    expect(ids(['extent-a'])).toEqual(['c-01', 'c-03'])
+    expect(ids(['extent-a', 'extent-b'])).toEqual(['c-01', 'c-03', 'c-02'])
+    expect(ids(['extent-a'], [3])).toEqual(['c-03'])
+  })
+
   it('round-trips logical skill selections and omits empty or invalid selections', () => {
     const options = getCardFilterOptions(cards, [
       'special:b',
@@ -226,6 +259,29 @@ describe('card list', () => {
         custom: 'keep',
       }),
     ).toEqual({ custom: 'keep' })
+  })
+
+  it('round-trips sorted Connect extent selections and ignores duplicate or unknown query values', () => {
+    const options = getCardFilterOptions(cards, undefined, [
+      'extent-c',
+      'extent-a',
+      'extent-b',
+      'extent-a',
+    ])
+    expect(options.connect).toEqual(['extent-a', 'extent-b', 'extent-c'])
+    const parsed = parseCardListQuery(
+      { connect: ['extent-c', 'unknown', 'extent-a', 'extent-c'] },
+      options,
+    )
+    expect(parsed.connect).toEqual(['extent-c', 'extent-a'])
+    expect(toCardListQuery(parsed, options).connect).toEqual([
+      'extent-a',
+      'extent-c',
+    ])
+    expect(
+      parseCardListQuery({ connect: ['unknown'] }, options).connect,
+    ).toEqual([])
+    expect(toCardListQuery({ ...parsed, connect: [] }, options)).toEqual({})
   })
 
   it('sorts every supported key in either direction and resolves ties consistently', () => {
@@ -327,6 +383,7 @@ describe('card list', () => {
       q: 'Sakura',
       character: ['c-a'],
       skill: [],
+      connect: [],
       rarity: [5],
       attribute: [2],
       specialization: ['sense'],
