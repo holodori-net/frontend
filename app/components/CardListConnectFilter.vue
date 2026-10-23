@@ -77,6 +77,7 @@ const dialogPt = {
       v-model:visible="dialogVisible"
       :header="t('cardList.connectFilter.title')"
       modal
+      dismissable-mask
       :close-button-props="{
         'aria-label': t('cardList.connectFilter.close'),
         severity: 'secondary',

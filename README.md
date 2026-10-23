@@ -6,7 +6,7 @@ Holodori Database is a static Nuxt site for browsing game reference data. The si
 
 Pages use `/{site-language}/{game-language}`. For example, `/zh-TW/jpn/cards` displays the card page with a Traditional Chinese interface and Japanese game content. Site languages are `ja`, `en`, and `zh-TW`; game content languages are `jpn`, `eng`, `ind`, `kor`, `cht`, and `chs`.
 
-The pages `/`, `/cards`, `/characters`, and `/settings` select languages from saved manual preferences first, then browser languages, then Japanese defaults. A complete language URL is shown as written. When it differs from a previously selected language, the site asks whether to use the saved preferences or keep the linked languages.
+The pages `/`, `/cards`, `/characters`, and `/settings` select languages from saved manual preferences first, then browser languages, then Japanese defaults. A complete language URL is shown as written. When it differs from a previously selected language, the site asks whether to use the saved preferences or keep the linked languages. Dismissing this prompt by clicking outside keeps the linked languages for the current visit without saving preferences.
 
 Changing either language keeps the current page, query parameters, and fragment.
 
@@ -18,7 +18,7 @@ The full layout wraps to fit the window, with 16:9 card art and aligned informat
 
 Search matches card, character, and outfit names, every level of passive, active, special, and leader outfit skills, and Connect descriptions in every game language. Separate keywords with spaces to require all of them, including across different fields or languages. Search covers the full collection, including hidden information and skill levels. For example, `みこ 分數` matches a character name and a skill description.
 
-Combine search with character, rarity, attribute, specialization, skill, and Connect filters. Selections within a filter match any selected value; different filters must all match. Empty character, skill, and Connect selections impose no restriction. Rarity, attribute, and specialization start with all options selected; clearing every option in one of these groups shows no cards. Sort by source order, rarity, character order, Performance, Technique, Sense, or total in either direction. **Reset filters** restores the default filters and sorting while keeping display preferences.
+Combine search with character, rarity, attribute, specialization, skill, and Connect filters. Selections within a filter match any selected value; different filters must all match. Empty character, skill, and Connect selections impose no restriction. Rarity, attribute, and specialization start with all options selected; clearing every option in one of these groups shows no cards. Skill and Connect filter dialogs close when you click outside and retain their current selections. Sort by source order, rarity, character order, Performance, Technique, Sense, or total in either direction. **Reset filters** restores the default filters and sorting while keeping display preferences.
 
 Search, filters, and sorting are saved in the URL and restored when reloading, changing languages, or using browser history. Layout, selected information, and skill levels are saved in this browser and shared across languages, including offline use. **Reset display** restores the default layout and information while keeping search and filters.
 

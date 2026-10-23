@@ -224,6 +224,7 @@ function openDialog() {
       v-model:visible="dialogVisible"
       :header="t('cardList.skills.placeholder')"
       modal
+      dismissable-mask
       :close-button-props="{
         'aria-label': t('cardList.skills.close'),
         severity: 'secondary',

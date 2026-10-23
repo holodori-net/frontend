@@ -137,6 +137,7 @@ async function keepLinkedLanguages() {
   <Dialog
     v-model:visible="conflictVisible"
     modal
+    dismissable-mask
     :closable="false"
     :header="t('languagePreferenceTitle')"
     class="w-[min(100%,28rem)]"
