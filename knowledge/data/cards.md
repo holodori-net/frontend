@@ -194,7 +194,9 @@ ORDER BY extent.position_y, extent.position_x;
 
 來源：`.data/master.sqlite` 的 `LangClientCommon(language, client_id, text)`；`../extraction/work/decompile/05-annotate-decompiled-code/annotated-csharp/Vision.Common.Core/Vision/Common/Localization/LangClientKeyConst.cs` 的 `Card` 靜態初始化及對應 `libil2cpp.so` 常數；`methods.json` 記錄其 RVA `0xE7AA9E8`（file offset `0xE7A69E8`）。介面依網站語言顯示，卡名與角色名依遊戲語言顯示。
 
-完整卡圖使用 `https://assets.holodori.net/cdn/img_card_full_{assetId}/Texture2D/img_card_full_{assetId}.webp`，以 16:9 完整顯示。直式卡圖使用 `https://assets.holodori.net/cdn/img_card_vert_{assetId}/Texture2D/img_card_vert_{assetId}.webp`，以 256:366 顯示。素材用途與 URL 由 `shared/game-data/card-list.ts` 管理，兩種 URL 均保留素材 ID。
+完整卡圖使用 `https://assets.holodori.net/cdn/img_card_full_{assetId}/Texture2D/img_card_full_{assetId}.thumb-640-v1.webp` 的 640×360 縮圖，以 16:9 顯示。直式卡圖使用 `https://assets.holodori.net/cdn/img_card_vert_{assetId}/Texture2D/img_card_vert_{assetId}.webp`，以 256:366 顯示。素材用途與 URL 由 `shared/game-data/card-list.ts` 的 `getCardImageUrl()` 管理，保留素材 ID 的前導零。卡圖以單一 `src` 載入，並共用 `useImageLoading` 處理 Skeleton、失敗占位及快取圖片狀態。
+
+**CONFIRMED**：2026-10-23 讀取 `04014-5-uniq-0094-00` 的 CDN WebP 檔頭，[縮圖](https://assets.holodori.net/cdn/img_card_full_04014-5-uniq-0094-00/Texture2D/img_card_full_04014-5-uniq-0094-00.thumb-640-v1.webp)為 640×360、49,850 bytes，原圖為 2048×1152、2,178,246 bytes。
 
 **CONFIRMED**：`06003-5-uniq-0091-00` 來源直式卡圖尺寸為 256×366。卡片頁兩種版型皆使用完整可用寬度，左右各保留 1rem 頁邊；標題與篩選、顯示控制面板置中，最大寬度為 100rem。直式版型每列一張，96px 寬卡圖置左，資訊置右並靠上排列。所有已選群組在同一橫列等寬排列，基礎資訊的已選子項集中於同一欄；每欄至少 12rem、欄距 1rem，空間足夠時等分餘寬。欄位順序依選取順序，個別卡片缺少資料時保留其欄位位置。所有欄位超出可用寬度時，整個列表共用可鍵盤操作的橫向捲動區，維持上下卡片對齊；卡列高度依卡圖或最長資訊內容決定。完整版型維持圖片在上、資訊在下；兩種版型皆使用水平三圍加總算式。兩種版型載入時均顯示 skeleton，偏好減少動態效果時停止其動畫；載入完成後移除，失敗時保留文字及占位。完整卡圖尺寸案例見下方素材記錄。
 

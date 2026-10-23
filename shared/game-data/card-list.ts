@@ -407,5 +407,7 @@ export function getCardImageUrl(
 ): string | null {
   if (!assetId) return null
   const name = `img_card_${layout === 'vertical' ? 'vert' : 'full'}_${assetId}`
-  return `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.webp`
+  const filename =
+    layout === 'vertical' ? `${name}.webp` : `${name}.thumb-640-v1.webp`
+  return `https://assets.holodori.net/cdn/${name}/Texture2D/${filename}`
 }

@@ -59,14 +59,19 @@ const props = withDefaults(
 )
 
 const { t, locale } = useI18n()
-const imageFailed = ref(false)
-const imageLoaded = ref(false)
-const imageElement = ref<HTMLImageElement | null>(null)
 const imageUrl = computed(() =>
   getCardImageUrl(props.card.assetId, props.layout),
 )
+const {
+  status: imageStatus,
+  imageElement,
+  onLoad,
+  onError,
+} = useImageLoading(imageUrl)
 const numberFormatter = computed(() => new Intl.NumberFormat(locale.value))
-const hasImage = computed(() => Boolean(imageUrl.value) && !imageFailed.value)
+const hasImage = computed(
+  () => Boolean(imageUrl.value) && imageStatus.value !== 'failed',
+)
 const cardName = computed(() =>
   resolveLocalizedName(props.card.name, props.gameLocale),
 )
@@ -225,23 +230,6 @@ const articleStyle = computed(() => ({
 const characterName = computed(() =>
   resolveLocalizedName(props.card.characterName, props.gameLocale),
 )
-function settleCompletedImage() {
-  const image = imageElement.value
-  if (!image?.complete) return
-  if (image.naturalWidth > 0) imageLoaded.value = true
-  else imageFailed.value = true
-}
-
-watch([() => props.card.id, imageUrl], async () => {
-  imageFailed.value = false
-  imageLoaded.value = false
-  await nextTick()
-  settleCompletedImage()
-})
-
-onMounted(() => {
-  settleCompletedImage()
-})
 </script>
 
 <template>
@@ -286,7 +274,7 @@ onMounted(() => {
         "
       >
         <Skeleton
-          v-if="hasImage && !imageLoaded"
+          v-if="hasImage && imageStatus === 'loading'"
           class="card-image-skeleton absolute inset-0"
           width="100%"
           height="100%"
@@ -302,8 +290,8 @@ onMounted(() => {
           draggable="false"
           loading="lazy"
           decoding="async"
-          @load="imageLoaded = true"
-          @error="imageFailed = true"
+          @load="onLoad"
+          @error="onError"
         />
         <span
           v-else

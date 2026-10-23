@@ -505,12 +505,16 @@ describe('card list', () => {
     expect(parseCardListQuery(serialized, options)).toEqual(empty)
   })
 
-  it('uses the selected card image CDN path and returns null when the asset is absent', () => {
-    expect(getCardImageUrl('00015')).toBe(
-      'https://assets.holodori.net/cdn/img_card_full_00015/Texture2D/img_card_full_00015.webp',
-    )
+  it('uses card art CDN paths and preserves asset ID zeroes', () => {
+    const fullImageUrl =
+      'https://assets.holodori.net/cdn/img_card_full_04014-5-uniq-0094-00/Texture2D/img_card_full_04014-5-uniq-0094-00.thumb-640-v1.webp'
+    expect(getCardImageUrl('04014-5-uniq-0094-00')).toBe(fullImageUrl)
+    expect(getCardImageUrl('04014-5-uniq-0094-00', 'full')).toBe(fullImageUrl)
     expect(getCardImageUrl('00015', 'vertical')).toBe(
       'https://assets.holodori.net/cdn/img_card_vert_00015/Texture2D/img_card_vert_00015.webp',
+    )
+    expect(getCardImageUrl('00015')).toBe(
+      'https://assets.holodori.net/cdn/img_card_full_00015/Texture2D/img_card_full_00015.thumb-640-v1.webp',
     )
     expect(getCardImageUrl(null)).toBeNull()
     expect(getCardImageUrl('')).toBeNull()
