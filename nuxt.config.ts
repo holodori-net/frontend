@@ -5,7 +5,12 @@ import {
   sitePages,
 } from './shared/language'
 import { primeVueComponents } from './shared/primevue'
-import { defaultThemeId, resolveMemberTheme } from './shared/theme'
+import {
+  defaultThemeId,
+  memberThemeFaviconKey,
+  memberThemeFaviconPlaceholderUrl,
+  resolveMemberTheme,
+} from './shared/theme'
 import { createMemberThemePalette } from './app/themes/member-palettes'
 import { readMemberThemes } from './server/data/member-themes'
 import tailwindcss from '@tailwindcss/vite'
@@ -117,12 +122,13 @@ export default defineNuxtConfig({
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap',
         },
-        { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
         {
           rel: 'icon',
-          type: 'image/png',
-          href: '/favicon-32.png',
-          sizes: '32x32',
+          key: memberThemeFaviconKey,
+          type: 'image/svg+xml',
+          href: memberThemeFaviconPlaceholderUrl,
+          sizes: 'any',
+          tagPriority: -30,
         },
         { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
       ],

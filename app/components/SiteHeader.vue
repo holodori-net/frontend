@@ -11,12 +11,63 @@ import {
   type GameLocale,
   type SiteLocale,
 } from '#shared/language'
+import {
+  getMemberThemeLogoType,
+  memberThemeFaviconKey,
+  memberThemeFaviconPlaceholderUrl,
+  memberThemeFallbackLogoUrl,
+} from '#shared/theme'
 
 const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n()
 const colorMode = useColorMode()
-const { selectedThemeId, theme, themes } = useMemberTheme()
+const { selectedThemeId, theme, themes, initialized } = useMemberTheme()
+const mounted = ref(false)
+onMounted(() => {
+  mounted.value = true
+})
+const logoReady = computed(() => initialized.value && mounted.value)
+const logoAsset = computed(() =>
+  logoReady.value ? theme.value.assets.logo : null,
+)
+const {
+  status: logoStatus,
+  imageElement,
+  onLoad,
+  onError,
+} = useImageLoading(logoAsset)
+const logoSource = computed(() =>
+  logoAsset.value && logoStatus.value !== 'failed'
+    ? logoAsset.value
+    : memberThemeFallbackLogoUrl,
+)
+const initialFavicon = ref({
+  href: memberThemeFaviconPlaceholderUrl,
+  type: 'image/svg+xml',
+})
+if (import.meta.client) {
+  const favicon = document.querySelector<HTMLLinkElement>(
+    `link[data-hid="${memberThemeFaviconKey}"]`,
+  )
+  const href = favicon?.getAttribute('href')
+  const type = favicon?.getAttribute('type')
+  if (href && type) initialFavicon.value = { href, type }
+}
+useHead(() => ({
+  link: [
+    {
+      key: memberThemeFaviconKey,
+      rel: 'icon',
+      type: logoReady.value
+        ? getMemberThemeLogoType(logoSource.value)
+        : initialFavicon.value.type,
+      href: logoReady.value ? logoSource.value : initialFavicon.value.href,
+      sizes: 'any',
+      tagPriority: -30,
+    },
+  ],
+}))
 const activeGameLocale = computed(() => {
   const value = route.params.gameLocale
   return typeof value === 'string' && isGameLocale(value) ? value : 'jpn'
@@ -90,10 +141,20 @@ async function chooseGameLocale(value: GameLocale) {
       class="inline-flex h-14 shrink-0 items-center gap-2.5 font-bold whitespace-nowrap text-primary sm:h-full"
       :to="buildLocalizedPath(locale as SiteLocale, activeGameLocale, 'home')"
     >
+      <span
+        v-if="!logoReady"
+        class="size-8 shrink-0 rounded-xl bg-surface-200 dark:bg-surface-700"
+        aria-hidden="true"
+      />
       <img
+        v-else
+        ref="imageElement"
+        :key="logoSource"
         class="size-8 rounded-xl object-cover"
-        src="/icons/icon-192.png"
+        :src="logoSource"
         alt=""
+        @load="onLoad"
+        @error="onError"
       />
       <span>{{ t('siteName') }}</span>
     </NuxtLink>

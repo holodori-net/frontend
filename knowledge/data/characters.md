@@ -16,9 +16,9 @@
 
 `color1` 衍生頁面、surface 與 topbar 底色，`color2/3` 用於背景漸層、首頁裝飾與選單色票，`color4` 衍生互動主色、topbar 品牌文字與顯示設定圖示。亮暗配色透過共用規則生成，主要文字及按鈕文字含 hover／active 維持至少 4.5:1 對比。
 
-素材用途由 `shared/theme.ts` 定義，保留 `assetId` 前導零：頭像為 `img_chr_icon_normal_${assetId}`，motif 使用 `img_chr_motif_icon_default_main_${assetId}` 與 `img_chr_motif_icon_light_main_${assetId}`；網址為 `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.webp`。背景交錯排列兩種 motif，並以主題色套用透明遮罩；缺少素材時保留背景漸層與底色。
+素材用途由 `shared/theme.ts` 定義，保留 `assetId` 前導零：頁首 logo 與瀏覽器分頁 favicon 為 `img_card_thumb_${assetId}-4-cmmn-0000-00`，頭像為 `img_chr_icon_normal_${assetId}`，motif 使用 `img_chr_motif_icon_default_main_${assetId}` 與 `img_chr_motif_icon_light_main_${assetId}`；網址為 `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.webp`。Logo 與 favicon 隨主題角色切換，缺圖或載入失敗時使用本機 `/icons/icon-192.png`。背景交錯排列兩種 motif，並以主題色套用透明遮罩；缺少素材時保留背景漸層與底色。
 
-Nuxt plugin 以 `useAsyncData('member-themes', ...)` 保存主題 payload。靜態 HTML 預設使用みこ；head 同步腳本使用同一 reader 提供的有效主題 ID，在首次繪製前套用 cookie 偏好。Hydration 保留已套用的配色，mounted 後同步 Vue 選擇並顯示背景圖案。偏好缺失、無效或讀取失敗使用預設；配色生成與 PWA manifest 直接使用同一 reader。
+Nuxt plugin 以 `useAsyncData('member-themes', ...)` 保存主題 payload。靜態 HTML 使用みこ配色與中性 logo／favicon 占位；head 同步腳本使用同一 reader 提供的有效主題 ID 與 logo 網址，在首次繪製前套用 cookie 偏好的配色與 favicon。Favicon 標籤使用本機透明 SVG 並先於腳本解析；頁首 logo 占位保留 32px 寬高。Hydration 保留已套用的配色與 favicon，主題初始化後顯示背景圖案；logo 另等待頁首自身 mounted。偏好缺失、無效或讀取失敗使用預設；配色生成與 PWA manifest 直接使用同一 reader。
 
 ## Character
 

@@ -53,6 +53,7 @@ describe('member theme projection', () => {
       color3: '#FFD64F',
       color4: '#FF5B70',
       assets: {
+        logo: 'https://assets.holodori.net/cdn/img_card_thumb_00015-4-cmmn-0000-00/Texture2D/img_card_thumb_00015-4-cmmn-0000-00.webp',
         avatar:
           'https://assets.holodori.net/cdn/img_chr_icon_normal_00015/Texture2D/img_chr_icon_normal_00015.webp',
         motifMain:
@@ -85,9 +86,10 @@ describe('member theme projection', () => {
       color2: '#AABBCC',
       color3: '#AABBCC',
       color4: '#AABBCC',
-      assets: { avatar: null, motifMain: null, motifLight: null },
+      assets: { logo: null, avatar: null, motifMain: null, motifLight: null },
     })
     expect(getMemberThemeAssets('')).toEqual({
+      logo: null,
       avatar: null,
       motifMain: null,
       motifLight: null,

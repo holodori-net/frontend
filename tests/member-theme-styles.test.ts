@@ -48,7 +48,7 @@ function sampleTheme(id: string, color: string): MemberTheme {
     color2: color,
     color3: color,
     color4: color,
-    assets: { avatar: null, motifMain: null, motifLight: null },
+    assets: { logo: null, avatar: null, motifMain: null, motifLight: null },
   }
 }
 
