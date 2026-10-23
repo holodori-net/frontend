@@ -2,7 +2,7 @@
 
 ## 產品與技術基線
 
-- Holodori Database 使用 Nuxt 4、Vue 3、TypeScript、PrimeVue、Tailwind CSS、Nuxt i18n 與自訂 PWA Service Worker。
+- hololive Dreams 非官方資料庫使用 Nuxt 4、Vue 3、TypeScript、PrimeVue、Tailwind CSS、Nuxt i18n 與自訂 PWA Service Worker。
 - Node.js 24+ 與 pnpm 為開發環境；開發及驗證指令見 [CONTRIBUTING.md](CONTRIBUTING.md)，網站操作及部署見 [README.md](README.md)。
 - 網站使用檔案路由與靜態生成，部署內容為 `.output/public`。目前提供首頁、卡片列表、角色列表及設定頁。
 - 語言、主題、頁面清單及素材用途由對應設定管理；數量從設定推導。

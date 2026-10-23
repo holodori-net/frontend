@@ -1,8 +1,8 @@
 {
-  "siteName": "Holodori Database",
+  "siteName": "hololive Dreams Unofficial Database",
   "mainNavigation": "Main navigation",
   "homePage": {
-    "description": "Browse cards and characters to find the game information you need.",
+    "description": "This is an unofficial database and is not affiliated with the hololive Dreams official team.",
     "explore": "Explore the database",
     "cards": "Browse card art, stats, skills, and Connect effects. Search and filter by your criteria.",
     "characters": "Browse characters by group and view their names in each language."
@@ -186,7 +186,7 @@
   "notFoundTitle": "Page not found",
   "notFoundDescription": "Check the URL and try again.",
   "backHome": "Back home",
-  "languageEntryTitle": "Holodori Database",
+  "languageEntryTitle": "hololive Dreams Unofficial Database",
   "languageEntryDescription": "Choose the languages to display.",
   "continue": "Continue",
   "offlineTitle": "Pages for offline use",
@@ -197,7 +197,7 @@
   "offlineSyncFailed": "Sync failed. Check your connection. Previously saved pages are still available.",
   "offlineSyncReady": "Choose pages to save while online.",
   "pwaInstall": "Install app",
-  "pwaInstallDescription": "Add Holodori Database to your home screen.",
+  "pwaInstallDescription": "Add the hololive Dreams Unofficial Database to your home screen.",
   "pwaIosInstallHelp": "To install, use the Share button and choose “Add to Home Screen.”",
   "pwaDismissInstall": "Dismiss install prompt"
 }

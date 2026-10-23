@@ -1,8 +1,8 @@
 {
-  "siteName": "ホロドリ データベース",
+  "siteName": "hololive Dreams 非公式データベース",
   "mainNavigation": "メインナビゲーション",
   "homePage": {
-    "description": "カードやキャラクターを見ながら、必要なゲーム情報を探せます。",
+    "description": "本サイトは非公式データベースであり、hololive Dreams の運営チームとは一切関係ありません。",
     "explore": "データベースを探索",
     "cards": "カードイラスト、ステータス、スキル、Connectを閲覧し、条件で検索・絞り込みできます。",
     "characters": "所属グループごとにキャラクターを見て、各言語の名前を確認できます。"
@@ -186,7 +186,7 @@
   "notFoundTitle": "ページが見つかりません",
   "notFoundDescription": "URL を確認して、もう一度お試しください。",
   "backHome": "ホームへ戻る",
-  "languageEntryTitle": "Holodori Database",
+  "languageEntryTitle": "hololive Dreams 非公式データベース",
   "languageEntryDescription": "表示する言語を選択してください。",
   "continue": "続ける",
   "offlineTitle": "オフライン用ページ",
@@ -197,7 +197,7 @@
   "offlineSyncFailed": "同期できませんでした。接続を確認してください。前回保存したページは保持されています。",
   "offlineSyncReady": "ページを選ぶと、オンライン時に保存します。",
   "pwaInstall": "アプリをインストール",
-  "pwaInstallDescription": "Holodori Database をホーム画面に追加できます。",
+  "pwaInstallDescription": "hololive Dreams 非公式データベースをホーム画面に追加できます。",
   "pwaIosInstallHelp": "インストールするには、共有ボタンから「ホーム画面に追加」を選択してください。",
   "pwaDismissInstall": "インストール案内を閉じる"
 }

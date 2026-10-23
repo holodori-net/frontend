@@ -140,7 +140,7 @@ async function chooseGameLocale(value: GameLocale) {
     class="theme-site-header sticky top-0 z-20 flex flex-wrap items-center gap-x-3 gap-y-0 border-b px-4 sm:h-14 sm:flex-nowrap sm:px-6 md:gap-x-6"
   >
     <NuxtLink
-      class="inline-flex h-14 shrink-0 items-center gap-2.5 font-bold whitespace-nowrap text-primary sm:h-full"
+      class="inline-flex h-14 min-w-0 flex-1 items-center gap-2.5 font-bold text-primary sm:h-full sm:max-w-[40%] sm:flex-initial"
       :to="buildLocalizedPath(locale as SiteLocale, activeGameLocale, 'home')"
     >
       <span
@@ -158,10 +158,10 @@ async function chooseGameLocale(value: GameLocale) {
         @load="onLoad"
         @error="onError"
       />
-      <span>{{ t('siteName') }}</span>
+      <span class="min-w-0 break-words leading-tight">{{ t('siteName') }}</span>
     </NuxtLink>
     <nav
-      class="order-3 flex h-9 basis-full flex-none items-center gap-4 text-sm text-muted-color sm:order-none sm:h-full sm:basis-auto sm:flex-1 md:gap-6"
+      class="order-3 flex h-9 min-w-0 basis-full flex-none items-center gap-3 text-sm text-muted-color sm:order-none sm:h-full sm:min-w-max sm:basis-auto sm:flex-1 md:gap-6"
       :aria-label="t('mainNavigation')"
     >
       <NuxtLink

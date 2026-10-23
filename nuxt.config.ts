@@ -188,9 +188,10 @@ export default defineNuxtConfig({
     manifest: {
       id: '/',
       lang: 'ja',
-      name: 'Holodori Database',
-      short_name: 'Holodori',
-      description: 'A database for exploring Holodori game information.',
+      name: 'hololive Dreams 非公式データベース',
+      short_name: 'hololive Dreams 非公式DB',
+      description:
+        'hololive Dreamsの非公式データベースです。公式運営チームとは関係ありません。',
       start_url: '/',
       scope: '/',
       display: 'standalone',

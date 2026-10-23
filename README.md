@@ -1,6 +1,6 @@
-# Holodori Database
+# hololive Dreams Unofficial Database
 
-Holodori Database is a static Nuxt site for browsing game reference data. The site interface and game content use separate language settings.
+This is an unofficial static Nuxt database for hololive Dreams. It is not affiliated with the hololive Dreams official team. The site interface and game content use separate language settings.
 
 ## Language URLs
 

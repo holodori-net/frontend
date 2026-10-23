@@ -11,11 +11,13 @@ const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n()
 const { theme, initialized } = useMemberTheme()
-useHead({
+useHead(() => ({
+  title: t('siteName'),
+  meta: [{ name: 'description', content: t('homePage.description') }],
   htmlAttrs: {
-    lang: computed(() => siteLocaleLanguages[locale.value as SiteLocale]),
+    lang: siteLocaleLanguages[locale.value as SiteLocale],
   },
-})
+}))
 const preferredSiteLocale = useCookie<string | null>('holodori-site-locale', {
   default: () => null,
   maxAge: 60 * 60 * 24 * 365,

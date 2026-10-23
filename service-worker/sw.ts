@@ -279,7 +279,7 @@ self.addEventListener('fetch', (event) => {
               ? '此頁面尚未儲存供離線使用。請在連線時從設定頁下載。'
               : 'This page is not saved for offline use. Save it from Settings while online.'
         return new Response(
-          `<!doctype html><html lang="${siteLanguageMetadata[siteLocale].language}"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Holodori Database</title><body><main><h1>Holodori Database</h1><p>${message}</p><a href="/" lang="en">Home</a></main></body></html>`,
+          `<!doctype html><html lang="${siteLanguageMetadata[siteLocale].language}"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>hololive Dreams Unofficial Database</title><body><main><h1>hololive Dreams Unofficial Database</h1><p>${message}</p><a href="/" lang="en">Home</a></main></body></html>`,
           { headers: { 'Content-Type': 'text/html; charset=utf-8' } },
         )
       }

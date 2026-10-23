@@ -1,8 +1,8 @@
 {
-  "siteName": "Holodori 資料庫",
+  "siteName": "hololive Dreams 非官方資料庫",
   "mainNavigation": "主要導覽",
   "homePage": {
-    "description": "瀏覽卡片與角色，查找你需要的遊戲資訊。",
+    "description": "本站為非官方資料庫，與 hololive Dreams 官方營運團隊沒有任何關聯。",
     "explore": "探索資料庫",
     "cards": "瀏覽卡面、能力、技能與 Connect，依條件搜尋與篩選。",
     "characters": "依所屬團體瀏覽角色，查看各語言名稱。"
@@ -186,7 +186,7 @@
   "notFoundTitle": "找不到頁面",
   "notFoundDescription": "請確認網址後再試一次。",
   "backHome": "回到首頁",
-  "languageEntryTitle": "Holodori 資料庫",
+  "languageEntryTitle": "hololive Dreams 非官方資料庫",
   "languageEntryDescription": "選擇要顯示的語言。",
   "continue": "繼續",
   "offlineTitle": "離線頁面",
@@ -197,7 +197,7 @@
   "offlineSyncFailed": "同步失敗，請確認網路連線。先前儲存的頁面仍會保留。",
   "offlineSyncReady": "連線時會儲存所選頁面。",
   "pwaInstall": "安裝應用程式",
-  "pwaInstallDescription": "將 Holodori 資料庫加入主畫面。",
+  "pwaInstallDescription": "將 hololive Dreams 非官方資料庫加入主畫面。",
   "pwaIosInstallHelp": "若要安裝，請點選分享按鈕，再選擇「加入主畫面」。",
   "pwaDismissInstall": "關閉安裝提示"
 }
