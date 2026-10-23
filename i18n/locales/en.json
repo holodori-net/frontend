@@ -1,5 +1,6 @@
 {
   "siteName": "Holodori Database",
+  "mainNavigation": "Main navigation",
   "homePage": {
     "description": "Browse cards and characters to find the game information you need.",
     "explore": "Explore the database",

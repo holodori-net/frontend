@@ -18,6 +18,8 @@ import {
   memberThemeFallbackLogoUrl,
 } from '#shared/theme'
 
+const navigationPages = sitePages.filter((page) => page !== 'home')
+
 const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n()
@@ -160,10 +162,10 @@ async function chooseGameLocale(value: GameLocale) {
     </NuxtLink>
     <nav
       class="order-3 flex h-9 basis-full flex-none items-center gap-4 text-sm text-muted-color sm:order-none sm:h-full sm:basis-auto sm:flex-1 md:gap-6"
-      :aria-label="t('home')"
+      :aria-label="t('mainNavigation')"
     >
       <NuxtLink
-        v-for="page in sitePages"
+        v-for="page in navigationPages"
         :key="page"
         class="inline-flex h-full items-center [&.router-link-active]:text-primary [&.router-link-active]:shadow-[inset_0_-2px_var(--p-primary-color)]"
         :to="buildLocalizedPath(locale as SiteLocale, activeGameLocale, page)"

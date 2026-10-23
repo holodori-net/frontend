@@ -1,5 +1,6 @@
 {
   "siteName": "ホロドリ データベース",
+  "mainNavigation": "メインナビゲーション",
   "homePage": {
     "description": "カードやキャラクターを見ながら、必要なゲーム情報を探せます。",
     "explore": "データベースを探索",
