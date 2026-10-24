@@ -261,7 +261,8 @@ const characterName = computed(() =>
     >
       <Skeleton
         v-if="hasImage && imageStatus === 'loading'"
-        class="card-image-skeleton absolute inset-0"
+        class="card-image-skeleton inset-0"
+        style="position: absolute"
         width="100%"
         height="100%"
         border-radius="0"
