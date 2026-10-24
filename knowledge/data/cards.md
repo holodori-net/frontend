@@ -235,6 +235,36 @@ ORDER BY extent.position_y, extent.position_x;
 
 前端 URL 對照集中於 `shared/game-data/card-icons.ts`。卡片上的屬性與三圍使用圖示；兩種版型共用「圖示 數值 + 圖示 數值 + 圖示 數值 = 合計」算式，完整版型於圖片下方呈現，直式版型放在圖片右側的三圍欄。窄螢幕與缺圖文字按數值項目換行。篩選與三圍排序選項保留圖示及文字。`CardListIcon` 提供名稱、tooltip、尺寸選擇及載入失敗時的文字 fallback；三圍圖示使用透明背景，亮模式顯示黑色、暗模式顯示白色。
 
+### 動態卡面與簽名影片
+
+**CONFIRMED**：遊戲的 `AutographedCardData` 分別保存 ImageAddress、MovieAddress 與 AutographAddress。`AutographedCardDataFactory.HasMovieAsset()` 以 `CardAssetType.ImageAndMovie` 判斷影片卡；`SelectMovieAddress(card, isPotentialUpgradeMax)` 依是否滿綻放選擇 `GetMovieLimitBreakMaxAddress()` 或 `GetMovieLimitBreakNotMaxAddress()`。簽名另由 `GetSignMovieAddress()` 載入。
+
+`AutographedCard` 使用 `_cardPlayer` 與 `_autographePlayer` 分開播放；`ToggleShowAutograph()` 控制簽名顯示。`GetAutographDelaySeconds()` 回傳 `max(0, 卡面影片長度 − 簽名影片長度)`，卡面循環時重新準備簽名播放。
+
+**CONFIRMED**：白上吹雪 `00006-5-uniq-0074-00` 的 CDN 索引列出以下三支來源影片，均有 `VideoClip/*.webm` 輸出。原始格式為 USM；簽名來源包含 `@SFV` 影像與 `@ALP` alpha 串流。簽名 WebM 的 HTTP Range 請求回傳 `206`、`video/webm`，檔頭包含 `V_VP9` 與 `AlphaMode=1`。
+
+| 素材       | 來源索引                                                                                                                        |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 卡面版本 0 | [mov_card_full_0_00006-5-uniq-0074-00.usm](https://assets.holodori.net/cdn/mov_card_full_0_00006-5-uniq-0074-00.usm/index.json) |
+| 卡面版本 1 | [mov_card_full_1_00006-5-uniq-0074-00.usm](https://assets.holodori.net/cdn/mov_card_full_1_00006-5-uniq-0074-00.usm/index.json) |
+| 簽名       | [mov_card_sign_00006-5-uniq-0074-00.usm](https://assets.holodori.net/cdn/mov_card_sign_00006-5-uniq-0074-00.usm/index.json)     |
+
+**CONFIRMED**：`GetMovieLimitBreakMax`（ARM64 RVA `0xEAE0D18`）的 slot `0x10CDE208` 經 ELF RELATIVE relocation 指向 literal `0x110ACF68`（`mov_card_full_1_{0}.usm`）；`GetMovieLimitBreakNotMax`（`0xEAE0DBC`）的 slot `0x10CDE210` 指向 `0x110ACF60`（`mov_card_full_0_{0}.usm`）。因此滿綻放使用版本 1，其他階段使用版本 0。本機 196 張卡中，88 張 `assetType=2` 的卡片均可於 CDN 索引找到上述三種影片；其餘 108 張為 `assetType=1`。
+
+**CONFIRMED**：簽名影片片尾包含淡出；`GachaCharacterCardMovieSequence` 的靜態揭示呼叫 `PauseAtTimes(8.00000000023283, 8.0)`，以簽名第 8 秒作為完整簽名停格。白上吹雪來源 WebM 為 30 fps、272 格，最後 8 格的 alpha 為零。
+
+影片 URL 由 `getCardMovieUrl()` 集中產生，格式為 `https://assets.holodori.net/cdn/{sourceName}/VideoClip/{sourceName 去除 .usm}.webm`。單卡 payload 的 `card.assetType` 保留來源數值；列表 payload 沿用靜態卡圖欄位。
+
+詳細頁保留靜態 `img_card_full_{assetId}.webp` 作為初始卡面及影片失敗時的 fallback。`assetType=2` 的卡片於 mounted 後載入影片，以「動態卡面」「顯示簽名」分別控制兩層，預設皆開啟；偏好減少動態效果時，新卡預設關閉動畫，仍可手動啟用。關閉動畫時，簽名停在遊戲完整簽名的 8 秒影格；較短影片限制於可用範圍。卡面使用靜音行內循環播放，簽名以卡面時間及上述延遲同步，採 `requestVideoFrameCallback` 並以 `timeupdate` 相容處理。頁面隱藏時暫停，離頁時清除同步回呼；載入與播放失敗記錄資產及錯誤，回到可用卡面。選擇保存在當次頁面記憶體，同卡切換語言保留，離開或換卡回到預設。影片沿用遠端素材載入，離線頁面快照保存單卡 JSON 與應用資源。
+
+#### 媒體開關
+
+**CONFIRMED**：`CardDetailScreen` prefab 的 `AutographedSwitchButtonRoot` 為 700×64，右側 `SwitchButton_r32` 為 120×64。標籤寬 580、高 64，與開關間隔 15；白色圓鈕為 48×48，圖案為 28×28。關閉狀態的圓鈕中心 x=32，開啟時移至右側。關閉底色為 `#62628E`、alpha 0.549；外框為白色、alpha 0.251。 底板與外框使用 `CommonRoundBaseAtlas` 的 `ui_999_base_r32_9s`、`ui_999_outline_w3_r32_9s`，圓鈕使用 `ui_999_base_r24_9s`、`ui_999_outline_w4_r24_9s`。
+
+`SwitchButton.SetCharacter()` 透過 `GetDefaultMainMotifIconAddress()` 載入 `img_chr_motif_icon_default_main_{characterAssetId}`，並由 `CharacterColorSetter` 套用角色 `Color4`。圖案沿用 `shared/theme.ts` 的 `getMemberThemeAssets().motifMain`，保留角色素材 ID 前導零。
+
+前端 `CardDetailMediaSwitch` 以既有 PrimeVue `ToggleSwitch` 呈現同比例膠囊、白色圓鈕及角色圖案。兩個媒體選項使用同款開關；標籤保留網站文字色，與開關皆可點選，原生輸入保留鍵盤操作及 switch 語意。開關配色來自卡片角色，動畫偏好遵循減少動態效果設定。
+
 ### 詳細頁標題與卡框素材
 
 **CONFIRMED**：APK `UnityDataAssetPack/assets/aa/Android/426dca9772d0aa0e8dc778baf36a8f1e.bundle` 的 `CardDetailScreen` prefab 包含完整標題、卡框與掛飾設定。以 UnityPy、Unity fallback `6000.3.15f1` 讀取各物件 typetree，可由 `GameObject.m_Component`、`RectTransform.m_Father/m_Children` 重建階層；外部 Sprite 由 serialized file 的 `externals` 與 PPtr 的 `m_FileID/m_PathID` 解析。AssetBundle 的 container key 為縮短識別碼，需讀根物件的 `m_Name` 辨識 prefab。

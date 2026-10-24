@@ -1,4 +1,5 @@
 import type { CardStatKey } from './card-list-data.ts'
+import { getMemberThemeAssets } from '../theme.ts'
 
 const cardAtlasBaseUrl =
   'https://assets.holodori.net/apk/bundle/5c7dca536fc387da111cc16aed58d394.bundle/images/'
@@ -30,6 +31,12 @@ export type CardDetailArtworkKind = keyof typeof cardDetailArtworkUrls
 
 export function getCardDetailArtworkUrl(kind: CardDetailArtworkKind): string {
   return cardDetailArtworkUrls[kind]
+}
+
+export function getCardDetailSwitchMotifUrl(
+  characterAssetId: string | null,
+): string | null {
+  return getMemberThemeAssets(characterAssetId).motifMain
 }
 
 const cardCharacterDecorationNames = {
@@ -125,6 +132,15 @@ export function getCostumeThumbnailUrl(assetId: string | null): string | null {
   if (!assetId) return null
   const name = `img_cos_2d_thumb_${assetId}`
   return `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.webp`
+}
+
+export function getCardMovieUrl(
+  assetId: string | null,
+  variant: 'full_0' | 'full_1' | 'sign',
+): string | null {
+  if (!assetId) return null
+  const sourceName = `mov_card_${variant}_${assetId}`
+  return `https://assets.holodori.net/cdn/${sourceName}.usm/VideoClip/${sourceName}.webm`
 }
 
 export const cardRarityAnimationUrl =

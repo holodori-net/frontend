@@ -52,6 +52,68 @@ const selection = ref<CardGrowthSelection>(
 const normalizedSelection = computed(() =>
   selectCardGrowthLevel(props.payload.growth, selection.value),
 )
+const mediaState = useState<{
+  cardId: string
+  animate: boolean
+  showSignature: boolean
+} | null>('card-detail-media-state', () => null)
+let hasSavedMediaState = mediaState.value?.cardId === props.payload.card.id
+const mediaEnabled = computed(() => props.payload.card.assetType === 2)
+const animateCard = ref(true)
+const showSignature = ref(true)
+const mediaVariant = computed(() =>
+  normalizedSelection.value.potentialUpgradeCount ===
+  maximum.value.potentialUpgradeCount
+    ? 'full_1'
+    : 'full_0',
+)
+function restoreMediaState(cardId: string) {
+  const saved = mediaState.value
+  hasSavedMediaState = saved?.cardId === cardId
+  if (saved?.cardId === cardId) {
+    animateCard.value = saved.animate
+    showSignature.value = saved.showSignature
+  } else {
+    animateCard.value = true
+    showSignature.value = true
+  }
+}
+restoreMediaState(props.payload.card.id)
+function saveMediaState(cardId = props.payload.card.id) {
+  mediaState.value = {
+    cardId,
+    animate: animateCard.value,
+    showSignature: showSignature.value,
+  }
+  hasSavedMediaState = true
+}
+watch([animateCard, showSignature], ([animate, signature]) => {
+  mediaState.value = {
+    cardId: props.payload.card.id,
+    animate,
+    showSignature: signature,
+  }
+  hasSavedMediaState = true
+})
+watch(
+  () => props.payload.card.id,
+  (id) => {
+    restoreMediaState(id)
+    if (
+      !hasSavedMediaState &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    )
+      animateCard.value = false
+    if (!hasSavedMediaState) saveMediaState(id)
+  },
+)
+onMounted(() => {
+  if (!hasSavedMediaState) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+      animateCard.value = false
+    saveMediaState()
+  }
+})
 watch(
   selection,
   (value) => {
@@ -75,6 +137,7 @@ watch(
 onBeforeRouteLeave((to) => {
   if (String(to.params.id) !== props.payload.card.id) {
     persistedSelection.value = null
+    mediaState.value = null
   }
 })
 const growth = computed(() =>
@@ -345,7 +408,33 @@ function changePotential(value: unknown) {
             :fields="[]"
             :linked="false"
             image-size="original"
-          />
+          >
+            <template v-if="mediaEnabled" #image-overlay>
+              <CardDetailMedia
+                :key="`${payload.card.id}:${mediaVariant}`"
+                v-model:animate="animateCard"
+                v-model:show-signature="showSignature"
+                :asset-id="payload.card.assetId"
+                :variant="mediaVariant"
+              />
+            </template>
+          </CardListContent>
+          <template v-if="mediaEnabled" #controls>
+            <div class="mt-2 flex flex-wrap justify-end gap-x-4 gap-y-1">
+              <CardDetailMediaSwitch
+                v-model="animateCard"
+                :label="t('cardDetail.animateCard')"
+                :character-id="payload.card.characterId"
+                :character-asset-id="payload.card.characterAssetId"
+              />
+              <CardDetailMediaSwitch
+                v-model="showSignature"
+                :label="t('cardDetail.showSignature')"
+                :character-id="payload.card.characterId"
+                :character-asset-id="payload.card.characterAssetId"
+              />
+            </div>
+          </template>
         </CardDetailArtwork>
 
         <div class="order-3 grid min-w-0 gap-4 sm:grid-cols-2 lg:order-none">

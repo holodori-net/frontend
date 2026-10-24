@@ -156,6 +156,7 @@ const { status, imageElement, onLoad, onError } = useImageLoading(titleBase)
           />
         </div>
       </div>
+      <slot name="controls" />
     </div>
   </div>
 </template>
@@ -354,6 +355,10 @@ const { status, imageElement, onLoad, onError } = useImageLoading(titleBase)
 
 .card-detail-artwork__frame :deep(.card-list-art) {
   overflow: visible;
+  border-radius: calc(36 * var(--artwork-unit));
+}
+
+.card-detail-artwork__frame :deep(.card-detail-media) {
   border-radius: calc(36 * var(--artwork-unit));
 }
 

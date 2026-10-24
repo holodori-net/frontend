@@ -24,6 +24,8 @@
     "potentialStage": "綻放 {stage}",
     "potentialNone": "未綻放",
     "allStatsUp": "全能力提升{percent}%",
+    "animateCard": "動態卡面",
+    "showSignature": "顯示簽名",
     "backToCards": "返回卡片列表"
   },
   "characters": "角色",

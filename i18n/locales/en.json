@@ -24,6 +24,8 @@
     "potentialStage": "Bloom {stage}",
     "potentialNone": "Unbloomed",
     "allStatsUp": "All stats +{percent}%",
+    "animateCard": "Animate card",
+    "showSignature": "Show signature",
     "backToCards": "Back to cards"
   },
   "characters": "Characters",

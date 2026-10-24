@@ -304,6 +304,8 @@ const contentWrapper = computed(() => (props.linked ? NuxtLink : 'div'))
           {{ t('cardList.imageUnavailable') }}
         </span>
 
+        <slot name="image-overlay" />
+
         <div class="absolute left-1 top-1">
           <CardListIcon
             :src="getCardAttributeIconUrl(card.attributeType)"

@@ -24,6 +24,8 @@
     "potentialStage": "開花 {stage}",
     "potentialNone": "未開花",
     "allStatsUp": "全パラメータ{percent}%UP",
+    "animateCard": "カードをアニメーション",
+    "showSignature": "サインを表示",
     "backToCards": "カード一覧に戻る"
   },
   "characters": "キャラクター",
