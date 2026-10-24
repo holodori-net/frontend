@@ -40,6 +40,7 @@ export interface PendingDescription {
 export interface CostumeData {
   id: string
   characterId: string
+  assetId: string
   name: LocalizedText
   liveLeaderSkillId: string | null
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import {
   buildLocalizedPath,
+  buildCardDetailPath,
   buildLocalizedRoute,
   gameLocales,
   gameLocaleLanguages,
@@ -120,6 +121,12 @@ describe('language resolution', () => {
       '/zh-TW/cht/characters',
     )
     expect(buildLocalizedPath('ja', 'jpn', 'settings')).toBe('/ja/jpn/settings')
+  })
+
+  it('encodes card identifiers in localized detail paths', () => {
+    expect(buildCardDetailPath('zh-TW', 'cht', 'card/a b')).toBe(
+      '/zh-TW/cht/cards/card%2Fa%20b',
+    )
   })
 
   it('builds a locale route from a nested path', () => {

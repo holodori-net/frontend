@@ -8,7 +8,7 @@
 
 ## Costume
 
-主鍵為 `id`。`transformCostumes(database)` 僅查詢名稱與技能關聯所需欄位。
+主鍵為 `id`。`transformCostumes(database)` 查詢素材 ID、名稱與技能關聯所需欄位。
 
 | 轉換 | 來源欄位                        | 型別        | 回傳對應／用途                                                |
 | ---- | ------------------------------- | ----------- | ------------------------------------------------------------- |
@@ -16,11 +16,13 @@
 | ✓    | `character_id`                  | TEXT        | `characterId`，關聯 `Character.id`                            |
 | ✓    | `name_lang_id`                  | TEXT        | 查 `LangCostume.id` 取得六語 `name`                           |
 | ✓    | `live_leader_skill_id`          | TEXT / null | `liveLeaderSkillId`，關聯 `LiveLeaderSkill.id`；null 原樣保留 |
-|      | `asset_id`                      | TEXT        | 服裝素材 ID                                                   |
+| ✓    | `asset_id`                      | TEXT        | `assetId`，保留前導零；詳細頁衣裝縮圖使用此 ID                |
 |      | `expression_asset_id`           | TEXT        | 表情素材 ID                                                   |
 |      | `live_start_character_voice_id` | TEXT / null | Live 開始角色語音 ID                                          |
 |      | `rarity_type`                   | INTEGER     | 服裝稀有度                                                    |
 |      | `order`                         | INTEGER     | 來源排序                                                      |
+
+**CONFIRMED**：衣裝縮圖使用 `img_cos_2d_thumb_{assetId}`，URL 由 `shared/game-data/card-icons.ts` 的 `getCostumeThumbnailUrl()` 組合。單卡 payload 的 `costumes` 保存 `assetId`；列表投影仍只包含名稱與技能關聯。來源字串為 `img_cos_2d_thumb_{0}`，實際下載 [あやめ的衣裝縮圖](https://assets.holodori.net/cdn/img_cos_2d_thumb_00010-uniq-0069-00/Texture2D/img_cos_2d_thumb_00010-uniq-0069-00.webp) 確認為 256×256 的透明 WebP。
 
 ## LiveLeaderSkill
 

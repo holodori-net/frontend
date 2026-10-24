@@ -8,6 +8,7 @@ const props = defineProps<{
   gameLocale: GameLocale
   levels: readonly CardListConnectEffectLevelData[]
   positions: readonly ConnectPosition[]
+  headingTag?: 'h2' | 'h3'
 }>()
 
 const levels = computed(() =>
@@ -33,11 +34,12 @@ const levels = computed(() =>
       class="my-2 min-w-0"
       :pt="{ content: { class: 'min-w-0 max-w-full' } }"
     >
-      <h3
+      <component
+        :is="headingTag ?? 'h3'"
         class="m-0 min-w-0 max-w-full text-sm font-semibold leading-snug wrap-anywhere"
       >
         {{ title }}
-      </h3>
+      </component>
     </Divider>
     <div class="flex min-w-0 flex-wrap items-start gap-3">
       <CardListConnectGraph :positions="positions" />

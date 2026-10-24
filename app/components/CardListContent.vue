@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import {
+  buildCardDetailPath,
   gameLocaleLanguages,
   resolveLocalizedName,
   type GameLocale,
+  type SiteLocale,
 } from '#shared/language'
 import type {
   CardListCostumeData,
@@ -18,10 +20,7 @@ import {
   composePassiveSkillDescription,
   composeSpecialSkillDescription,
 } from '#shared/game-data/live-skill-description'
-import {
-  getCardAttributeIconUrl,
-  getCardStatIconUrl,
-} from '#shared/game-data/card-icons'
+import { getCardAttributeIconUrl } from '#shared/game-data/card-icons'
 import {
   getCardImageUrl,
   CARD_LIST_FIELDS,
@@ -30,6 +29,7 @@ import {
   type CardListField,
   type CardListLayout,
 } from '#shared/game-data/card-list'
+import { NuxtLink } from '#components'
 
 type CardSkillSelections = Readonly<Record<CardSkillField, readonly number[]>>
 
@@ -45,6 +45,8 @@ const props = withDefaults(
     fields?: readonly CardListField[]
     skillLevels?: CardSkillSelections
     layout?: CardListLayout
+    imageSize?: 'thumbnail' | 'original'
+    linked?: boolean
   }>(),
   {
     fields: () => CARD_LIST_FIELDS,
@@ -55,12 +57,14 @@ const props = withDefaults(
       connectEffect: [1, 2],
     }),
     layout: 'full',
+    imageSize: 'thumbnail',
+    linked: true,
   },
 )
 
 const { t, locale } = useI18n()
 const imageUrl = computed(() =>
-  getCardImageUrl(props.card.assetId, props.layout),
+  getCardImageUrl(props.card.assetId, props.layout, props.imageSize),
 )
 const {
   status: imageStatus,
@@ -68,7 +72,6 @@ const {
   onLoad,
   onError,
 } = useImageLoading(imageUrl)
-const numberFormatter = computed(() => new Intl.NumberFormat(locale.value))
 const hasImage = computed(
   () => Boolean(imageUrl.value) && imageStatus.value !== 'failed',
 )
@@ -230,6 +233,14 @@ const articleStyle = computed(() => ({
 const characterName = computed(() =>
   resolveLocalizedName(props.card.characterName, props.gameLocale),
 )
+const detailLink = computed(() => ({
+  path: buildCardDetailPath(
+    locale.value as SiteLocale,
+    props.gameLocale,
+    props.card.id,
+  ),
+}))
+const contentWrapper = computed(() => (props.linked ? NuxtLink : 'div'))
 </script>
 
 <template>
@@ -249,59 +260,66 @@ const characterName = computed(() =>
     ]"
     :style="{ ...articleStyle, ...fullSubgridStyle }"
   >
-    <div
-      class="card-list-art relative overflow-hidden bg-surface-100 dark:bg-surface-800"
-      :class="
-        layout === 'vertical' && hasInformation
-          ? 'aspect-[256/366] w-24 shrink-0'
-          : layout === 'vertical'
-            ? 'aspect-[256/366] w-full'
-            : 'aspect-video w-full'
-      "
+    <component
+      :is="contentWrapper"
+      :to="linked ? detailLink : undefined"
+      class="contents card-list-detail-link text-inherit no-underline"
+      :aria-label="linked ? cardName.text : undefined"
     >
-      <Skeleton
-        v-if="hasImage && imageStatus === 'loading'"
-        class="card-image-skeleton inset-0"
-        style="position: absolute"
-        width="100%"
-        height="100%"
-        border-radius="0"
-      />
-      <img
-        v-if="hasImage"
-        ref="imageElement"
-        :key="imageUrl!"
-        :src="imageUrl!"
-        alt=""
-        class="relative size-full object-contain"
-        draggable="false"
-        loading="lazy"
-        decoding="async"
-        @load="onLoad"
-        @error="onError"
-      />
-      <span
-        v-else
-        class="absolute inset-0 grid place-items-center px-3 text-center text-xs text-muted-color"
+      <div
+        class="card-list-art relative overflow-hidden bg-surface-100 dark:bg-surface-800"
+        :class="
+          layout === 'vertical' && hasInformation
+            ? 'aspect-[256/366] w-24 shrink-0'
+            : layout === 'vertical'
+              ? 'aspect-[256/366] w-full'
+              : 'aspect-video w-full'
+        "
       >
-        {{ t('cardList.imageUnavailable') }}
-      </span>
+        <Skeleton
+          v-if="hasImage && imageStatus === 'loading'"
+          class="card-image-skeleton inset-0"
+          style="position: absolute"
+          width="100%"
+          height="100%"
+          border-radius="0"
+        />
+        <img
+          v-if="hasImage"
+          ref="imageElement"
+          :key="imageUrl!"
+          :src="imageUrl!"
+          alt=""
+          class="relative size-full object-contain"
+          draggable="false"
+          loading="lazy"
+          decoding="async"
+          @load="onLoad"
+          @error="onError"
+        />
+        <span
+          v-else
+          class="absolute inset-0 grid place-items-center px-3 text-center text-xs text-muted-color"
+        >
+          {{ t('cardList.imageUnavailable') }}
+        </span>
 
-      <div class="absolute left-1 top-1">
-        <CardListIcon
-          :src="getCardAttributeIconUrl(card.attributeType)"
-          :label="t(`cardList.attribute${card.attributeType}`)"
-          size="large"
-        />
+        <div class="absolute left-1 top-1">
+          <CardListIcon
+            :src="getCardAttributeIconUrl(card.attributeType)"
+            :label="t(`cardList.attribute${card.attributeType}`)"
+            size="large"
+          />
+        </div>
+        <div class="absolute bottom-1 left-1 top-11">
+          <CardListRarity
+            :count="card.rarity"
+            :label="t('cardList.rarityOption', { count: card.rarity })"
+            vertical
+          />
+        </div>
       </div>
-      <div class="absolute bottom-1 left-1 top-11">
-        <CardListRarity
-          :count="card.rarity"
-          :label="t('cardList.rarityOption', { count: card.rarity })"
-          vertical
-        />
-      </div>
-    </div>
+    </component>
 
     <div
       v-if="hasInformation"
@@ -330,7 +348,14 @@ const characterName = computed(() =>
             :style="fieldStyle(field)"
             :lang="cardName.lang"
           >
-            {{ cardName.text }}
+            <NuxtLink
+              v-if="linked"
+              :to="detailLink"
+              class="card-list-name-link text-inherit underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              :lang="cardName.lang"
+              >{{ cardName.text }}</NuxtLink
+            >
+            <span v-else>{{ cardName.text }}</span>
           </p>
           <p
             v-else-if="field === 'characterName'"
@@ -342,63 +367,16 @@ const characterName = computed(() =>
             {{ characterName.text }}
           </p>
 
-          <dl
+          <CardParameters
             v-else-if="field === 'parameters'"
             class="min-w-0 text-base"
-            :class="[
-              fieldClass(),
-              'card-list-parameters-row flex flex-wrap items-center justify-center gap-x-1 gap-y-1',
-            ]"
+            :class="[fieldClass()]"
             :style="fieldStyle(field)"
-          >
-            <div
-              v-for="stat in statKeys"
-              :key="stat"
-              class="inline-flex min-w-0 max-w-full flex-[0_1_auto] items-center gap-1 py-1"
-            >
-              <span
-                v-if="stat !== statKeys[0]"
-                aria-hidden="true"
-                class="mx-1 shrink-0"
-                >+</span
-              >
-              <dt class="sr-only">
-                {{ t(`cardList.stat.${stat}`) }}
-              </dt>
-              <dd
-                class="m-0 inline-flex min-w-0 items-center gap-1 font-medium tabular-nums"
-              >
-                <CardListIcon
-                  :src="getCardStatIconUrl(stat)"
-                  :label="t(`cardList.stat.${stat}`)"
-                  aria-hidden="true"
-                  monochrome
-                  size="small"
-                />
-                <span
-                  class="ml-px text-sm"
-                  :class="card.specializations.includes(stat) && 'text-primary'"
-                >
-                  {{ numberFormatter.format(card.stats[stat]) }}
-                </span>
-              </dd>
-            </div>
-            <div
-              class="inline-flex min-w-0 max-w-full flex-[0_1_auto] items-center gap-1 py-1"
-            >
-              <span aria-hidden="true" class="mx-1 shrink-0">=</span>
-              <dt class="sr-only">
-                {{ t('cardList.total') }}
-              </dt>
-              <dd
-                class="m-0 inline-flex min-w-0 items-center gap-1 font-bold tabular-nums"
-              >
-                <span>
-                  {{ numberFormatter.format(card.total) }}
-                </span>
-              </dd>
-            </div>
-          </dl>
+            :stats="card.stats"
+            :total="card.total"
+            :specializations="card.specializations"
+            :stat-keys="statKeys"
+          />
 
           <CardListSkillSection
             v-else-if="
@@ -464,6 +442,16 @@ const characterName = computed(() =>
 </template>
 
 <style scoped>
+.card-list-detail-link:focus-visible .card-list-art {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 2px;
+}
+
+.card-list-name-link:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 2px;
+}
+
 .card-list-content {
   content-visibility: auto;
   contain-intrinsic-block-size: auto 24rem;
@@ -507,6 +495,11 @@ const characterName = computed(() =>
   grid-row: 1;
 }
 
+.card-list-detail-link:focus-visible .card-list-art {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: -3px;
+}
+
 .card-list-info--full-subgrid {
   display: grid;
   grid-row: 2 / -1;
@@ -517,9 +510,6 @@ const characterName = computed(() =>
   padding: 1rem;
 }
 
-.card-list-parameters-row {
-  margin-top: 0;
-}
 .card-list-field-row {
   min-width: 0;
 }

@@ -1,11 +1,7 @@
 import type { CardData } from '#shared/game-data/cards'
 import type { CardGrowthData } from '#shared/game-data/card-growth'
-import type {
-  CardListItemData,
-  CardStatKey,
-} from '#shared/game-data/card-list-data'
-
-const statKeys: CardStatKey[] = ['performance', 'technique', 'sense']
+import type { CardListItemData } from '#shared/game-data/card-list-data'
+import { calculateCardStats } from '#shared/game-data/card-stats'
 const allParameterUpPermilUpEffectType = 4
 
 export function calculateCardListStats(
@@ -17,27 +13,9 @@ export function calculateCardListStats(
     .filter((effect) => effect.effectType === allParameterUpPermilUpEffectType)
     .reduce((sum, effect) => sum + effect.value, 0)
 
-  const base = Math.fround(baseValue)
-  const bonus = Math.fround(potentialBonus)
-  const multiplier = Math.fround(Math.fround(bonus / 1000) + Math.fround(1))
-  const stats = Object.fromEntries(
-    statKeys.map((key) => {
-      const basePermil = Math.fround(base / 1000)
-      const weighted = Math.fround(
-        basePermil * Math.fround(card.growth.weightsPermil[key]),
-      )
-      return [key, Math.ceil(Math.fround(weighted * multiplier))]
-    }),
-  ) as Record<CardStatKey, number>
-  const highestWeight = Math.max(
-    ...statKeys.map((key) => card.growth.weightsPermil[key]),
+  return calculateCardStats(
+    card.growth.weightsPermil,
+    baseValue,
+    potentialBonus,
   )
-
-  return {
-    stats,
-    total: stats.performance + stats.technique + stats.sense,
-    specializations: statKeys.filter(
-      (key) => card.growth.weightsPermil[key] === highestWeight,
-    ),
-  }
 }

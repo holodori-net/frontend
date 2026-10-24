@@ -15,7 +15,7 @@ describe('language entry routes', () => {
         children: [
           {
             path: 'cards',
-            file: '/project/app/pages/[gameLocale]/cards.vue',
+            file: '/project/app/pages/[gameLocale]/cards/index.vue',
             meta: { validate: () => true },
             children: [
               {

@@ -19,6 +19,7 @@ export const primeVueComponents = [
   'Popover',
   'Select',
   'Skeleton',
+  'Slider',
   'Tag',
   'Tab',
   'TabList',

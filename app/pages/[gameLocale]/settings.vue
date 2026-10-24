@@ -27,6 +27,8 @@ const gameLocale = computed(() => String(route.params.gameLocale))
 const validGameLocale = computed<GameLocale>(() =>
   isGameLocale(gameLocale.value) ? gameLocale.value : 'jpn',
 )
+const offlinePageLabel = (page: OfflinePage) =>
+  page === 'cards' ? t('cardListTitle') : t(page)
 const selectedPages = ref<OfflinePage[]>([])
 const syncing = ref(false)
 const transferProgress = ref<{ completed: number; total: number } | null>(null)
@@ -152,7 +154,7 @@ onUnmounted(() => {
               :input-id="`offline-${page}`"
               :value="page"
             />
-            {{ t(page) }}
+            {{ offlinePageLabel(page) }}
           </label>
         </fieldset>
         <p v-if="syncing" class="mt-4 text-sm text-primary" role="status">

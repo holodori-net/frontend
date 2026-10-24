@@ -408,10 +408,13 @@ export function filterAndSortCards(
 export function getCardImageUrl(
   assetId: string | null,
   layout: CardListLayout = 'full',
+  size: 'thumbnail' | 'original' = 'thumbnail',
 ): string | null {
   if (!assetId) return null
   const name = `img_card_${layout === 'vertical' ? 'vert' : 'full'}_${assetId}`
   const filename =
-    layout === 'vertical' ? `${name}.webp` : `${name}.thumb-640-v1.webp`
+    layout === 'vertical' || size === 'original'
+      ? `${name}.webp`
+      : `${name}.thumb-640-v1.webp`
   return `https://assets.holodori.net/cdn/${name}/Texture2D/${filename}`
 }

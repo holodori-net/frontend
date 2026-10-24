@@ -4,6 +4,14 @@
 
 欄位名稱、SQLite 型別、主鍵、schema 宣告的關聯與轉換對應均為 **CONFIRMED**。用途尚未完整追蹤者另以信心標籤標示；宣告的關聯不等同 SQLite 外鍵約束。`✓` 表示已直接轉換或經查表產生回傳值，空白表示尚未轉換。
 
+## 卡片詳細頁
+
+`readCardDetailIndex()` 回傳 `{ cardIds: string[] }`，`readCardDetail(id)` 回傳該卡的 `CardDetailPayload`；未找到 ID 時回傳 null。索引輸出為 `/data/card-details.json`，單卡資料輸出為 `/data/cards/{id}.json`。Reader 在每個 process 重用轉換來源，並只投影該卡所需的六語名稱、技能、服裝、Connect 與養成資料。
+
+詳細頁路徑為 `/{siteLocale}/{gameLocale}/cards/{id}`，預生成滿養成資訊與卡片 SEO。卡圖使用原尺寸的 `img_card_full_{assetId}.webp`。寬螢幕左側排列遊戲素材標題牌、卡框中的卡圖、衣裝縮圖與技能及 Connect；右側為養成控制及特殊、主動、被動技能。標題保留卡名與放大的角色名，角色掛飾取自卡片的角色素材 ID，沿標題與卡框左側排列；標題使用該角色的 `color4`，搭配原始亮點、波紋、內側光暈及外框，白字保留深色陰影。手機依序顯示標題與卡圖、養成、衣裝與 Connect、卡片技能。等級 Slider 涵蓋卡片完整養成範圍，旁邊合併顯示最低所需特訓及階段上限；綻放以列出各階段新增效果的下拉選單調整，收起時顯示緊湊的階段與效果摘要，展開後的技能升級選項包含目標等級的完整技能描述。三圍由 `CardDetailParameters` 以圖示、名稱及放大數值直式排列，增加列高，右側以更大的數字顯示合計；列表沿用 `CardParameters` 的水平加總算式。衣裝縮圖與 Connect 圖同為 112px，兩區使用圖示標題頁籤銜接圓角內容框，搭配中性框線；標題使用淡主題色背景與一般文字及圖示色，內容區與其他面板使用相同背景。各類卡片技能與 Connect 顯示全部來源等級，目前等級依養成強調，其他等級使用較淡文字；Connect 共用的範圍圖跟隨目前等級，窄螢幕在圖下方排列描述。養成選擇在頁面記憶體中保存；同卡切換語言保留選擇，重新載入、換卡或離開後重新進入使用滿養成。三圍與技能等級計算見 [卡片成長資料](card-growth.md#詳細頁的養成計算)。
+
+離線設定的 `cards` 保存列表，`cardDetails` 獨立保存選定語言組合的全部詳細頁、Nuxt payload 與單卡計算資料。兩者可分別選擇；下載成功後替換快照，失敗保留既有快照。
+
 ## Card
 
 每筆代表一張卡片。角色 ID 指向角色表；名稱依文字 ID 與遊戲語言查找。成長組別指向一組等級或養成階段資料。
@@ -226,6 +234,59 @@ ORDER BY extent.position_y, extent.position_x;
 客戶端對應：`../extraction/work/decompile/05-annotate-decompiled-code/annotated-csharp/Vision.Common.Core/Vision/Common/AddressDefinition.cs` 的 `LocalSpriteAtlas`；屬性由 `Vision.Common/Vision/Common/CardAttributeTypeIcon.cs` 的 `Set` 選取。屬性 1／2／3 引用的靜態欄位 offset 分別為 8120／8168／8144，對應 `cute_cl`／`pure_cl`／`happy_cl`。觀察日期為 2026-10-14。
 
 前端 URL 對照集中於 `shared/game-data/card-icons.ts`。卡片上的屬性與三圍使用圖示；兩種版型共用「圖示 數值 + 圖示 數值 + 圖示 數值 = 合計」算式，完整版型於圖片下方呈現，直式版型放在圖片右側的三圍欄。窄螢幕與缺圖文字按數值項目換行。篩選與三圍排序選項保留圖示及文字。`CardListIcon` 提供名稱、tooltip、尺寸選擇及載入失敗時的文字 fallback；三圍圖示使用透明背景，亮模式顯示黑色、暗模式顯示白色。
+
+### 詳細頁標題與卡框素材
+
+**CONFIRMED**：APK `UnityDataAssetPack/assets/aa/Android/426dca9772d0aa0e8dc778baf36a8f1e.bundle` 的 `CardDetailScreen` prefab 包含完整標題、卡框與掛飾設定。以 UnityPy、Unity fallback `6000.3.15f1` 讀取各物件 typetree，可由 `GameObject.m_Component`、`RectTransform.m_Father/m_Children` 重建階層；外部 Sprite 由 serialized file 的 `externals` 與 PPtr 的 `m_FileID/m_PathID` 解析。AssetBundle 的 container key 為縮短識別碼，需讀根物件的 `m_Name` 辨識 prefab。
+
+`MainCardRoot` 的繪製順序為 `motif`、`CardTitleGroup`、`card`、`ring`。以下尺寸為 Canvas units；相關 Sprite 的 `m_PixelsToUnits=200`，Canvas reference pixels per unit 為 100，來源 Sprite pixel rect／border 須除以二。
+
+| 元素                | Prefab 設定                                                 |
+| ------------------- | ----------------------------------------------------------- |
+| `CardTitleGroup`    | 944×164、pivot (0, 0.5)、position (92.96, 33.495)、Z 軸 +1° |
+| 標題底板與外框      | 976×164、相對 group 左界 −32                                |
+| 卡名／角色名        | 字級 36／48；卡名框 816×49，角色名列高 64                   |
+| `card`              | 卡圖 960×540、position (580.99, −325.999)                   |
+| 卡框底板與外框      | 1012×594，相對卡圖中心 position (−10, +11)；底板 alpha 0.65 |
+| 卡圖遮罩            | `ui_999_base_r36_9s`，圓角 36                               |
+| 屬性圖示            | 72×72，卡圖左上 position (−8, +8)                           |
+| 星星                | 寬 56、間距 −16，卡圖左下 position (−16, +8)                |
+| `ring`／`KeyWiring` | 240×240／214×214；wiring Z 軸 −104°，受 ring mask 裁切      |
+| `img_chr_key_chain` | 77.988×166.375、pivot (0.5, 0.73)                           |
+| `img_chr_key_motif` | 186.667×186.667、pivot (0.5, 1)，位於 chain 之下            |
+
+**CONFIRMED**：`CardDetailScreenContentListCell_Front/Back` 的 `CharacterColorSetter._individualColorSettingData` 將標題底板指定為 `_colorType=3`，即角色 `Character.Color4`／ButtonColor；外框沒有套用角色色。標題由以下原始圖層組成，依序繪製並以底板 alpha 裁切：
+
+| 圖層     | 原素材與設定                                                                                             |
+| -------- | -------------------------------------------------------------------------------------------------------- |
+| 底板     | `ui_800_img_cardname_base_wh_9s`，角色 Color4                                                            |
+| 亮點     | `ui_999_pattern_glitter`，Tiled Image；完整 Texture2D 為 434×434，Canvas tile 為 217×217                 |
+| 波紋     | `ui_999_pattern_wave_3_wide_wh`，RawImage alpha 115/255；UV rect (0.33, 0, 5, 1)，Z 軸 −151°、scale Y=−1 |
+| 內側光暈 | `ui_999_inwht_b70_a100_9s`，白色 9-slice                                                                 |
+| 外框     | `ui_800_img_cardname_outline_9s`，白色 9-slice                                                           |
+
+底板、標題外框、卡框與 `ui_800_img_ring_mask` 位於 [CardAtlas](https://assets.holodori.net/apk/bundle/5c7dca536fc387da111cc16aed58d394.bundle/index.json)；內側光暈與角色標籤位於 [CommonAtlas](https://assets.holodori.net/apk/bundle/e7f629315795970b8fbc94cf21766d2c.bundle/index.json)。[亮點](https://assets.holodori.net/apk/bundle/b2257aa649ca1aa6fb7b75e405610a47.bundle/index.json) 與 [波紋](https://assets.holodori.net/apk/bundle/5a37a2b6fe150ea29663029aa16734c2.bundle/index.json) 使用完整 Texture2D，保留 Sprite 裁切外的透明邊界及 UV 重複範圍。
+
+| Sprite                                     | 解碼尺寸     | Canvas border 左／下／右／上 |
+| ------------------------------------------ | ------------ | ---------------------------- |
+| `ui_800_img_cardname_{base_wh,outline}_9s` | 141×164      | 87.5／0／53.5／0             |
+| `ui_800_img_card_{base_wh,outline}_9s`     | 140×140      | 70／70／70／70               |
+| `ui_999_inwht_b70_a100_9s`                 | 142×142      | 70／70／70／70               |
+| `ui_999_lab_unit_{base_wh,outline_wh}_9s`  | 32×48／33×48 | 20／0／12.5／0               |
+
+前端以 CSS border image 呈現外框與光暈；卡框以 69px 切片保留 2px 中心取樣區。`CardDetailSpriteMask` 以左右原圖切片及白色中心重建水平 9-slice 的 SVG alpha mask；接合處重疊四個原圖單位，保留素材本身的 alpha 邊緣。標題使用 SVG alpha mask 疊加原圖層，網頁座標反轉後為 −1° 傾斜。字型沿用網站各語系 Noto Sans，字重 800；遊戲 prefab 的日文預設字型為 `TT-RoGSanSrfStdN-Bd SDF_Shadow`，卡名／角色名共用深色 underlay `#24234C`、alpha 166/255。
+
+**CONFIRMED**：詳細頁載入的角色裝飾為 `img_chr_key_wiring_{id}`、`img_chr_key_chain_{id}` 與 `img_chr_motif_main_{id}`，使用卡片 `characterAssetId`、保留前導零。網址為 `https://assets.holodori.net/cdn/{name}/Texture2D/{name}.webp`。掛飾位於卡框及卡圖之後，右側會被遮住；wiring 則位於最上層並使用原 ring mask。`img_chr_key_ring_{id}` 是其他角色鑰匙圈畫面的素材，CardDetail 沒有獨立的 ring texture setter。裝飾缺圖時隱藏，標題文字保留背景。
+
+**CONFIRMED**：角色標籤由 `CharacterGroupingLabelGroup.Set(character)` 與 `CharacterUtility.SetCharacterGroupingLabels` 設定；遊戲取 `SortedRegularCharacterGroupingIds`，先依 `CharacterGrouping.order` 升冪排序，再選取群組 ID；getter 的 `OrderBy` 與 lambda `253_0`／`253_1` 分別確認排序欄位與 ID 投影。白上吹雪的原始群組陣列為 GAMERS、1期生，而兩群組的 order 為 4、2，遊戲顯示為 1期生、GAMERS。每個標籤使用群組本地化名稱與 color1→color2 水平漸層。前端單卡 payload 的 `characterGroups` 依有效 `Character.regularGroupIds` 對應群組的 `CharacterGrouping.order` 升冪提供 id、name、color1、color2，保留原標籤底板及外框。列表 payload 不包含這些欄位。
+
+客戶端 C# 來源為 `Vision.OutGame/Vision/OutGame/CardDetailScreenContentListCellView.cs` 的 `_characterColorSetter`、`_keyWiringImageSetter`、`_keyChainTextureSetter`、`_keyMainMotifTextureSetter`；角色素材地址由 `Vision.Common.Core/Vision/Common/Proto/Master/Character.cs` 的 `AssetNameRelation` 提供。以上路徑相對於 `../extraction/work/decompile/05-annotate-decompiled-code/annotated-csharp/`。
+
+### 詳細頁技能圖示
+
+**CONFIRMED**：技能圖示由彩色底圖、中央效果圖與左下類型字標組成。底圖及字標來自 [技能圖集](https://assets.holodori.net/apk/bundle/5c7dca536fc387da111cc16aed58d394.bundle/index.json)：`ui_800_thm_skill_{sp,active,passive}_base` 及 `ui_800_ico_thm_skill_{sp,active,passive}_txt`。底圖約 120×120；特殊、主動、被動字標分別為 70×53、50×52、45×52。前端以透明圖片疊加，URL 集中於 `shared/game-data/card-icons.ts`。
+
+**CONFIRMED**：中央效果圖沿用 `RemoteAddress.LiveActiveSkillEffect.GetSkillThumb()` 與 `LivePassiveSkillEffect.GetSkillThumb()` 的 enum 名稱轉小寫規則。主動與特殊技能使用 `img_skill_icon_active_{effectName}`，被動使用 `img_skill_icon_passive_{effectName}`；`effectName` 為對應 `LiveActiveSkillEffectType`／`LivePassiveSkillEffectType` 名稱的小寫，不加底線。詳細頁取目前技能等級主要效果群組的第一項效果型別，未知型別或缺圖時保留類型底圖與字標。實際下載確認主動分數提升、特殊分數加成效果提升及被動主動技能效果提升的中央圖案。衣裝縮圖來源見 [服裝資料](costume-live-skills.md#costume)。
 
 ### 星級動畫與星形圖示
 

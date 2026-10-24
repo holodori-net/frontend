@@ -26,6 +26,14 @@ Search, filters, and sorting are saved in the URL and restored when reloading, c
 
 The page shows a loading message until it restores display preferences and URL conditions. Cards outside the view show placeholders until you scroll to them, then retain their details. JavaScript is required to browse cards. Card art and icons load from `assets.holodori.net`. Loading card art shows a skeleton placeholder; reduced motion disables its shimmer. Unavailable card art shows a text placeholder while retaining card details; unavailable attribute and stat icons show their names. Stars play as animated WebP images managed by the browser; if star images are unavailable, rarity text appears.
 
+### Card details
+
+Select a card's image or name to open its detail page at `/{site-language}/{game-language}/cards/{card-id}`. On wide screens, full-size art, the leader outfit skill, and Connect appear on the left, with growth controls and special, active, and passive skills on the right. Stats show enlarged, labeled Performance, Technique, and Sense rows with a prominent total alongside. All available card skill and Connect levels remain visible, with the current level emphasized as growth changes.
+
+Use the **Level** slider and **Bloom** dropdown to calculate the card's own stats and skill levels immediately. Special training and its level cap appear beside the selected level and follow the minimum training required for that level. The slider covers the card's full level range. Each Bloom option describes the effects unlocked at that stage. The page starts at maximum growth. Growth choices stay in page memory across language changes; reloading, opening another card, or returning after leaving starts at maximum growth. The return link opens the card list in the current site and game languages.
+
+The default card information is available without JavaScript. Enable JavaScript to use the growth simulator.
+
 ## Characters
 
 Open **Characters** to browse members grouped by production. Only playable characters are shown by default; turn on **Show unplayable characters** to include the others. Names follow the selected game content language. The default character list is available without JavaScript. Character icons load from `assets.holodori.net`; unavailable icons show a placeholder while retaining the character's name.
@@ -41,6 +49,8 @@ Member themes use official character colors, avatars, and motifs. Names follow t
 ## Install and use offline
 
 The site can be installed from a supported browser when served over HTTPS (or localhost). The close button remembers your choice in this browser until you clear its site data; you can still install from the browser menu. Open **Settings** for a language combination to choose whether its home, cards, and characters pages should be available offline. The current language combination is kept offline; switching to another combination replaces its saved pages after the new selection downloads successfully. The settings page and app resources remain available to manage offline content. Saved card lists support searching, filtering, and sorting offline. Unselected pages, card art, star animations, attribute and stat icons, and character icons require a network connection.
+
+**Card list** and **Card details** are separate offline choices. Selecting **Card details** saves every card detail page for the current language combination, including the data needed for growth calculations. Detail pages can then be opened and reloaded offline. The detail option is initially unselected. Card art and icons use their offline placeholders.
 
 Settings displays download progress. If synchronization fails, the previous offline selection remains available.
 
@@ -73,6 +83,6 @@ Production builds use the GA4 web data stream Measurement ID `G-3Z3154J0WR` by d
 
 In the GA4 web data stream's **Enhanced measurement → Page views** settings, enable **Page changes based on browser history events** to track in-app navigation.
 
-The output is written to `.output/public`. It includes the language entry pages at `/`, `/cards`, `/characters`, and `/settings`, each configured language combination for the home, cards, characters, and settings pages, along with the sitemap, robots file, web manifest, and service worker. The sitemap lists the localized home, cards, and characters pages. Deploy the contents of that directory to a static host configured to serve generated paths and `404.html` fallback behavior. The service worker and install prompt require HTTPS in production.
+The output is written to `.output/public`. It includes the language entry pages and each configured language combination for all pages, including individual card details, along with the sitemap, robots file, web manifest, and service worker. The sitemap lists the localized public pages and every card detail page. Deploy the contents of that directory to a static host configured to serve generated paths and `404.html` fallback behavior. The service worker and install prompt require HTTPS in production.
 
 Pushes to `main` build and deploy the site to GitHub Pages. You can also run **Deploy to GitHub Pages** manually from GitHub Actions on `main`.

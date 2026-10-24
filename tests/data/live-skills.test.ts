@@ -27,7 +27,7 @@ beforeEach(() => {
     CREATE TABLE LangCharacter (language TEXT, id TEXT, text TEXT, PRIMARY KEY(language, id));
     CREATE TABLE CharacterGrouping (id TEXT PRIMARY KEY, name_lang_id TEXT NOT NULL);
     CREATE TABLE LangCharacterGrouping (language TEXT, id TEXT, text TEXT, PRIMARY KEY(language, id));
-    CREATE TABLE Costume (id TEXT PRIMARY KEY, character_id TEXT NOT NULL, name_lang_id TEXT NOT NULL, live_leader_skill_id TEXT);
+    CREATE TABLE Costume (id TEXT PRIMARY KEY, character_id TEXT NOT NULL, asset_id TEXT NOT NULL, name_lang_id TEXT NOT NULL, live_leader_skill_id TEXT);
     CREATE TABLE LangCostume (language TEXT, id TEXT, text TEXT, PRIMARY KEY(language, id));
     CREATE TABLE LiveLeaderSkill (id TEXT PRIMARY KEY, live_skill_trigger_group_id TEXT, live_passive_skill_effect_group_id TEXT NOT NULL, additional_live_skill_trigger_group_id TEXT, additional_live_passive_skill_effect_group_id TEXT);
     CREATE TABLE LivePassiveSkillEffect (group_id TEXT, number INTEGER, type INTEGER NOT NULL, value TEXT, live_skill_effect_target_id TEXT, resource_type INTEGER, resource_ids TEXT, description_lang_id TEXT NOT NULL, PRIMARY KEY(group_id, number));
@@ -38,7 +38,7 @@ beforeEach(() => {
     CREATE TABLE LangGeneratedLiveSkillEffectTarget (language TEXT, id TEXT, text TEXT, PRIMARY KEY(language, id));
     INSERT INTO Character VALUES ('character-1', 'character-name');
     INSERT INTO CharacterGrouping VALUES ('group-1', 'group-name');
-    INSERT INTO Costume VALUES ('costume-1', 'character-1', 'costume-name', 'skill-1');
+    INSERT INTO Costume VALUES ('costume-1', 'character-1', '00010-uniq-0069-00', 'costume-name', 'skill-1');
     INSERT INTO LiveLeaderSkill VALUES ('skill-1', 'trigger-main', 'effect-main', 'trigger-extra', 'effect-extra');
     INSERT INTO LivePassiveSkillEffect VALUES
       ('effect-main', 2, 8, '200', 'target-all', NULL, NULL, 'effect-2'),
@@ -111,6 +111,7 @@ describe('live skill data transform', () => {
     expect(data.costumes[0]).toMatchObject({
       id: 'costume-1',
       characterId: 'character-1',
+      assetId: '00010-uniq-0069-00',
       liveLeaderSkillId: 'skill-1',
       name: Object.fromEntries(
         gameLocales.map((locale) => [locale, `Costume ${locale}`]),

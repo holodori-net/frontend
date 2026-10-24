@@ -107,6 +107,7 @@ export function transformCostumes(database: GameDatabase): CostumeData[] {
     .select({
       id: costume.id,
       characterId: costume.characterId,
+      assetId: costume.assetId,
       nameLangId: costume.nameLangId,
       liveLeaderSkillId: costume.liveLeaderSkillId,
     })
@@ -117,6 +118,7 @@ export function transformCostumes(database: GameDatabase): CostumeData[] {
   return rows.map((row) => ({
     id: row.id,
     characterId: row.characterId,
+    assetId: row.assetId,
     name: sourceText(
       textQuery.all({ id: row.nameLangId }),
       row.nameLangId,

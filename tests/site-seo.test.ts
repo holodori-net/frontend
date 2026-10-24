@@ -7,7 +7,9 @@ import {
   generateSiteSeo,
   getSiteSeoRoutes,
 } from '../scripts/site-seo'
-import { gameLocales, siteLocales } from '../shared/language'
+import { gameLocales, siteLocales, sitePages } from '../shared/language'
+
+const publicPages = sitePages.filter((page) => page !== 'settings')
 
 const directories: string[] = []
 afterEach(async () => {
@@ -28,7 +30,7 @@ describe('site SEO files', () => {
     const sitemap = await readFile(join(root, 'public/sitemap.xml'), 'utf8')
     const robots = await readFile(join(root, 'public/robots.txt'), 'utf8')
     expect(sitemap.match(/<url>/g)).toHaveLength(
-      siteLocales.length * gameLocales.length * 3,
+      siteLocales.length * gameLocales.length * publicPages.length,
     )
     expect(sitemap).toContain('https://example.test/ja/jpn/')
     expect(sitemap).toContain('https://example.test/zh-TW/cht/cards/')
@@ -43,7 +45,9 @@ describe('site SEO files', () => {
 
   it('derives public page paths from configured locales only', () => {
     const routes = getSiteSeoRoutes()
-    expect(routes).toHaveLength(siteLocales.length * gameLocales.length * 3)
+    expect(routes).toHaveLength(
+      siteLocales.length * gameLocales.length * publicPages.length,
+    )
     expect(routes).toContain('/en/eng/')
     expect(routes).toContain('/en/eng/cards/')
     expect(routes).toContain('/en/eng/characters/')
@@ -63,6 +67,31 @@ describe('site SEO files', () => {
     expect(await readFile(join(root, 'public/sitemap.xml'), 'utf8')).toContain(
       'http://staging.example.test:8080/ja/jpn/',
     )
+  })
+
+  it('includes each card detail in every configured language combination', async () => {
+    const cardIds = ['card-00015-3-nrml-0003-00', 'card-00015-5-uniq-0003-00']
+    const routes = getSiteSeoRoutes(cardIds)
+    expect(routes).toHaveLength(
+      siteLocales.length *
+        gameLocales.length *
+        (publicPages.length + cardIds.length),
+    )
+    for (const siteLocale of siteLocales) {
+      for (const gameLocale of gameLocales) {
+        for (const id of cardIds) {
+          expect(routes).toContain(`/${siteLocale}/${gameLocale}/cards/${id}/`)
+        }
+      }
+    }
+    const root = await mkdtemp(join(tmpdir(), 'holodori-seo-'))
+    directories.push(root)
+    await generateSiteSeo(root, 'https://example.test', cardIds)
+    const sitemap = await readFile(join(root, 'public/sitemap.xml'), 'utf8')
+    expect(sitemap).toContain(
+      `https://example.test/zh-TW/cht/cards/${cardIds[0]}/`,
+    )
+    expect(sitemap).not.toContain('https://example.test/cards/card-')
   })
 
   it.each([
