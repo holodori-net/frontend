@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "verbatimModuleSyntax": true
+  },
+  "files": ["scripts/language-entry-bootstrap.ts"]
+}

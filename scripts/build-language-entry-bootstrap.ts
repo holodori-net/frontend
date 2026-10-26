@@ -7,6 +7,9 @@ export async function buildLanguageEntryBootstrap() {
   )
   const output = await build({
     configFile: false,
+    tsconfig: fileURLToPath(
+      new URL('../tsconfig.language-entry.json', import.meta.url),
+    ),
     mode: process.env.NODE_ENV ?? 'development',
     logLevel: 'silent',
     publicDir: false,
