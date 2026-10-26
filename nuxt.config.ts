@@ -20,6 +20,8 @@ import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
 import { generateSiteSeo } from './scripts/site-seo'
 import { renderMemberThemeBootstrap } from './scripts/member-theme-bootstrap'
+import { buildLanguageEntryBootstrap } from './scripts/build-language-entry-bootstrap'
+import { addTemplate, defineNuxtModule } from 'nuxt/kit'
 import { getPrerenderWorkerCount } from './scripts/prerender/worker-count'
 import {
   getLanguageEntryRoutes,
@@ -54,6 +56,17 @@ const prerenderRoutes = [
   ),
 ]
 let languageEntryPaths: string[] = []
+const languageEntryBootstrapModule = defineNuxtModule({
+  meta: { name: 'language-entry-bootstrap' },
+  async setup() {
+    const script = await buildLanguageEntryBootstrap()
+    addTemplate({
+      filename: 'language-entry-bootstrap.ts',
+      write: true,
+      getContents: () => `export default ${JSON.stringify(script)}`,
+    })
+  },
+})
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-09-25',
@@ -146,6 +159,7 @@ export default defineNuxtConfig({
     },
   },
   modules: [
+    languageEntryBootstrapModule,
     '@nuxtjs/i18n',
     '@nuxt/eslint',
     '@vite-pwa/nuxt',

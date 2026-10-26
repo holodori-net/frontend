@@ -12,6 +12,7 @@
 - `shared/language.ts` 集中管理網站語言、遊戲語言、顯示名稱、瀏覽器語言對照與 fallback。Nuxt、選單、路由驗證及 Service Worker 共用此設定。
 - 網站語言與遊戲語言獨立；日文 fallback 分別為 `ja` 與 `jpn`，保留遊戲語言的原始代碼。
 - 路徑格式為 `/{siteLocale}/{gameLocale}/...`。`/`、`/cards`、`/characters` 與 `/settings` 依已儲存偏好、瀏覽器語言及日文 fallback 選擇語言。
+- 語言入口 HTML 以同步 head script 在 Nuxt 載入前導向，保留原始 query 與 hash；程式由 TypeScript 共用語言邏輯經 Vite 打包。停用 JavaScript 或導向錯誤時保留日文「繼續」連結，站內入口導覽使用 Vue Router replace。
 - 完整語言網址先依網址顯示；與已儲存偏好衝突時提供確認。切換語言須保留目前頁面、實體 ID、query 與 hash。
 - 新增網站語言需提供介面翻譯；新增遊戲語言需驗證來源文字。語言測試涵蓋設定一致性、實際組合及 fallback。
 - Sitemap 收錄已設定語言組合的首頁、cards 與 characters 入口，以及全部卡片詳細頁；設定頁不列入 sitemap。網站網址由 `NUXT_PUBLIC_SITE_URL` 設定。

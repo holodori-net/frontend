@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { NuxtLink } from '#components'
 import { buildLocalizedRoute, resolveEntryLocales } from '#shared/language'
+import languageEntryBootstrap from '#build/language-entry-bootstrap'
 
 const route = useRoute()
 const router = useRouter()
@@ -18,7 +18,20 @@ const preferredGameLocale = useCookie<string | null>('holodori-game-locale', {
 
 const continueRoute = computed(() => buildLocalizedRoute('ja', 'jpn', route))
 
+if (import.meta.server) {
+  useHead({
+    script: [{ innerHTML: languageEntryBootstrap, tagPriority: -19 }],
+  })
+}
+
 onMounted(async () => {
+  if (
+    document.documentElement.getAttribute('data-language-entry-fallback') ===
+    'failed'
+  ) {
+    return
+  }
+
   const resolved = resolveEntryLocales(
     navigator.languages,
     preferredSiteLocale.value,
@@ -31,20 +44,15 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="grid min-h-screen place-items-center p-6">
-    <section
-      class="w-full max-w-xl rounded-3xl border border-surface-200 bg-surface-0 p-8 shadow-xl dark:border-surface-700 dark:bg-surface-900 sm:p-11"
-    >
-      <h1 class="mb-3 text-3xl font-bold">{{ t('languageEntryTitle') }}</h1>
-      <p class="mb-0 leading-relaxed text-muted-color">
-        {{ t('languageEntryDescription') }}
-      </p>
-      <Button
-        :as="NuxtLink"
-        class="mt-6"
-        :to="continueRoute"
-        :label="t('continue')"
-      />
-    </section>
+  <main class="language-entry-fallback p-6">
+    <NuxtLink :to="continueRoute" class="underline">
+      {{ t('continue') }}
+    </NuxtLink>
   </main>
 </template>
+
+<style>
+html[data-language-entry-fallback='hidden'] .language-entry-fallback {
+  display: none;
+}
+</style>

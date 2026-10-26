@@ -10,6 +10,8 @@ The home page links to **Cards** and **Characters**. Select the site title in th
 
 The pages `/`, `/cards`, `/characters`, and `/settings` select languages from saved manual preferences first, then browser languages, then Japanese defaults. A complete language URL is shown as written. When it differs from a previously selected language, the site asks whether to use the saved preferences or keep the linked languages. Dismissing this prompt by clicking outside keeps the linked languages for the current visit without saving preferences.
 
+Language entries automatically open the selected language URL, keeping the current page, query parameters, and fragment. If automatic navigation is unavailable, select **Continue** to open the Japanese version.
+
 Changing either language keeps the current page, query parameters, and fragment.
 
 ## Cards
