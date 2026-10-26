@@ -5,6 +5,7 @@
 ## 文件索引
 
 - [卡片資料](data/cards.md)：Card 與 LangCard 的完整欄位、技能／語音／服裝關聯、技能樹 Connect 範圍座標與查詢、Connect 列表資料、固定 5×5 預覽、形狀方向分類及圖形複選篩選、服裝技能的列表資料來源、預設服裝關聯、六語描述組合與參數模板、正式屬性與三圍文字及圖示、星級動畫 WebP、動態卡面、簽名影片及遊戲式開關、全螢幕播放與詳情語音、來源 sprite 圖集與星形圖示、完整與直式卡圖、640px 縮圖、列表版型與延後載入、六語全文搜尋索引、技能篩選與壓縮網址、全部技能顯示、共用 payload 投影、獨立詳細頁與單卡資料、離線詳細頁下載及轉換狀態。
+- [歌曲資料](data/songs.md)：歌曲與六語文字、演唱成員、譜面難度與音符數、收錄時間、取得與解鎖說明、評分門檻、Combo、曲長結算加成、MV 關聯、直播靜音、投影與搜尋索引。
 - [角色資料](data/characters.md)：Character 與 LangCharacter 的完整欄位、多語角色資料、生日與出道日期、養成關聯、SD 動畫、群組文字、顏色用途、成員主題投影及轉換狀態。
 - [角色群組資料](data/character-groups.md)：CharacterGrouping 與 LangCharacterGrouping 的完整欄位、角色成員關聯、多語文字及轉換狀態。
 - [卡片成長資料](data/card-growth.md)：CardLevel、CardLevelLimit、CardPotential 的組別、養成階段、累積經驗門檻、特訓消耗、綻放累加、共用三圍公式、詳細頁養成選擇與技能等級、特化判定，以及 CardPotentialUpgradeItem 的綻放道具對應與轉換狀態。
@@ -17,7 +18,7 @@
 - Schema：[holodori-net/android-protos](https://github.com/holodori-net/android-protos)，相關 entity.master 與 enums 定義。
 - 資料：[holodori-net/android-database](https://github.com/holodori-net/android-database) 的 [master.sqlite](https://github.com/holodori-net/android-database/releases/latest/download/master.sqlite)，本機位於 `.data/master.sqlite`。
 - 欄位與關聯的可重現來源：SQLite 的 `PRAGMA table_info`、`logical_fields` 與 `declared_foreign_keys`。
-- 轉換依據：[Drizzle schema](../server/data/schema/)、[轉換模組](../server/data/converters/)、[資料型別](../shared/game-data/)。Schema 手動維護查詢所需欄位，透過 `snakeCase.table` 將 camelCase 屬性自動映射為 SQLite 的 snake_case 欄位名稱。Converter 接收 `GameDatabase`，[卡片 reader](../server/data/card-list.ts)、[角色 reader](../server/data/character-list.ts) 與 [主題 reader](../server/data/member-themes.ts) 管理唯讀連線並選取所需欄位。卡片與角色列表由 Nitro 產生共用靜態 JSON，卡片詳細資料另以單卡 JSON 保存；角色頁的初始列表另保存在 HTML 的 Nuxt state，主題資料由 Nuxt 保存為 payload。
+- 轉換依據：[Drizzle schema](../server/data/schema/)、[轉換模組](../server/data/converters/)、[資料型別](../shared/game-data/)。Schema 手動維護查詢所需欄位，透過 `snakeCase.table` 將 camelCase 屬性自動映射為 SQLite 的 snake_case 欄位名稱。Converter 接收 `GameDatabase`，[卡片 reader](../server/data/card-list.ts)、[歌曲 reader](../server/data/song-list.ts)、[角色 reader](../server/data/character-list.ts) 與 [主題 reader](../server/data/member-themes.ts) 管理唯讀連線並選取所需欄位。卡片、歌曲與角色列表由 Nitro 產生共用靜態 JSON，卡片詳細資料另以單卡 JSON 保存；角色頁的初始列表另保存在 HTML 的 Nuxt state，主題資料由 Nuxt 保存為 payload。
 
 卡片文件觀察日期為 2026-10-20，master_version 為 `452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`，此快照包含 196 張卡片與 1176 筆 LangCard。角色文件觀察日期為 2026-10-12，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 62 位角色與 2412 筆 LangCharacter。角色群組文件觀察日期為 2026-10-11，master_version 為 `65badf8533aacbc04382f97f0f5f56740e761e6f5be6172d8440ae9061deebe7`，此快照包含 16 個 CharacterGrouping 與 192 筆 LangCharacterGrouping。來源更新後，重新驗證受影響的欄位、枚舉與結論。
 
