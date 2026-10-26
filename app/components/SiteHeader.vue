@@ -309,7 +309,7 @@ async function chooseGameLocale(value: GameLocale) {
             </button>
           </div>
         </fieldset>
-        <label class="grid gap-2 text-sm font-medium">
+        <div class="grid gap-2 text-sm font-medium">
           {{ t('themeTitle') }}
           <Select
             v-model="selectedThemeId"
@@ -381,7 +381,7 @@ async function chooseGameLocale(value: GameLocale) {
               </span>
             </template>
           </Select>
-        </label>
+        </div>
       </section>
     </Popover>
   </header>
