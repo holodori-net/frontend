@@ -71,12 +71,19 @@ export function resolveLocalizedName(
   return { text: '', lang: gameLocaleLanguages[selectedLocale] }
 }
 
-export const sitePages = ['home', 'cards', 'characters', 'settings'] as const
+export const sitePages = [
+  'home',
+  'cards',
+  'songs',
+  'characters',
+  'settings',
+] as const
 export type PageKind = (typeof sitePages)[number]
 export const offlinePageKinds = [
   'home',
   'cards',
   'cardDetails',
+  'songs',
   'characters',
 ] as const
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, PanelsTopLeft, UsersRound } from '@lucide/vue'
+import { ArrowRight, Music, PanelsTopLeft, UsersRound } from '@lucide/vue'
 import {
   buildLocalizedPath,
   isGameLocale,
@@ -15,6 +15,7 @@ definePageMeta({
 const gameLocale = computed(() => String(route.params.gameLocale) as GameLocale)
 const portalPages = [
   { page: 'cards', icon: PanelsTopLeft },
+  { page: 'songs', icon: Music },
   { page: 'characters', icon: UsersRound },
 ] as const
 </script>

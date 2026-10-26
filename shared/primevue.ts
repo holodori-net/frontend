@@ -11,6 +11,7 @@ export const primeVueComponents = [
   'DeferredContent',
   'Divider',
   'InputText',
+  'InputNumber',
   'InputGroup',
   'InputGroupAddon',
   'InputIcon',
@@ -36,6 +37,7 @@ export const primeVueStyleDependencies: Partial<
 > = {
   AccordionHeader: { directives: ['ripple'] },
   Button: { components: ['Badge'], directives: ['ripple'] },
+  InputNumber: { components: ['InputText'] },
   Dialog: { directives: ['ripple'] },
   Message: { directives: ['ripple'] },
   MultiSelect: {

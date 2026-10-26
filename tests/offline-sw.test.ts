@@ -214,33 +214,36 @@ describe('offline service worker selection', () => {
     expect(downloaded).toContain('https://example.test/data/cards/card-1.json')
   })
 
-  it('stores the character page and payload at their localized paths', async () => {
-    const fetchPage = vi.fn(
-      async (request: Request) => new Response(request.url),
-    )
-    vi.stubGlobal('fetch', fetchPage)
-    const replies = await message({
-      type: 'SYNC_OFFLINE_PAGES',
-      siteLocale: 'zh-TW',
-      gameLocale: 'cht',
-      pages: ['characters'],
-    })
-    expect(replies.at(-1)).toMatchObject({
-      success: true,
-      pages: ['characters'],
-    })
-    const downloaded = fetchPage.mock.calls.map(
-      ([request]) => (request as Request).url,
-    )
-    expect(downloaded).toContain('https://example.test/zh-TW/cht/characters/')
-    expect(downloaded).toContain(
-      'https://example.test/zh-TW/cht/characters/_payload.json',
-    )
-    expect(downloaded).toContain('https://example.test/data/characters.json')
-    expect(downloaded).not.toContain('https://example.test/data/cards.json')
-  })
+  it.each(['characters', 'songs'])(
+    'stores the %s page and payload at their localized paths',
+    async (page) => {
+      const fetchPage = vi.fn(
+        async (request: Request) => new Response(request.url),
+      )
+      vi.stubGlobal('fetch', fetchPage)
+      const replies = await message({
+        type: 'SYNC_OFFLINE_PAGES',
+        siteLocale: 'zh-TW',
+        gameLocale: 'cht',
+        pages: [page],
+      })
+      expect(replies.at(-1)).toMatchObject({
+        success: true,
+        pages: [page],
+      })
+      const downloaded = fetchPage.mock.calls.map(
+        ([request]) => (request as Request).url,
+      )
+      expect(downloaded).toContain(`https://example.test/zh-TW/cht/${page}/`)
+      expect(downloaded).toContain(
+        `https://example.test/zh-TW/cht/${page}/_payload.json`,
+      )
+      expect(downloaded).toContain(`https://example.test/data/${page}.json`)
+      expect(downloaded).not.toContain('https://example.test/data/cards.json')
+    },
+  )
 
-  it.each(['/_payload.json', '/data/characters.json'])(
+  it.each(['/_payload.json', '/data/characters.json', '/data/songs.json'])(
     'keeps the previous selection when downloading %s fails',
     async (failedResource) => {
       const core = await caches.open('holodori-core-v1')
@@ -270,7 +273,7 @@ describe('offline service worker selection', () => {
         type: 'SYNC_OFFLINE_PAGES',
         siteLocale: 'ja',
         gameLocale: 'jpn',
-        pages: ['characters'],
+        pages: ['characters', 'songs'],
       })
       expect(replies.at(-1)).toMatchObject({ type: 'result', success: false })
       expect(await (await core.match(selectionUrl))?.json()).toMatchObject({
@@ -337,7 +340,7 @@ describe('offline service worker selection', () => {
     },
   )
 
-  it.each(['/data/cards.json', '/data/characters.json'])(
+  it.each(['/data/cards.json', '/data/characters.json', '/data/songs.json'])(
     'serves saved %s offline with a build query after an app update',
     async (path) => {
       vi.stubGlobal(
@@ -348,7 +351,7 @@ describe('offline service worker selection', () => {
         type: 'SYNC_OFFLINE_PAGES',
         siteLocale: 'ja',
         gameLocale: 'jpn',
-        pages: ['cards', 'characters'],
+        pages: ['cards', 'characters', 'songs'],
       })
       await loadWorker('/_nuxt/new.js')
       vi.stubGlobal(

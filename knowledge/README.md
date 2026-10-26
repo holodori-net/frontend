@@ -5,7 +5,7 @@
 ## 文件索引
 
 - [卡片資料](data/cards.md)：Card 與 LangCard 的完整欄位、技能／語音／服裝關聯、技能樹 Connect 範圍座標與查詢、Connect 列表資料、固定 5×5 預覽、形狀方向分類及圖形複選篩選、服裝技能的列表資料來源、預設服裝關聯、六語描述組合與參數模板、正式屬性與三圍文字及圖示、星級動畫 WebP、動態卡面、簽名影片及遊戲式開關、全螢幕播放與詳情語音、來源 sprite 圖集與星形圖示、完整與直式卡圖、640px 縮圖、列表版型與延後載入、六語全文搜尋索引、技能篩選與壓縮網址、全部技能顯示、共用 payload 投影、獨立詳細頁與單卡資料、離線詳細頁下載及轉換狀態。
-- [歌曲資料](data/songs.md)：歌曲與六語文字、演唱成員、譜面難度與音符數、收錄時間、取得與解鎖說明、評分門檻、Combo、曲長結算加成、MV 關聯、直播靜音、投影與搜尋索引。
+- [歌曲資料](data/songs.md)：歌曲與六語文字、演唱成員、譜面難度與音符數、難度配色、收錄時間、取得與解鎖說明、評分門檻、Combo、曲長結算加成、MV 關聯、直播靜音、列表篩選與顯示、遊戲介面用語、投影與搜尋索引。
 - [角色資料](data/characters.md)：Character 與 LangCharacter 的完整欄位、多語角色資料、生日與出道日期、養成關聯、SD 動畫、群組文字、顏色用途、成員主題投影及轉換狀態。
 - [角色群組資料](data/character-groups.md)：CharacterGrouping 與 LangCharacterGrouping 的完整欄位、角色成員關聯、多語文字及轉換狀態。
 - [卡片成長資料](data/card-growth.md)：CardLevel、CardLevelLimit、CardPotential 的組別、養成階段、累積經驗門檻、特訓消耗、綻放累加、共用三圍公式、詳細頁養成選擇與技能等級、特化判定，以及 CardPotentialUpgradeItem 的綻放道具對應與轉換狀態。

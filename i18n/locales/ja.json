@@ -5,7 +5,8 @@
     "description": "本サイトは非公式データベースであり、hololive Dreams の運営チームとは一切関係ありません。",
     "explore": "データベースを探索",
     "cards": "カードイラスト、ステータス、スキル、Connectを閲覧し、条件で検索・絞り込みできます。",
-    "characters": "所属グループごとにキャラクターを見て、各言語の名前を確認できます。"
+    "characters": "所属グループごとにキャラクターを見て、各言語の名前を確認できます。",
+    "songs": "楽曲、歌唱者、楽曲 Lv.、解放条件を確認できます。"
   },
   "home": "ホーム",
   "cards": "カード",
@@ -66,8 +67,8 @@
     "basicInformation": "基本情報",
     "fieldOrderHelp": "グループは最初に有効にした項目の順に表示します。基本情報は1つの位置にまとまり、項目は有効にした順に並びます。スキルレベルは低い順に表示します。",
     "resetDisplay": "表示設定をリセット",
-    "skillLevel": "Lv. {level}",
-    "skillLevelOption": "{skill} Lv. {level}",
+    "skillLevel": " Lv.. {level}",
+    "skillLevelOption": "{skill}  Lv.. {level}",
     "field": {
       "name": "カード名",
       "characterName": "キャラクター名",
@@ -224,5 +225,98 @@
   "pwaInstall": "アプリをインストール",
   "pwaInstallDescription": "hololive Dreams 非公式データベースをホーム画面に追加できます。",
   "pwaIosInstallHelp": "インストールするには、共有ボタンから「ホーム画面に追加」を選択してください。",
-  "pwaDismissInstall": "インストール案内を閉じる"
+  "pwaDismissInstall": "インストール案内を閉じる",
+  "songs": "楽曲",
+  "songList": {
+    "description": "楽曲、歌唱者、楽曲 Lv.、解放条件を確認できます。",
+    "requiresJavaScript": "楽曲の閲覧、検索、絞り込みには JavaScript が必要です。",
+    "loading": "楽曲を読み込み中…",
+    "controls": "楽曲リストの操作",
+    "filters": "楽曲の絞り込み",
+    "displaySettings": "楽曲の表示",
+    "fieldsCount": "{count} 項目",
+    "reset": "絞り込みをリセット",
+    "resetDisplay": "表示設定をリセット",
+    "search": "検索",
+    "searchPlaceholder": "ゲーム内のすべての言語で曲名・歌唱者・説明を検索",
+    "character": "キャラクター",
+    "allCharacters": "すべてのキャラクター",
+    "categoryLabel": "楽曲カテゴリ",
+    "singerTypeLabel": "歌唱形式",
+    "difficultyLabel": "難易度",
+    "allDifficulties": "すべての難易度",
+    "sortLabel": "並び替え",
+    "descending": "降順",
+    "ascending": "昇順",
+    "queryError": "URLを更新できませんでした。現在の絞り込みは維持されます。",
+    "resultCount": "{total} 曲中 {visible} 曲を表示",
+    "noResults": "条件に一致する楽曲はありません。",
+    "imageUnavailable": "ジャケット画像を表示できません",
+    "category": {
+      "1": "オリジナル",
+      "2": "カバー"
+    },
+    "singerType": {
+      "1": "ソロ",
+      "2": "グループ",
+      "3": "全体"
+    },
+    "difficulty": {
+      "1": "EASY",
+      "2": "NORMAL",
+      "3": "HARD",
+      "4": "EXPERT"
+    },
+    "sort": {
+      "order": "表示順",
+      "title": "楽曲名",
+      "startTime": "配信順",
+      "playingSeconds": "曲長",
+      "levelEasy": "EASY 楽曲 Lv.",
+      "levelNormal": "NORMAL 楽曲 Lv.",
+      "levelHard": "HARD 楽曲 Lv.",
+      "levelExpert": "EXPERT 楽曲 Lv.",
+      "notes": "ノーツ数"
+    },
+    "field": {
+      "title": "楽曲名",
+      "singer": "歌唱者",
+      "duration": "曲長",
+      "charts": "楽曲 Lv.",
+      "category": "楽曲カテゴリ",
+      "notes": "ノーツ数",
+      "unlock": "解放条件",
+      "availability": "配信日",
+      "musicVideos": "MV／ライブ映像",
+      "streamingMute": "配信設定でミュート"
+    },
+    "otherCategory": "その他",
+    "levelLabel": "楽曲 Lv.",
+    "notesLabel": "ノーツ数",
+    "durationLabel": "曲長",
+    "streamingMuteLabel": "配信設定でミュート",
+    "mvLabel": "MV",
+    "liveLabel": "ライブ映像",
+    "unlockLabel": "解放条件",
+    "members": "歌唱メンバー",
+    "muted": "配信設定でミュート",
+    "notMuted": "配信設定でミュートしない",
+    "unlockType": {
+      "member": "ホロメンクエスト",
+      "shop": "楽曲ショップ",
+      "none": "解放不要",
+      "main": "メインクエスト",
+      "other": "その他"
+    },
+    "videoLabel": "映像の種類",
+    "rangeMin": "{label}の最小値",
+    "rangeMax": "{label}の最大値",
+    "video": {
+      "mv": "MV あり",
+      "live": "ライブ映像あり",
+      "none": "MV なし"
+    },
+    "none": "なし",
+    "editRangeValue": "クリックして編集"
+  }
 }

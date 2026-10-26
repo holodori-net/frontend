@@ -117,6 +117,7 @@ describe('language resolution', () => {
   it('builds language-prefixed page paths', () => {
     expect(buildLocalizedPath('zh-TW', 'jpn', 'home')).toBe('/zh-TW/jpn')
     expect(buildLocalizedPath('en', 'chs', 'cards')).toBe('/en/chs/cards')
+    expect(buildLocalizedPath('zh-TW', 'jpn', 'songs')).toBe('/zh-TW/jpn/songs')
     expect(buildLocalizedPath('zh-TW', 'cht', 'characters')).toBe(
       '/zh-TW/cht/characters',
     )
@@ -143,6 +144,7 @@ describe('language resolution', () => {
     '/ja/jpn/cards/123/history',
     '/ja/jpn/cards/123',
     '/ja/jpn/characters',
+    '/ja/jpn/songs',
   ])('preserves router state for %s when changing locales', async (path) => {
     const router = createRouter({
       history: createMemoryHistory(),
@@ -171,7 +173,7 @@ describe('language resolution', () => {
     )
   })
 
-  it.each(['/', '/cards', '/characters', '/settings'])(
+  it.each(['/', '/cards', '/songs', '/characters', '/settings'])(
     'localizes language entry %s while preserving query and hash',
     async (path) => {
       const router = createRouter({

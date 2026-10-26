@@ -171,13 +171,13 @@ async function chooseGameLocale(value: GameLocale) {
       <span class="min-w-0 break-words leading-tight">{{ t('siteName') }}</span>
     </NuxtLink>
     <nav
-      class="order-3 flex h-9 min-w-0 basis-full flex-none items-center gap-3 text-sm text-muted-color sm:order-none sm:h-full sm:min-w-max sm:basis-auto sm:flex-1 md:gap-6"
+      class="order-3 flex h-9 min-w-0 basis-full flex-none items-center gap-3 overflow-x-auto text-sm whitespace-nowrap text-muted-color sm:order-none sm:h-full sm:basis-auto sm:flex-1 md:gap-6"
       :aria-label="t('mainNavigation')"
     >
       <NuxtLink
         v-for="page in navigationPages"
         :key="page"
-        class="inline-flex h-full items-center [&.router-link-active]:text-primary [&.router-link-active]:shadow-[inset_0_-2px_var(--p-primary-color)]"
+        class="inline-flex h-full shrink-0 items-center [&.router-link-active]:text-primary [&.router-link-active]:shadow-[inset_0_-2px_var(--p-primary-color)]"
         :class="{ 'router-link-active': !!pageCurrent(page) }"
         :aria-current="pageCurrent(page)"
         :to="buildLocalizedPath(locale as SiteLocale, activeGameLocale, page)"

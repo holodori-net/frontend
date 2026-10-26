@@ -6,9 +6,9 @@ This is an unofficial static Nuxt database for hololive Dreams. It is not affili
 
 Pages use `/{site-language}/{game-language}`. For example, `/zh-TW/jpn/cards` displays the card page with a Traditional Chinese interface and Japanese game content. Site languages are `ja`, `en`, and `zh-TW`; game content languages are `jpn`, `eng`, `ind`, `kor`, `cht`, and `chs`.
 
-The home page links to **Cards** and **Characters**. Select the site title in the header to return home.
+The home page links to **Cards**, **Songs**, and **Characters**. Select the site title in the header to return home.
 
-The pages `/`, `/cards`, `/characters`, and `/settings` select languages from saved manual preferences first, then browser languages, then Japanese defaults. A complete language URL is shown as written. When it differs from a previously selected language, the site asks whether to use the saved preferences or keep the linked languages. Dismissing this prompt by clicking outside keeps the linked languages for the current visit without saving preferences.
+The pages `/`, `/cards`, `/songs`, `/characters`, and `/settings` select languages from saved manual preferences first, then browser languages, then Japanese defaults. A complete language URL is shown as written. When it differs from a previously selected language, the site asks whether to use the saved preferences or keep the linked languages. Dismissing this prompt by clicking outside keeps the linked languages for the current visit without saving preferences.
 
 Language entries automatically open the selected language URL, keeping the current page, query parameters, and fragment. If automatic navigation is unavailable, select **Continue** to open the Japanese version.
 
@@ -38,11 +38,19 @@ Select **Play fullscreen** to view the card with its current animation and signa
 
 The default card information is available without JavaScript. Enable JavaScript to use the growth simulator and fullscreen player.
 
+## Songs
+
+Open **Songs** to browse jacket images, singers, four chart difficulties, Song Level, Notes, Unlock Conditions, Release Date, and available MV, Live Video, or Muted in Streamer Mode tags. Search works across all six game languages, including readings, credits, descriptions, unlock information, and music video names; every space-separated keyword must match. Filter by character, original or cover, singer type, streaming mute status, MV/Live Video/no video, unlock method, Song Level, Notes, and song duration. Song Level and Notes have independent difficulty and range filters; duration uses editable `m:ss` endpoints. Results default to descending Release Order. Character filters use the source's explicit member list.
+
+**Filters and sorting** and **Song display** start collapsed and can be expanded independently. Resetting either panel preserves both panels' open or closed state. Song display options stay in a fixed order, with one Song Level toggle for all four difficulties; singer names can be expanded to show member avatars. Display preferences are saved in this browser across languages, while filters and sorting are saved in the URL.
+
+Songs are checked against the device time whenever you enter the page. Tutorial songs and songs whose source availability time has not arrived are hidden. Reopen or reload the page after the availability time to see a song already included in the site's data. Dates are displayed in JST. JavaScript is required to browse songs. Jackets load on demand from `assets.holodori.net`; unavailable images retain a placeholder and the song name.
+
 ## Characters
 
 Open **Characters** to browse members grouped by production. Only playable characters are shown by default; turn on **Show unplayable characters** to include the others. Names follow the selected game content language. The default character list is available without JavaScript. Character icons load from `assets.holodori.net`; unavailable icons show a placeholder while retaining the character's name.
 
-Cards and characters show a loading status while their data downloads. If loading fails, select **Retry** to try again.
+Cards, songs, and characters show a loading status while their data downloads. If loading fails, select **Retry** to try again.
 
 ## Theme and appearance
 
@@ -52,7 +60,7 @@ Member themes use official character colors, avatars, and motifs. Names follow t
 
 ## Install and use offline
 
-The site can be installed from a supported browser when served over HTTPS (or localhost). The close button remembers your choice in this browser until you clear its site data; you can still install from the browser menu. Open **Settings** for a language combination to choose whether its home, cards, and characters pages should be available offline. The current language combination is kept offline; switching to another combination replaces its saved pages after the new selection downloads successfully. The settings page and app resources remain available to manage offline content. Saved card lists support searching, filtering, and sorting offline. Unselected pages, card art, star animations, attribute and stat icons, and character icons require a network connection.
+The site can be installed from a supported browser when served over HTTPS (or localhost). The close button remembers your choice in this browser until you clear its site data; you can still install from the browser menu. Open **Settings** for a language combination to choose whether its home, cards, songs, and characters pages should be available offline. The current language combination is kept offline; switching to another combination replaces its saved pages after the new selection downloads successfully. The settings page and app resources remain available to manage offline content. Saved card and song lists support searching, filtering, and sorting offline. Unselected pages, card art, song jackets, star animations, attribute and stat icons, and character icons require a network connection.
 
 **Card list** and **Card details** are separate offline choices. Selecting **Card details** saves every card detail page for the current language combination, including the data needed for growth calculations. Detail pages can then be opened and reloaded offline. The detail option is initially unselected. Card art and icons use their offline placeholders.
 

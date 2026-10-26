@@ -5,7 +5,8 @@
     "description": "This is an unofficial database and is not affiliated with the hololive Dreams official team.",
     "explore": "Explore the database",
     "cards": "Browse card art, stats, skills, and Connect effects. Search and filter by your criteria.",
-    "characters": "Browse characters by group and view their names in each language."
+    "characters": "Browse characters by group and view their names in each language.",
+    "songs": "Browse songs, singers, song levels, and unlock conditions."
   },
   "home": "Home",
   "cards": "Cards",
@@ -224,5 +225,98 @@
   "pwaInstall": "Install app",
   "pwaInstallDescription": "Add the hololive Dreams Unofficial Database to your home screen.",
   "pwaIosInstallHelp": "To install, use the Share button and choose “Add to Home Screen.”",
-  "pwaDismissInstall": "Dismiss install prompt"
+  "pwaDismissInstall": "Dismiss install prompt",
+  "songs": "Songs",
+  "songList": {
+    "description": "Browse songs, singers, song levels, and unlock conditions.",
+    "requiresJavaScript": "Enable JavaScript to browse, search, and filter songs.",
+    "loading": "Loading songs…",
+    "controls": "Song list controls",
+    "filters": "Song filters",
+    "displaySettings": "Song display",
+    "fieldsCount": "{count} fields",
+    "reset": "Reset filters",
+    "resetDisplay": "Reset display",
+    "search": "Search",
+    "searchPlaceholder": "Search song titles, singers, and descriptions in any game language",
+    "character": "Character",
+    "allCharacters": "All characters",
+    "categoryLabel": "Song Category",
+    "singerTypeLabel": "Singer type",
+    "difficultyLabel": "Difficulty",
+    "allDifficulties": "All difficulties",
+    "sortLabel": "Sort by",
+    "descending": "Descending",
+    "ascending": "Ascending",
+    "queryError": "Could not update the URL. Current filters remain active.",
+    "resultCount": "Showing {visible} of {total} songs",
+    "noResults": "No songs match these filters.",
+    "imageUnavailable": "Song jacket unavailable",
+    "category": {
+      "1": "Original",
+      "2": "Cover"
+    },
+    "singerType": {
+      "1": "Solo",
+      "2": "Group",
+      "3": "All singers"
+    },
+    "difficulty": {
+      "1": "EASY",
+      "2": "NORMAL",
+      "3": "HARD",
+      "4": "EXPERT"
+    },
+    "sort": {
+      "order": "Source order",
+      "title": "Song title",
+      "startTime": "Release Order",
+      "playingSeconds": "Song Length",
+      "levelEasy": "EASY Song Level",
+      "levelNormal": "NORMAL Song Level",
+      "levelHard": "HARD Song Level",
+      "levelExpert": "EXPERT Song Level",
+      "notes": "Notes"
+    },
+    "field": {
+      "title": "Song title",
+      "singer": "Singer",
+      "duration": "Song Length",
+      "charts": "Song Level",
+      "category": "Song Category",
+      "notes": "Notes",
+      "unlock": "Unlock Conditions",
+      "availability": "Release Date",
+      "musicVideos": "MV / Live Video",
+      "streamingMute": "Muted in Streamer Mode"
+    },
+    "otherCategory": "Other",
+    "levelLabel": "Song Level",
+    "notesLabel": "Notes",
+    "durationLabel": "Song Length",
+    "streamingMuteLabel": "Muted in Streamer Mode",
+    "mvLabel": "MV",
+    "liveLabel": "Live Video",
+    "unlockLabel": "Unlock Conditions",
+    "members": "Singers",
+    "muted": "Muted in Streamer Mode",
+    "notMuted": "Not muted in Streamer Mode",
+    "unlockType": {
+      "member": "Holomem Quests",
+      "shop": "Song Shop",
+      "none": "No unlock required",
+      "main": "Main Quest",
+      "other": "Other"
+    },
+    "videoLabel": "Video type",
+    "rangeMin": "Minimum {label}",
+    "rangeMax": "Maximum {label}",
+    "video": {
+      "mv": "With MV",
+      "live": "Live Footage Available",
+      "none": "No MV"
+    },
+    "none": "None",
+    "editRangeValue": "Click to edit"
+  }
 }

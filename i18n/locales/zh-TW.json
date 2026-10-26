@@ -5,7 +5,8 @@
     "description": "本站為非官方資料庫，與 hololive Dreams 官方營運團隊沒有任何關聯。",
     "explore": "探索資料庫",
     "cards": "瀏覽卡面、能力、技能與 Connect，依條件搜尋與篩選。",
-    "characters": "依所屬團體瀏覽角色，查看各語言名稱。"
+    "characters": "依所屬團體瀏覽角色，查看各語言名稱。",
+    "songs": "瀏覽樂曲、演唱者、樂曲 Lv. 與解鎖條件。"
   },
   "home": "首頁",
   "cards": "卡片",
@@ -224,5 +225,98 @@
   "pwaInstall": "安裝應用程式",
   "pwaInstallDescription": "將 hololive Dreams 非官方資料庫加入主畫面。",
   "pwaIosInstallHelp": "若要安裝，請點選分享按鈕，再選擇「加入主畫面」。",
-  "pwaDismissInstall": "關閉安裝提示"
+  "pwaDismissInstall": "關閉安裝提示",
+  "songs": "樂曲",
+  "songList": {
+    "description": "瀏覽樂曲、演唱者、樂曲 Lv. 與解鎖條件。",
+    "requiresJavaScript": "瀏覽、搜尋與篩選樂曲需要啟用 JavaScript。",
+    "loading": "正在載入樂曲…",
+    "controls": "樂曲列表控制項",
+    "filters": "樂曲篩選",
+    "displaySettings": "樂曲顯示",
+    "fieldsCount": "{count} 個項目",
+    "reset": "重設篩選",
+    "resetDisplay": "重設顯示",
+    "search": "搜尋",
+    "searchPlaceholder": "以任一遊戲語言搜尋樂曲、演唱者與說明",
+    "character": "角色",
+    "allCharacters": "所有角色",
+    "categoryLabel": "樂曲類別",
+    "singerTypeLabel": "演唱形式",
+    "difficultyLabel": "難易度",
+    "allDifficulties": "所有難度",
+    "sortLabel": "排序方式",
+    "descending": "降冪",
+    "ascending": "升冪",
+    "queryError": "無法更新網址，已保留目前篩選條件。",
+    "resultCount": "顯示 {total} 首中的 {visible} 首樂曲",
+    "noResults": "沒有符合條件的樂曲。",
+    "imageUnavailable": "無法載入樂曲封面",
+    "category": {
+      "1": "原創",
+      "2": "翻唱"
+    },
+    "singerType": {
+      "1": "獨唱",
+      "2": "團體",
+      "3": "全體"
+    },
+    "difficulty": {
+      "1": "EASY",
+      "2": "NORMAL",
+      "3": "HARD",
+      "4": "EXPERT"
+    },
+    "sort": {
+      "order": "來源順序",
+      "title": "樂曲名稱",
+      "startTime": "依發行日排序",
+      "playingSeconds": "曲長",
+      "levelEasy": "EASY 樂曲 Lv.",
+      "levelNormal": "NORMAL 樂曲 Lv.",
+      "levelHard": "HARD 樂曲 Lv.",
+      "levelExpert": "EXPERT 樂曲 Lv.",
+      "notes": "音符數量"
+    },
+    "field": {
+      "title": "樂曲名稱",
+      "singer": "演唱者",
+      "duration": "曲長",
+      "charts": "樂曲 Lv.",
+      "category": "樂曲類別",
+      "notes": "音符數量",
+      "unlock": "解鎖條件",
+      "availability": "發行日",
+      "musicVideos": "MV／Live 動畫",
+      "streamingMute": "直播模式靜音"
+    },
+    "otherCategory": "其他",
+    "levelLabel": "樂曲 Lv.",
+    "notesLabel": "音符數量",
+    "durationLabel": "曲長",
+    "streamingMuteLabel": "直播模式靜音",
+    "mvLabel": "MV",
+    "liveLabel": "Live 動畫",
+    "unlockLabel": "解鎖條件",
+    "members": "演唱成員",
+    "muted": "直播模式靜音",
+    "notMuted": "直播模式不靜音",
+    "unlockType": {
+      "member": "Holo 成員關卡",
+      "shop": "樂曲商店",
+      "none": "無須解鎖",
+      "main": "主線關卡",
+      "other": "其他"
+    },
+    "videoLabel": "影片類型",
+    "rangeMin": "{label}下限",
+    "rangeMax": "{label}上限",
+    "video": {
+      "mv": "有 MV",
+      "live": "含 Live 動畫",
+      "none": "無 MV"
+    },
+    "none": "無",
+    "editRangeValue": "點擊編輯"
+  }
 }

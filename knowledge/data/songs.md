@@ -61,3 +61,63 @@ JOIN AssetStreamingMute AS a
 ```
 
 `transformSongData()` 讀取 `AssetStreamingMute.asset_id`，以 `'music_short_' + Music.asset_id` 的精確清單包含關係產生 `isStreamingMuted`；歌曲列表保留此布林值。
+
+## 歌曲列表介面
+
+列表預設依發行日（`startTime`）數值倒序，日期相同時依來源 order 倒序及 ID 排列。排序可分別選擇 EASY、NORMAL、HARD 或 EXPERT 的樂曲 Lv。六語全文搜尋沿用完整文字索引，角色條件依歌曲的明確 `characterIds` 比對。
+
+封面左上以透明底細框膠囊顯示樂曲類別，文字、邊框與唱片圖示使用遊戲原色，右下顯示曲長。封面下方以四個等寬欄位顯示各難度的樂曲 Lv，各欄採中性底色與隨亮暗主題切換的文字，下緣以 4px 遊戲原色細條標示難度。資訊依序為標題、演唱者、各難度音符數量、解鎖條件及發行日，最下方僅為具備 MV、Live 動畫或直播靜音的歌曲顯示對應中性 Tag，曲長角標亦採中性色；無須解鎖的內容簡示為「無」。歌曲副標題與資訊小標使用卡片頁相同的 Divider。演唱者緊接標題下方並與標題共用一個資訊區塊；同排卡片沿用 CSS row subgrid 共用封面、難度及各啟用資訊區塊的列高，展開成員時同步擴高標題區塊；未啟用的區塊移除，缺少標籤的卡片保留該列位置。演唱者的 hover 提示與點擊展開清單由 `characterIds` 查對應角色的當前遊戲語言名稱，展開清單顯示角色頭像；沒有成員清單時保留來源唱者文字。音符數量依各難度的 `fullComboNoteCount` 分開顯示。
+
+**CONFIRMED**：難度色碼集中於 `shared/game-data/song-difficulty.ts`，取自 APK `data.unity3d` 的 `PaletteStore`（MonoBehaviour path ID 12680）。本機來源為 `../extraction/work/decompile/02-extract-apk/apk-contents/game.qualiarts.hololive.dreams.jp/assets/bin/Data/data.unity3d`；色票的 RGBA float32 以 `round(channel × 255)` 轉成 RGB。遊戲色票用於難度列下緣細條，亮暗模式共用色碼。
+
+| 難度   | 色票名稱   | RGB       |
+| ------ | ---------- | --------- |
+| EASY   | GameEasy   | `#4FDB95` |
+| NORMAL | GameNormal | `#FFBB54` |
+| HARD   | GameHard   | `#FD93B6` |
+| EXPERT | GameExpert | `#9A93FF` |
+
+**CONFIRMED**：類別色取自同一 `PaletteStore`（`globalgamemanagers.assets`，path ID 12680）的完整原始物件，共 18,776 bytes；色票位於自訂序列化資料，Unity 基底 typetree 不含該區段。`shared/game-data/song-category.ts` 依 `MusicCategoryType` 對應下列色值，類別角標的文字、邊框與 Lucide `Disc3` 圖示使用對應色值，透明底上以陰影維持封面上的辨識度。
+
+| 類別      | 色票名稱        | RGBA float32                         | RGB       |
+| --------- | --------------- | ------------------------------------ | --------- |
+| 原創（1） | `MusicOriginal` | `(0.6431372762, 0.9019607902, 1, 1)` | `#A4E6FF` |
+| 翻唱（2） | `MusicCover`    | `(1, 0.8022267222, 0.4606182277, 1)` | `#FFCD75` |
+
+角色選單沿用卡片頁的頭像選項、多語搜尋與已選角色 Chip；類別、演唱形式、影片及解鎖方式的 Checkbox 沿用卡片頁的 44px 點擊區。角色、類別、演唱形式與直播靜音、影片、解鎖方式於寬螢幕排列為三欄，位於三組範圍控制項上方。直播模式靜音以兩個 Checkbox 選取靜音／不靜音，預設全選；全不選時不顯示任何歌曲。「無須解鎖」選項排在解鎖方式首位。樂曲 Lv、音符數量與曲長範圍各占完整寬度，由 `SongRangeFilter` 共用 Slider 與可編輯端點；樂曲 Lv 與音符數量另有全部／單一難度選擇，任一指定譜面符合即保留歌曲，兩組條件彼此採 AND。輸入與 Slider 共用條件；端點限制於來源範圍且下限不高於上限，清空後恢復對應全域邊界。曲長端點以 `m:ss` 輸入、內部與網址仍保存秒數；可輸入 `m:s` 並正規化秒數為兩位，格式錯誤時恢復目前值。所有端點文字置中，平時透明無框，hover 顯示編輯提示，聚焦顯示輸入框；不另外顯示區間摘要。
+
+影片選項為 `mv`、`live`、`none`，採 OR。`mv` 與 `live` 分別要求 `music_mv_category-mv`／`music_mv_category-live` 及非空 `mv_asset_id`；`none` 表示兩者皆無，只有圖片輪播仍符合。解鎖選項為 `member`、`shop`、`none`、`main`：`release_type=1` 對應無須解鎖，2 對應商店；3 依來源多語解鎖說明辨識成員或主線關卡。未辨識的條件保留為 `other`，未篩選時仍顯示。
+
+網址保存搜尋、角色、類別、演唱形式、兩組譜面範圍、曲長、直播靜音、影片、解鎖與排序，保留其他 query 及 hash。範圍使用 `levelMin/Max`、`notesMin/Max`、`durationMin/Max`；音符難度另以 `notesDifficulty` 保存。直播模式靜音以 `streamingMute=true`／`false` 保存單選，全選省略，空字串代表全不選。複選預設全選，空字串表示全取消，全選省略；舊 `sort=level` 讀為 `levelExpert`。
+
+樂曲頁的「篩選與排序」及「樂曲顯示」面板預設皆收合，手動開合狀態保存在頁面記憶體。`holodori-song-fields` 以 `{ fields }` 保存顯示偏好，預設全開。選項依封面類別、曲長、樂曲Lv、標題、演唱者、音符數量、解鎖、發行日、影片與直播靜音的固定順序排列，不顯示排序編號。樂曲Lv 使用單一開關，同時顯示或隱藏四種難度。讀取舊偏好時忽略 `chartDifficulties`，保留有效欄位；含已取消欄位的舊物件補上音符數與直播靜音。空欄位選取保留純封面模式。重設顯示恢復目前預設，篩選及網址保留。
+
+### 介面用語
+
+**CONFIRMED**：歌曲介面採用 master database 的 `LangClientCommon`、`LangResourceObtainmentRoute` 與 `LangMusicMvCategory` 文字。`cht`、`jpn`、`eng` 分別對應繁體中文、日文與英文。
+
+| 用途          | 來源 key                                                                                              | 繁體中文                   | 日本語                     | English                    |
+| ------------- | ----------------------------------------------------------------------------------------------------- | -------------------------- | -------------------------- | -------------------------- |
+| 樂曲          | `LangClientCommon.client_id=10435095945216`                                                           | 樂曲                       | 楽曲                       | Songs                      |
+| 演唱者        | `LangClientCommon.client_id=179181927588882`                                                          | 演唱者                     | 歌唱者                     | Singer                     |
+| 樂曲類別      | `LangClientCommon.client_id=137989107996083`                                                          | 樂曲類別                   | 楽曲カテゴリ               | Song Category              |
+| 原創          | `LangClientCommon.client_id=205926950428672`                                                          | 原創                       | オリジナル                 | Original                   |
+| 翻唱          | `LangClientCommon.client_id=205993312706560`                                                          | 翻唱                       | カバー                     | Cover                      |
+| 難易度        | `LangClientCommon.client_id=806106654334976`                                                          | 難易度                     | 難易度                     | Difficulty                 |
+| 樂曲 Lv       | `LangClientCommon.client_id=248908092650803`                                                          | 樂曲Lv                     | 楽曲Lv                     | Song Level                 |
+| 難度名稱      | `LangClientCommon.client_id=644284026118144`, `644324887027712`, `644364548366336`, `644391358357504` | EASY、NORMAL、HARD、EXPERT | EASY、NORMAL、HARD、EXPERT | EASY, NORMAL, HARD, EXPERT |
+| 發行順        | `LangClientCommon.client_id=231740691275778`                                                          | 依發行日排序               | 配信順                     | Release Order              |
+| 曲長          | `LangClientCommon.client_id=184647675026846`                                                          | 曲長加成                   | 曲長ボーナス               | Song Length Bonus          |
+| 音符          | `LangClientCommon.client_id=5380235266`                                                               | 音符                       | ノーツ                     | Notes                      |
+| 音符數量      | `LangClientCommon.client_id=201583456983557`                                                          | 音符數量詳情               | ノーツ数詳細               | Notes Amount Details       |
+| 解鎖條件      | `LangClientCommon.client_id=104872538217778`                                                          | 解鎖條件：                 | 解放条件：                 | Unlock Conditions:         |
+| Holo 成員關卡 | `LangResourceObtainmentRoute.id=la-resource_obtainment_route-character_quest`                         | Holo成員關卡               | ホロメンクエスト           | Holomem Quests             |
+| 主線關卡      | `LangResourceObtainmentRoute.id=la-resource_obtainment_route-main_quest`                              | 主線關卡                   | メインクエスト             | Main Quest                 |
+| 樂曲商店      | `LangResourceObtainmentRoute.id=la-resource_obtainment_route-music_shop`                              | 樂曲商店                   | 楽曲ショップ               | Song Shop                  |
+| MV            | `LangMusicMvCategory.id=la-music_mv_category-mv`                                                      | MV                         | MV                         | MV                         |
+| Live 影像     | `LangMusicMvCategory.id=la-music_mv_category-live`                                                    | Live動畫                   | ライブ映像                 | Live Video                 |
+| MV 篩選       | `LangMusicMvCategory.id=la-music_mv_category-filter-mv`                                               | 有MV                       | MVあり                     | With MV                    |
+| Live 影像篩選 | `LangMusicMvCategory.id=la-music_mv_category-filter-live`                                             | 含Live動畫                 | ライブ映像あり             | Live Footage Available     |
+| Streamer Mode | `LangClientCommon.client_id=111394954585488`                                                          | 直播設定                   | 配信設定                   | Streamer Mode              |
+
+來源用語維持原文。發行日、曲長與音符數量欄名取自遊戲詞組的詞幹；解鎖條件標籤移除來源文案末尾冒號。樂曲Lv 欄名以「樂曲 Lv.／楽曲 Lv.／Song Level」呈現。MV／Live 影像合併標籤與 Streamer Mode 靜音狀態由網站組合顯示；演唱形式、無須解鎖與輸入提示使用網站介面文案。
