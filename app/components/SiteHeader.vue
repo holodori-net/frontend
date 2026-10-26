@@ -9,6 +9,7 @@ import {
   siteLanguageOptions,
   sitePages,
   type GameLocale,
+  type PageKind,
   type SiteLocale,
 } from '#shared/language'
 import {
@@ -74,6 +75,15 @@ const activeGameLocale = computed(() => {
   const value = route.params.gameLocale
   return typeof value === 'string' && isGameLocale(value) ? value : 'jpn'
 })
+function pageCurrent(page: PageKind): 'page' | 'location' | undefined {
+  const path = buildLocalizedPath(
+    locale.value as SiteLocale,
+    activeGameLocale.value,
+    page,
+  )
+  if (route.path === path) return 'page'
+  if (route.path.startsWith(`${path}/`)) return 'location'
+}
 const preferencesPopover = ref<{
   toggle: (event: Event) => void
   hide: () => void
@@ -168,6 +178,8 @@ async function chooseGameLocale(value: GameLocale) {
         v-for="page in navigationPages"
         :key="page"
         class="inline-flex h-full items-center [&.router-link-active]:text-primary [&.router-link-active]:shadow-[inset_0_-2px_var(--p-primary-color)]"
+        :class="{ 'router-link-active': !!pageCurrent(page) }"
+        :aria-current="pageCurrent(page)"
         :to="buildLocalizedPath(locale as SiteLocale, activeGameLocale, page)"
         >{{ t(page) }}</NuxtLink
       >
