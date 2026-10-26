@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
-import { asc } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import type { CardData } from '#shared/game-data/cards'
 import type {
   CardDetailGrowthData,
@@ -10,6 +10,7 @@ import type {
 import type { CardGrowthData } from '#shared/game-data/card-growth'
 import type { CharacterGroupData } from '#shared/game-data/character-groups'
 import { card } from './schema/cards.ts'
+import { characterVoice } from './schema/character-voices.ts'
 import { createGameDatabase } from './database.ts'
 import { transformCards } from './converters/cards.ts'
 import { transformCharacters } from './converters/characters.ts'
@@ -65,6 +66,14 @@ export function readCardDetailIndex(): CardDetailIndex {
 
 interface DetailSources {
   cards: CardData[]
+  voiceAssetsByCardId: Map<
+    string,
+    {
+      voiceId: string | null
+      matchedVoiceId: string | null
+      voiceAssetId: string | null
+    }
+  >
   growth: CardGrowthData
   characters: ReturnType<typeof transformCharacters>
   characterGroups: CharacterGroupData[]
@@ -78,6 +87,25 @@ function getSources() {
   if (sourcesCache) return sourcesCache
   sourcesCache = withDatabase((database) => ({
     cards: transformCards(database),
+    voiceAssetsByCardId: new Map(
+      database
+        .select({
+          cardId: card.id,
+          voiceId: card.cardDetailCharacterVoiceId,
+          matchedVoiceId: characterVoice.id,
+          voiceAssetId: characterVoice.voiceAssetId,
+        })
+        .from(card)
+        .leftJoin(
+          characterVoice,
+          eq(card.cardDetailCharacterVoiceId, characterVoice.id),
+        )
+        .all()
+        .map(({ cardId, voiceId, matchedVoiceId, voiceAssetId }) => [
+          cardId,
+          { voiceId, matchedVoiceId, voiceAssetId },
+        ]),
+    ),
     growth: transformCardGrowth(database),
     characters: transformCharacters(database),
     characterGroups: transformCharacterGroups(database),
@@ -96,6 +124,12 @@ export function readCardDetail(id: string): CardDetailPayload | null {
   const sources = getSources()
   const card = sources.cards.find((item) => item.id === id)
   if (!card) return null
+  const voice = sources.voiceAssetsByCardId.get(id)
+  if (!voice) throw new Error(`Card ${id} has no card detail voice projection`)
+  if (voice.voiceId && !voice.matchedVoiceId)
+    throw new Error(
+      `Card ${id} references missing CharacterVoice ${voice.voiceId}`,
+    )
   const character = sources.characters.find(
     (item) => item.id === card.characterId,
   )
@@ -263,6 +297,7 @@ export function readCardDetail(id: string): CardDetailPayload | null {
       connectEffects[card.skillTreeConnectEffectId],
     )
   return {
+    voiceAssetId: voice.voiceAssetId,
     card: listCard,
     characterGroups,
     ...projected,

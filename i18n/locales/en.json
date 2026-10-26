@@ -26,7 +26,13 @@
     "allStatsUp": "All stats +{percent}%",
     "animateCard": "Animate card",
     "showSignature": "Show signature",
-    "backToCards": "Back to cards"
+    "backToCards": "Back to cards",
+    "fullscreen": "Play fullscreen",
+    "closeFullscreen": "Close fullscreen",
+    "replayVoice": "Replay voice",
+    "muteVoice": "Mute voice",
+    "unmuteVoice": "Unmute voice",
+    "voiceUnavailable": "Voice could not be played."
   },
   "characters": "Characters",
   "pageLoading": "Loading page data…",

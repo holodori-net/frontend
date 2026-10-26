@@ -6,7 +6,7 @@
 
 ## 卡片詳細頁
 
-`readCardDetailIndex()` 回傳 `{ cardIds: string[] }`，`readCardDetail(id)` 回傳該卡的 `CardDetailPayload`；未找到 ID 時回傳 null。索引輸出為 `/data/card-details.json`，單卡資料輸出為 `/data/cards/{id}.json`。Reader 在每個 process 重用轉換來源，並只投影該卡所需的六語名稱、技能、服裝、Connect 與養成資料。
+`readCardDetailIndex()` 回傳 `{ cardIds: string[] }`，`readCardDetail(id)` 回傳該卡的 `CardDetailPayload`；未找到 ID 時回傳 null。索引輸出為 `/data/card-details.json`，單卡資料輸出為 `/data/cards/{id}.json`。Reader 在每個 process 重用轉換來源，並只投影該卡所需的六語名稱、技能、服裝、Connect、養成資料及 nullable `voiceAssetId`。
 
 詳細頁路徑為 `/{siteLocale}/{gameLocale}/cards/{id}`，預生成滿養成資訊與卡片 SEO。卡圖使用原尺寸的 `img_card_full_{assetId}.webp`。寬螢幕左側排列遊戲素材標題牌、卡框中的卡圖、衣裝縮圖與技能及 Connect；右側為養成控制及特殊、主動、被動技能。標題保留卡名與放大的角色名，角色掛飾取自卡片的角色素材 ID，沿標題與卡框左側排列；標題使用該角色的 `color4`，搭配原始亮點、波紋、內側光暈及外框，白字保留深色陰影。手機依序顯示標題與卡圖、養成、衣裝與 Connect、卡片技能。等級 Slider 涵蓋卡片完整養成範圍，旁邊合併顯示最低所需特訓及階段上限；綻放以列出各階段新增效果的下拉選單調整，收起時顯示緊湊的階段與效果摘要，展開後的技能升級選項包含目標等級的完整技能描述。三圍由 `CardDetailParameters` 以圖示、名稱及放大數值直式排列，增加列高，右側以更大的數字顯示合計；列表沿用 `CardParameters` 的水平加總算式。衣裝縮圖與 Connect 圖同為 112px，兩區使用圖示標題頁籤銜接圓角內容框，搭配中性框線；標題使用淡主題色背景與一般文字及圖示色，內容區與其他面板使用相同背景。各類卡片技能與 Connect 顯示全部來源等級，目前等級依養成強調，其他等級使用較淡文字；Connect 共用的範圍圖跟隨目前等級，窄螢幕在圖下方排列描述。養成選擇在頁面記憶體中保存；同卡切換語言保留選擇，重新載入、換卡或離開後重新進入使用滿養成。三圍與技能等級計算見 [卡片成長資料](card-growth.md#詳細頁的養成計算)。
 
@@ -44,7 +44,7 @@
 | ✓    | `vertical_anchor_type`                  | INTEGER（enum）           | 卡面垂直定位；見枚舉                                          | `enums.CardVerticalAnchorType`                             | `cards[].verticalAnchorType`               | —                                                                                               |
 | ✓    | `horizontal_anchor_type`                | INTEGER（enum）           | 卡面水平定位；見枚舉                                          | `enums.CardHorizontalAnchorType`                           | `cards[].horizontalAnchorType`             | —                                                                                               |
 |      | `gacha_animation_character_voice_id`    | TEXT / null               | 抽卡動畫台詞語音 ID                                           | `CharacterVoice.id`                                        | —                                          | 未回傳語音；用途 **CONFIRMED**                                                                  |
-|      | `card_detail_character_voice_id`        | TEXT / null               | 卡片放大畫面的詳情語音 ID；持有卡片或畫面允許未持有播放時使用 | `CharacterVoice.id`                                        | —                                          | 未回傳語音；用途 **CONFIRMED**                                                                  |
+| ✓    | `card_detail_character_voice_id`        | TEXT / null               | 卡片放大畫面的詳情語音 ID；持有卡片或畫面允許未持有播放時使用 | `CharacterVoice.id`                                        | `CardDetailPayload.voiceAssetId`           | 詳細頁單卡投影；列表不回傳語音；保留 null                                                       |
 |      | `is_no_signed_card_message`             | INTEGER（boolean） / null | 抽卡精選卡片詳情的訊息切換旗標                                | —                                                          | —                                          | 未處理簽名卡訊息；切換用途 **CONFIRMED**，true／false 對應內容 **UNKNOWN**                      |
 |      | `potential_upgrade1_character_voice_id` | TEXT / null               | 綻放第 1 階段結果語音 ID                                      | `CharacterVoice.id`                                        | —                                          | 未回傳語音；用途 **CONFIRMED**，一次提升多階段的選擇及缺值 fallback **UNKNOWN**                 |
 |      | `potential_upgrade2_character_voice_id` | TEXT / null               | 綻放第 2 階段結果語音 ID                                      | `CharacterVoice.id`                                        | —                                          | 未回傳語音；用途 **CONFIRMED**，一次提升多階段的選擇及缺值 fallback **UNKNOWN**                 |
@@ -256,6 +256,16 @@ ORDER BY extent.position_y, extent.position_x;
 影片 URL 由 `getCardMovieUrl()` 集中產生，格式為 `https://assets.holodori.net/cdn/{sourceName}/VideoClip/{sourceName 去除 .usm}.webm`。單卡 payload 的 `card.assetType` 保留來源數值；列表 payload 沿用靜態卡圖欄位。
 
 詳細頁保留靜態 `img_card_full_{assetId}.webp` 作為初始卡面及影片失敗時的 fallback。`assetType=2` 的卡片於 mounted 後載入影片，以「動態卡面」「顯示簽名」分別控制兩層，預設皆開啟；偏好減少動態效果時，新卡預設關閉動畫，仍可手動啟用。關閉動畫時，簽名停在遊戲完整簽名的 8 秒影格；較短影片限制於可用範圍。卡面使用靜音行內循環播放，簽名以卡面時間及上述延遲同步，採 `requestVideoFrameCallback` 並以 `timeupdate` 相容處理。頁面隱藏時暫停，離頁時清除同步回呼；載入與播放失敗記錄資產及錯誤，回到可用卡面。選擇保存在當次頁面記憶體，同卡切換語言保留，離開或換卡回到預設。影片沿用遠端素材載入，離線頁面快照保存單卡 JSON 與應用資源。
+
+#### 全螢幕播放與詳情語音
+
+**CONFIRMED**：`Card.card_detail_character_voice_id` 關聯 `CharacterVoice.id`，音檔素材 ID 為 `CharacterVoice.voice_asset_id`。詳細頁 reader 以 LEFT JOIN 投影為 `CardDetailPayload.voiceAssetId`，保留來源 null；列表維持原有欄位。
+
+`getCardVoiceUrl()` 產生 `https://assets.holodori.net/cdn/{voiceAssetId}.acb/AudioClip/{voiceAssetId}.flac`。白上吹雪 `00006-5-uniq-0074-00` 與百鬼綾目 `00010-5-uniq-0069-00` 的詳情語音分別為 `vo_card_cmn_00006_00006-5-uniq-0074-00_situation` 與 `vo_card_cmn_00010_00010-5-uniq-0069-00_situation`；兩者均已確認回傳 `audio/flac`、HTTP 200 及 Range 206。
+
+**CONFIRMED**：遊戲 `CardZoomScreenPresenter` 開啟時先呼叫 `VisionSoundManager.PlayVoice()`，隨後以 `Forget()` 啟動 `CardZoomScreenView.PlayCardMovieAsync()`，不等待語音結束或對齊兩條時間軸。View 準備卡面時設定 `AutographedCard.IsLoop = true`；卡面每圈只同步簽名層，不重播或重設語音。
+
+`CardDetailFullscreen` 以 PrimeVue Dialog 呈現全螢幕卡面，保留動態卡面與簽名開關。點擊開啟時先呼叫預掛載且 `preload="none"` 的 audio 播放，再請求原生 fullscreen；API 不可用或遭拒時沿用填滿視窗的 Dialog。語音每次開啟播放一次，獨立提供重播與靜音；重播從頭播放語音並保留靜音狀態，影片循環不觸發語音。開啟時移除頁面中的媒體層，關閉後恢復。點擊卡面或背景關閉，媒體控制項保留點擊操作。關閉、原生 fullscreen 結束、導覽、語言切換及卸載均停止並重設語音，分頁隱藏時暫停，返回時從原位置接續播放；只退出播放器自行開啟的原生 fullscreen。語音載入或播放失敗時顯示提示並記錄素材與錯誤，可使用重播重試。遠端音檔不包含於離線快照。
 
 #### 媒體開關
 

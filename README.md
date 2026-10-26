@@ -32,7 +32,9 @@ Select a card's image or name to open its detail page at `/{site-language}/{game
 
 Use the **Level** slider and **Bloom** dropdown to calculate the card's own stats and skill levels immediately. Special training and its level cap appear beside the selected level and follow the minimum training required for that level. The slider covers the card's full level range. Each Bloom option describes the effects unlocked at that stage. The page starts at maximum growth. Growth choices stay in page memory across language changes; reloading, opening another card, or returning after leaving starts at maximum growth. The return link opens the card list in the current site and game languages.
 
-The default card information is available without JavaScript. Enable JavaScript to use the growth simulator.
+Select **Play fullscreen** to view the card with its current animation and signature settings. Cards with a detail voice play it once when opened; use the voice controls to replay or mute it. Click the card or background, use the close button, or press **Esc** to return to the page and stop the voice. Media files require a network connection.
+
+The default card information is available without JavaScript. Enable JavaScript to use the growth simulator and fullscreen player.
 
 ## Characters
 

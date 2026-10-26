@@ -35,6 +35,25 @@ describe.skipIf(!existsSync(sourcePath))(
           .all()
           .map((row) => [String(row.id), row.asset_id]),
       )
+      const voiceAssets = new Map(
+        database
+          .prepare(
+            `SELECT Card.id, Card.card_detail_character_voice_id AS voice_id,
+              CharacterVoice.voice_asset_id AS voice_asset_id
+             FROM Card
+             LEFT JOIN CharacterVoice
+               ON Card.card_detail_character_voice_id = CharacterVoice.id`,
+          )
+          .all()
+          .map((row) => [
+            String(row.id),
+            {
+              voiceId: row.voice_id === null ? null : String(row.voice_id),
+              voiceAssetId:
+                row.voice_asset_id === null ? null : String(row.voice_asset_id),
+            },
+          ]),
+      )
       const regularGroupsByCharacter = new Map(
         database
           .prepare('SELECT id, regular_character_grouping_ids FROM Character')
@@ -70,6 +89,12 @@ describe.skipIf(!existsSync(sourcePath))(
         expect(detail, id).not.toBeNull()
         expect(listed, id).toBeDefined()
         const { card, growth, skills, connectEffects } = detail!
+        expect(detail!.voiceAssetId, id).toBe(
+          voiceAssets.get(id)?.voiceAssetId ?? null,
+        )
+        if (voiceAssets.get(id)?.voiceId)
+          expect(detail!.voiceAssetId, id).toBeTruthy()
+        expect(listed, id).not.toHaveProperty('voiceAssetId')
         expect(card.assetType, id).toBe(assetTypes.get(id))
         expect(listed, id).not.toHaveProperty('assetType')
         expect(

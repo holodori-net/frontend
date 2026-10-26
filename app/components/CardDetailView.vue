@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, Grid2X2, Shirt } from '@lucide/vue'
+import { ArrowLeft, Grid2X2, Maximize, Shirt } from '@lucide/vue'
 import { NuxtLink } from '#components'
 import {
   buildLocalizedPath,
@@ -36,6 +36,11 @@ const props = defineProps<{
   gameLocale: GameLocale
 }>()
 const { t, locale } = useI18n()
+const fullscreenVisible = ref(false)
+const fullscreenPlayer = ref<{ open: () => void } | null>(null)
+watch([() => props.payload.card.id, () => props.gameLocale, locale], () => {
+  fullscreenVisible.value = false
+})
 const maximum = computed(() => getMaxCardGrowth(props.payload.growth))
 const persistedSelection = useState<{
   cardId: string
@@ -135,6 +140,7 @@ watch(
   },
 )
 onBeforeRouteLeave((to) => {
+  fullscreenVisible.value = false
   if (String(to.params.id) !== props.payload.card.id) {
     persistedSelection.value = null
     mediaState.value = null
@@ -409,7 +415,7 @@ function changePotential(value: unknown) {
             :linked="false"
             image-size="original"
           >
-            <template v-if="mediaEnabled" #image-overlay>
+            <template v-if="mediaEnabled && !fullscreenVisible" #image-overlay>
               <CardDetailMedia
                 :key="`${payload.card.id}:${mediaVariant}`"
                 v-model:animate="animateCard"
@@ -419,20 +425,33 @@ function changePotential(value: unknown) {
               />
             </template>
           </CardListContent>
-          <template v-if="mediaEnabled" #controls>
-            <div class="mt-2 flex flex-wrap justify-end gap-x-4 gap-y-1">
-              <CardDetailMediaSwitch
-                v-model="animateCard"
-                :label="t('cardDetail.animateCard')"
-                :character-id="payload.card.characterId"
-                :character-asset-id="payload.card.characterAssetId"
-              />
-              <CardDetailMediaSwitch
-                v-model="showSignature"
-                :label="t('cardDetail.showSignature')"
-                :character-id="payload.card.characterId"
-                :character-asset-id="payload.card.characterAssetId"
-              />
+          <template #controls>
+            <div
+              class="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1"
+            >
+              <Button
+                class="min-h-11"
+                text
+                size="small"
+                @click="fullscreenPlayer?.open()"
+              >
+                <Maximize class="size-5" :stroke-width="2" aria-hidden="true" />
+                <span>{{ t('cardDetail.fullscreen') }}</span>
+              </Button>
+              <div v-if="mediaEnabled" class="flex flex-wrap gap-x-4 gap-y-1">
+                <CardDetailMediaSwitch
+                  v-model="animateCard"
+                  :label="t('cardDetail.animateCard')"
+                  :character-id="payload.card.characterId"
+                  :character-asset-id="payload.card.characterAssetId"
+                />
+                <CardDetailMediaSwitch
+                  v-model="showSignature"
+                  :label="t('cardDetail.showSignature')"
+                  :character-id="payload.card.characterId"
+                  :character-asset-id="payload.card.characterAssetId"
+                />
+              </div>
             </div>
           </template>
         </CardDetailArtwork>
@@ -724,6 +743,19 @@ function changePotential(value: unknown) {
         </section>
       </div>
     </div>
+    <CardDetailFullscreen
+      ref="fullscreenPlayer"
+      v-model:visible="fullscreenVisible"
+      v-model:animate="animateCard"
+      v-model:show-signature="showSignature"
+      :asset-id="payload.card.assetId"
+      :voice-asset-id="payload.voiceAssetId"
+      :animated="mediaEnabled"
+      :variant="mediaVariant"
+      :card-name="cardName"
+      :character-id="payload.card.characterId"
+      :character-asset-id="payload.card.characterAssetId"
+    />
   </article>
 </template>
 

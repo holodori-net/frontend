@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { getCardMovieUrl } from '../shared/game-data/card-icons.ts'
+import {
+  getCardMovieUrl,
+  getCardVoiceUrl,
+} from '../shared/game-data/card-icons.ts'
 
 describe('card movie URLs', () => {
   it('preserves the asset ID and builds each movie variant URL', () => {
@@ -18,5 +21,19 @@ describe('card movie URLs', () => {
 
   it('returns null when the card has no asset ID', () => {
     expect(getCardMovieUrl(null, 'sign')).toBeNull()
+  })
+})
+
+describe('card voice URLs', () => {
+  it('preserves the voice asset ID and builds its FLAC URL', () => {
+    const assetId = 'vo_card_cmn_00006_00006-5-uniq-0074-00_situation'
+
+    expect(getCardVoiceUrl(assetId)).toBe(
+      `https://assets.holodori.net/cdn/${assetId}.acb/AudioClip/${assetId}.flac`,
+    )
+  })
+
+  it('returns null when the card has no voice asset ID', () => {
+    expect(getCardVoiceUrl(null)).toBeNull()
   })
 })

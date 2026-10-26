@@ -26,7 +26,13 @@
     "allStatsUp": "全能力提升{percent}%",
     "animateCard": "動態卡面",
     "showSignature": "顯示簽名",
-    "backToCards": "返回卡片列表"
+    "backToCards": "返回卡片列表",
+    "fullscreen": "全螢幕播放",
+    "closeFullscreen": "關閉全螢幕",
+    "replayVoice": "重播語音",
+    "muteVoice": "靜音",
+    "unmuteVoice": "取消靜音",
+    "voiceUnavailable": "暫時無法播放語音。"
   },
   "characters": "角色",
   "pageLoading": "正在載入頁面資料…",

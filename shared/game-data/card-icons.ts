@@ -143,6 +143,11 @@ export function getCardMovieUrl(
   return `https://assets.holodori.net/cdn/${sourceName}.usm/VideoClip/${sourceName}.webm`
 }
 
+export function getCardVoiceUrl(assetId: string | null): string | null {
+  if (!assetId) return null
+  return `https://assets.holodori.net/cdn/${assetId}.acb/AudioClip/${assetId}.flac`
+}
+
 export const cardRarityAnimationUrl =
   'https://assets.holodori.net/apk/generated/animations/ef_ui_999_rare_anim_001--da09250dd35035f2.webp'
 

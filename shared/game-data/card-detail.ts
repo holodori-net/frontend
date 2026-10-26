@@ -21,6 +21,7 @@ export interface CardDetailPayload extends Omit<
   CardListPayload,
   'cards' | 'searchTextByCardId' | 'costumes'
 > {
+  voiceAssetId: string | null
   card: CardListItemData & Pick<CardData, 'assetType'>
   characterGroups: Array<
     Pick<CharacterGroupData, 'id' | 'name' | 'color1' | 'color2'>

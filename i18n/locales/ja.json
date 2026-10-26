@@ -26,7 +26,13 @@
     "allStatsUp": "全パラメータ{percent}%UP",
     "animateCard": "カードをアニメーション",
     "showSignature": "サインを表示",
-    "backToCards": "カード一覧に戻る"
+    "backToCards": "カード一覧に戻る",
+    "fullscreen": "全画面で再生",
+    "closeFullscreen": "全画面を閉じる",
+    "replayVoice": "ボイスをもう一度再生",
+    "muteVoice": "ボイスをミュート",
+    "unmuteVoice": "ミュートを解除",
+    "voiceUnavailable": "ボイスを再生できませんでした。"
   },
   "characters": "キャラクター",
   "pageLoading": "ページデータを読み込み中…",
