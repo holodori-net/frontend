@@ -4,7 +4,7 @@
   "homePage": {
     "description": "本サイトは非公式データベースであり、hololive Dreams の運営チームとは一切関係ありません。",
     "explore": "データベースを探索",
-    "cards": "カードイラスト、ステータス、スキル、Connectを閲覧し、条件で検索・絞り込みできます。",
+    "cards": "カードイラスト、ステータス、スキル、コネクト効果を閲覧し、条件で検索・絞り込みできます。",
     "characters": "所属グループごとにキャラクターを見て、各言語の名前を確認できます。",
     "songs": "楽曲、歌唱者、楽曲 Lv.、解放条件を確認できます。"
   },
@@ -24,9 +24,9 @@
     "levelSummary": "Lv. {level} / {limit} · 特訓 {training}",
     "potentialStage": "開花 {stage}",
     "potentialNone": "未開花",
-    "allStatsUp": "全パラメータ{percent}%UP",
+    "allStatsUp": "全パラメータが{percent}%UP",
     "animateCard": "カードをアニメーション",
-    "showSignature": "サインを表示",
+    "showSignature": "サイン表示",
     "backToCards": "カード一覧に戻る",
     "fullscreen": "全画面で再生",
     "closeFullscreen": "全画面を閉じる",
@@ -57,7 +57,7 @@
   "cardList": {
     "loading": "カード一覧を読み込み中…",
     "requiresJavaScript": "カードの閲覧・検索・絞り込みには JavaScript を有効にしてください。",
-    "statsDescription": "ステータスはカード単体の最大レベル・最大特訓・最大ブルーム時の値です。",
+    "statsDescription": "ステータスはカード単体の最大レベル・最大特訓・最大開花時の値です。",
     "filters": "カードの絞り込み",
     "controls": "カード一覧の操作",
     "filtersAndSort": "絞り込みと並び替え",
@@ -67,8 +67,8 @@
     "basicInformation": "基本情報",
     "fieldOrderHelp": "グループは最初に有効にした項目の順に表示します。基本情報は1つの位置にまとまり、項目は有効にした順に並びます。スキルレベルは低い順に表示します。",
     "resetDisplay": "表示設定をリセット",
-    "skillLevel": " Lv.. {level}",
-    "skillLevelOption": "{skill}  Lv.. {level}",
+    "skillLevel": "Lv. {level}",
+    "skillLevelOption": "{skill} Lv. {level}",
     "field": {
       "name": "カード名",
       "characterName": "キャラクター名",
@@ -147,7 +147,7 @@
         "passive": "パッシブ",
         "active": "アクティブ",
         "special": "スペシャル",
-        "leader": "リーダー衣装"
+        "leader": "リーダー衣装スキル"
       },
       "effect": {
         "performance": "パフォーマンスUP",
@@ -257,9 +257,9 @@
       "2": "カバー"
     },
     "singerType": {
-      "1": "ソロ",
-      "2": "グループ",
-      "3": "全体"
+      "1": "ソロ楽曲",
+      "2": "ユニット楽曲",
+      "3": "全体楽曲"
     },
     "difficulty": {
       "1": "EASY",
