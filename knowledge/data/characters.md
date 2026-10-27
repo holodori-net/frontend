@@ -10,6 +10,15 @@
 
 角色列表 reader 選取 `id`、`name`、`productionId`、`assetId`、`isPlayable`、`order` 與 `color1`，回傳 `CharacterListItemData[]`。保留全部角色與六語名稱；Nitro 於建置時產生共用靜態 `/data/characters.json`。角色頁以 `onServerPrefetch` 讀取初始資料，透過 `useState` 將資料保存在 HTML 的 Nuxt state，預設角色列表直接生成於 HTML。Hydration 透過 `getCachedData` 重用初始資料；從其他頁面切入時，以 `useLazyAsyncData` 先顯示頁首、標題與載入狀態，再取得靜態 JSON，失敗時提供重試。離線同步將此資料與角色頁保存於同一份快照。
 
+角色頁依 `CharacterProduction.id` 分區，固定顯示順序為 hololive、hololive ID、hololive EN、DEV_IS；未知或空 production ID 的角色保留於最後的未分類區。分區名稱依網址中的遊戲語言顯示。名稱來源為 `CharacterProduction.name_lang_id` 對應 `LangCharacterProduction.id`，目前四組來源 key 在六種遊戲語言皆有文字（**CONFIRMED**）：
+
+| Production ID | LangCharacterProduction ID | jpn           | eng、ind、kor、cht、chs |
+| ------------- | -------------------------- | ------------- | ----------------------- |
+| `prd-jp`      | `la-production-jp`         | ホロライブ    | hololive                |
+| `prd-id`      | `la-production-id`         | ホロライブ ID | hololive ID             |
+| `prd-en`      | `la-production-en`         | ホロライブ EN | hololive EN             |
+| `prd-dev_is`  | `la-production-dev_is`     | DEV_IS        | DEV_IS                  |
+
 ## 成員主題 payload
 
 **CONFIRMED**：`server/data/member-themes.ts` 重用完整角色 converter，選取角色 ID、六語名稱、來源排序、官方 `color1`～`color4` 與素材網址，回傳 `MemberTheme[]`。主題 ID 使用 `Character.id`，預設為みこ `chr-00015`；目前快照 62 位角色皆具備主色，包括 8 位非可遊玩角色。缺少主色時不收錄，選填色缺失時使用主色；色值轉為 `#RRGGBB`，格式錯誤回報角色與來源欄位。
