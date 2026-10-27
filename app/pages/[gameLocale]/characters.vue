@@ -57,7 +57,9 @@ const visibleCharacters = computed(() =>
     (character) => showUnplayableCharacters.value || character.isPlayable,
   ),
 )
-const sections = computed(() => getCharacterSections(visibleCharacters.value))
+const sections = computed(() =>
+  getCharacterSections(visibleCharacters.value, gameLocale.value),
+)
 const hasCharacters = computed(() =>
   sections.value.some((section) => section.characters.length > 0),
 )

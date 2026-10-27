@@ -48,7 +48,7 @@ Songs are checked against the device time whenever you enter the page. Tutorial 
 
 ## Characters
 
-Open **Characters** to browse members grouped by production. Only playable characters are shown by default; turn on **Show unplayable characters** to include the others. Names follow the selected game content language. The default character list is available without JavaScript. Character icons load from `assets.holodori.net`; unavailable icons show a placeholder while retaining the character's name.
+Open **Characters** to browse members grouped by production. Only playable characters are shown by default; turn on **Show unplayable characters** to include the others. Character and production names follow the selected game content language. The default character list is available without JavaScript. Character icons load from `assets.holodori.net`; unavailable icons show a placeholder while retaining the character's name.
 
 Cards, songs, and characters show a loading status while their data downloads. If loading fails, select **Retry** to try again.
 

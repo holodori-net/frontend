@@ -19,7 +19,7 @@ describe('character list', () => {
       { id: 'chr-06001', productionId: 'prd-dev_is', order: 180 },
     ]
     const originalOrder = characters.map((character) => character.id)
-    const sections = getCharacterSections(characters)
+    const sections = getCharacterSections(characters, 'eng')
     expect(sections.map((section) => section.name)).toEqual([
       'hololive',
       'hololive ID',
@@ -39,14 +39,47 @@ describe('character list', () => {
       { id: 'unknown', productionId: 'prd-new', order: 2 },
       { id: 'no-production', productionId: null, order: 1 },
     ]
-    expect(getCharacterSections(characters)).toEqual([
+    expect(getCharacterSections(characters, 'eng')).toEqual([
       {
         id: 'other',
         name: null,
         characters: [characters[1], characters[0]],
       },
     ])
-    expect(getCharacterSections([])).toEqual([])
+    expect(getCharacterSections([], 'eng')).toEqual([])
+  })
+
+  it('localizes production names without changing section order or membership', () => {
+    const characters = [
+      { id: 'en', productionId: 'prd-en', order: 3 },
+      { id: 'jp', productionId: 'prd-jp', order: 2 },
+      { id: 'unknown', productionId: 'prd-new', order: 1 },
+      { id: 'dev-is', productionId: 'prd-dev_is', order: 4 },
+      { id: 'id', productionId: 'prd-id', order: 5 },
+    ]
+    const japanese = getCharacterSections(characters, 'jpn')
+    const english = getCharacterSections(characters, 'eng')
+
+    expect(japanese.map((section) => section.name)).toEqual([
+      'ホロライブ',
+      'ホロライブ ID',
+      'ホロライブ EN',
+      'DEV_IS',
+      null,
+    ])
+    expect(english.map((section) => section.name)).toEqual([
+      'hololive',
+      'hololive ID',
+      'hololive EN',
+      'DEV_IS',
+      null,
+    ])
+    expect(japanese.map((section) => section.id)).toEqual(
+      english.map((section) => section.id),
+    )
+    expect(
+      japanese.map((section) => section.characters.map(({ id }) => id)),
+    ).toEqual(english.map((section) => section.characters.map(({ id }) => id)))
   })
 
   it('uses the normal icon CDN path and supports an absent asset ID', () => {
