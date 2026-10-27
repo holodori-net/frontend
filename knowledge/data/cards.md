@@ -61,6 +61,8 @@
 
 `transformSkillTreeConnectEffects(database)` 依效果 ID、等級排序，回傳效果欄位及 `LangGeneratedSkillTreeConnectEffect` 六語描述，並依 group ID、y、x 排序範圍位置。列表 reader 只投影被卡片引用的效果與所需範圍；原始效果欄位留在 server，來源描述的 `[highlight]` 標記於顯示時移除。描述直接使用來源六語翻譯，不另行推導 catalog。缺少非 null 的效果、非空 extent group 或設定語言翻譯時，生成失敗並保留來源列資訊。Connect 效果描述使用遊戲語言，介面標籤使用網站語言。
 
+**CONFIRMED**：介面標籤沿用 `LangClientCommon.client_id=104293205598208` 的「協力效果／コネクト効果／Connect Bonus」；範圍篩選沿用網站自訂名稱。
+
 轉換欄位對照：
 
 | 轉換 | 來源欄位                                    | 型別            | 意義              | 關聯                                     | 回傳對應                                            | 備註／未轉換原因                     |
@@ -201,6 +203,8 @@ ORDER BY extent.position_y, extent.position_x;
 | sense       | `544462232674304` | 品味     | Sense       | センス         |
 
 來源：`.data/master.sqlite` 的 `LangClientCommon(language, client_id, text)`；`../extraction/work/decompile/05-annotate-decompiled-code/annotated-csharp/Vision.Common.Core/Vision/Common/Localization/LangClientKeyConst.cs` 的 `Card` 靜態初始化及對應 `libil2cpp.so` 常數；`methods.json` 記錄其 RVA `0xE7AA9E8`（file offset `0xE7A69E8`）。介面依網站語言顯示，卡名與角色名依遊戲語言顯示。
+
+**CONFIRMED**：簽名開關標籤沿用 `LangClientCommon.client_id=49606730009678` 的「顯示簽名／サイン表示／Show Signature」。
 
 完整卡圖使用 `https://assets.holodori.net/cdn/img_card_full_{assetId}/Texture2D/img_card_full_{assetId}.thumb-640-v1.webp` 的 640×360 縮圖，以 16:9 顯示。直式卡圖使用 `https://assets.holodori.net/cdn/img_card_vert_{assetId}/Texture2D/img_card_vert_{assetId}.webp`，以 256:366 顯示。素材用途與 URL 由 `shared/game-data/card-list.ts` 的 `getCardImageUrl()` 管理，保留素材 ID 的前導零。卡圖以單一 `src` 載入，並共用 `useImageLoading` 處理 Skeleton、失敗占位及快取圖片狀態。
 
@@ -354,7 +358,7 @@ ORDER BY extent.position_y, extent.position_x;
 
 `readCardList()` 重用卡片、角色與成長 converter，回傳 `CardListPayload`，包含 `cards`、依 ID 共用的 `costumes` 與精簡 `skills`。卡片列保留角色順序、角色素材 ID、名稱、卡圖素材、篩選欄位、已計算的滿養成三圍、`costumeId` 及三類卡片技能 ID。`skills` 依技能 ID 保存被引用技能的全部來源等級，並共用條件、效果、Target、模板與標籤；主動效果使用獨立的 `activeEffects` 字典。`characterAssetId` 取自 `Character.assetId`；角色篩選選項以 `img_chr_icon_normal_${characterAssetId}` 素材顯示名稱旁圖示，保留素材 ID 前導零，缺圖時保留名稱。列表資料保存角色順序與六語卡名及角色名；角色排序依 `Character.order`，角色篩選選項依其遞增排列。同順序時角色選項依 ID 遞增，卡片排序則依卡片 `order` 遞減及 ID 遞增排列。角色下拉選單可搜尋所有已設定遊戲語言的名稱，選項與已選標籤仍依目前遊戲語言顯示。六語名稱支援跨語搜尋，成長表保留於生成階段。三圍公式、特化判定與固定案例見 [卡片成長資料](card-growth.md#列表的滿養成三圍)。
 
-`searchTextByCardId` 依卡片 ID 保存建置時產生的完整搜尋文字，來源為六語卡名、角色名、服裝名、全部等級的被動／主動／特殊技能、隊長服裝技能及 Connect 描述。技能沿用既有 `display` composer，已知屬性標記保留可見文字，highlight 標記移除，未解析描述略過。完整文字片段轉為小寫、去重後以換行串接。查詢依空白分詞並要求全部關鍵字符合，可跨欄位及語言比對；空查詢不限。索引獨立於資訊顯示、技能等級選擇及元件載入，列表與技能／Connect 篩選數量共用搜尋結果，離線沿用相同 payload。
+`searchTextByCardId` 依卡片 ID 保存建置時產生的完整搜尋文字，來源為六語卡名、角色名、服裝名、全部等級的被動／主動／特殊技能、服裝技能及 Connect 描述。技能沿用既有 `display` composer，已知屬性標記保留可見文字，highlight 標記移除，未解析描述略過。完整文字片段轉為小寫、去重後以換行串接。查詢依空白分詞並要求全部關鍵字符合，可跨欄位及語言比對；空查詢不限。索引獨立於資訊顯示、技能等級選擇及元件載入，列表與技能／Connect 篩選數量共用搜尋結果，離線沿用相同 payload。
 
 `potential_alternative_reward` 與 `acquire_reward` 的結構型別為 `common.Reward`，包含 resource_type、resource_id、quantity；資源種類決定 resource_id 的解讀，schema 未將此欄宣告為單一表的外鍵。獎勵發放條件尚未確認。
 
@@ -383,7 +387,7 @@ ORDER BY extent.position_y, extent.position_x;
 | `LiveLeaderSkill.description_lang_id` | `LangGeneratedLiveLeaderSkill.id` | 技能完整描述；以 `language` 選擇遊戲語言 |
 | `Costume.name_lang_id`                | `LangCostume.id`                  | 服裝名稱；以 `language` 選擇遊戲語言     |
 
-**CONFIRMED**：2026-10-20 觀察的 master_version 為 `452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`，包含 196 張卡片、204 筆 Costume 與 196 筆 LiveLeaderSkill。54 張四星與 88 張五星的 `reward_costume_id` 皆有值且可連到技能；54 張三星皆為 null。三星可經 `Card.character_id → Character.id`、`Character.default_costume_id → Costume.id` 取得角色預設服裝，再沿相同路徑取得技能。列表依上述優先序選擇服裝，並提供隊長服裝技能顯示。
+**CONFIRMED**：2026-10-20 觀察的 master_version 為 `452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`，包含 196 張卡片、204 筆 Costume 與 196 筆 LiveLeaderSkill。54 張四星與 88 張五星的 `reward_costume_id` 皆有值且可連到技能；54 張三星皆為 null。三星可經 `Card.character_id → Character.id`、`Character.default_costume_id → Costume.id` 取得角色預設服裝，再沿相同路徑取得技能。列表依上述優先序選擇服裝，並提供服裝技能顯示。
 
 `Costume.live_leader_skill_id` 可為 null；此快照有 8 件服裝無技能。`LangGeneratedLiveLeaderSkill` 有 1176 筆文字，每個技能皆具備六種設定語言的非 null 描述；`LangLiveLeaderSkill` 為空表。描述保留 `[attribute=...]` 等文字標記。
 
@@ -436,7 +440,7 @@ ORDER BY extent.position_y, extent.position_x;
 
 **CONFIRMED**：`live_skill_effect_target-character_grouping-grp-indonesia` 的 `target_count=null`，六語來源描述皆含 0 人文字；目前沒有 LivePassiveSkillEffect 引用此目標。其生效人數語意為 **UNKNOWN**，來源 null 與數值 0 應保持區分。其餘目標可整理為每個 `(type, language)` 一個模板。此快照的服裝技能僅使用 Target `ALL`、Trigger 類型 7／8，以及上述 5 種 Effect。
 
-### 隊長服裝技能顯示
+### 服裝技能顯示
 
 **CONFIRMED**：`costume` 為單一「隊長服裝技能」資訊選項，控制區塊小標、服裝名稱與完整技能描述。首次使用預設開啟，既有顯示偏好維持原選擇與順序。服裝名稱以較小、較灰的一般字重副標置於小標旁，不加括號。區塊依資訊選取順序呈現，預設位於被動、主動與特殊技能之後。完整卡圖以 row subgrid 對齊同排的名稱、數值與技能，各區塊靠上排列，列高依該排最長內容決定；直式版型使用右側資訊區，所有區塊靠上，依選取順序在同一橫列等寬排列，並保留缺少資料的欄位位置。粗體小標與服裝副標放在靠左的 PrimeVue `Divider` 內，技能描述置於其下方。關閉時移除區塊與間距。
 

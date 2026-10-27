@@ -2,6 +2,10 @@
 
 `transformLiveSkillData(database)` 回傳 `LiveSkillData`，包含 `costumes`、`leaderSkills`、依 `groupId` 分組的 `effects` 與 `triggers`、`targets`、共用 `catalog` 與 `pendingDescriptions`。各組依來源 `number` 排序。型別位於 [live-skills.ts](../../shared/game-data/live-skills.ts)，轉換位於 [live-skills.ts](../../server/data/converters/live-skills.ts)。
 
+## 介面用語
+
+**CONFIRMED**：遊戲來源用語為 `LangClientCommon` 的「服裝技能／衣装スキル／Outfit Skill」（client ID `112307387178923`），無技能時為「無服裝技能／衣装スキルなし／No Outfit Skills」（`348501113790464`）；網站介面目前顯示「隊長服裝技能／リーダー衣装スキル／Leader Outfit Skill」，無技能時顯示「無隊長服裝技能／リーダー衣装スキルなし／No Leader Outfit Skills」。短介面名稱沿用 `LangClientCommon` 的 Outfit 用語：Outfit（`2980951678976`、`504282976280576`、`845122435899392`）、Live Outfit（`108788449468416`）及 Park Outfit（`109259847294976`）。來源資料表與型別仍使用 `Costume`、`LiveLeaderSkill`。
+
 服裝與[卡片技能](card-skills.md)共用 [live-skill-descriptions.ts](../../server/data/converters/live-skill-descriptions.ts) 的效果、條件、目標與 catalog 轉換，各入口分別查詢自己的技能關聯。角色與群組僅查詢 ID 及名稱所需欄位。
 
 以下欄位型別、主鍵與轉換為 **CONFIRMED**，由本機 SQLite `PRAGMA table_info` 及轉換程式確認。`✓` 表示已轉換。關聯不等同 SQLite 外鍵約束。卡片保留 `rewardCostumeId: string | null`，角色預設服裝仍由 `Character.defaultCostumeId` 關聯。
@@ -87,7 +91,7 @@
 
 **CONFIRMED**：`live_skill_effect_target-character_grouping-grp-indonesia` 的 `target_count=null`，來源六語含 0 人文字，目前無效果引用。其人數語意為 **UNKNOWN**，保留 null 並列為待確認。
 
-`renderSkillDescription(description, data, locale)` 展開模板與實體參照。`composeCostumeSkillDescription(skill, data, locale)` 分別組合主要與附加段落，依遊戲語言加入條件與技能段落的分隔標點，見[卡片資料](cards.md#隊長服裝技能顯示)。兩個函式接受唯讀的精簡描述資料；多列條件或效果的連接規則為 **UNKNOWN**，組合函式回傳 null，並透過可選的 `onFailure(reason)` 回呼交由 server 記錄警告。前端呼叫不修改 payload。列表投影與顯示見[卡片資料](cards.md#隊長服裝技能顯示)。
+`renderSkillDescription(description, data, locale)` 展開模板與實體參照。`composeCostumeSkillDescription(skill, data, locale)` 分別組合主要與附加段落，依遊戲語言加入條件與技能段落的分隔標點，見[卡片資料](cards.md#服裝技能顯示)。兩個函式接受唯讀的精簡描述資料；多列條件或效果的連接規則為 **UNKNOWN**，組合函式回傳 null，並透過可選的 `onFailure(reason)` 回呼交由 server 記錄警告。前端呼叫不修改 payload。列表投影與顯示見[卡片資料](cards.md#服裝技能顯示)。
 
 ## 觀察與驗證
 

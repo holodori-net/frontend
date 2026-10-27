@@ -4,7 +4,7 @@
   "homePage": {
     "description": "This is an unofficial database and is not affiliated with the hololive Dreams official team.",
     "explore": "Explore the database",
-    "cards": "Browse card art, stats, skills, and Connect effects. Search and filter by your criteria.",
+    "cards": "Browse card art, stats, skills, and Connect bonuses. Search and filter by your criteria.",
     "characters": "Browse characters by group and view their names in each language.",
     "songs": "Browse songs, singers, song levels, and unlock conditions."
   },
@@ -14,19 +14,19 @@
   "cardDetails": "Card details",
   "cardDetail": {
     "level": "Level",
-    "limitBreak": "Special training",
+    "limitBreak": "SP Training",
     "potential": "Bloom",
-    "statsDescription": "Stats reflect the selected level and Bloom; special training follows the level.",
+    "statsDescription": "Stats reflect the selected level and Bloom; SP Training follows the level.",
     "notFound": "Card not found",
     "notFoundDescription": "This card is unavailable.",
     "description": "View {name}, its skills, and stats at your selected growth levels.",
     "requiresJavaScript": "Enable JavaScript to adjust growth and calculate stats.",
-    "levelSummary": "Lv. {level} / {limit} · Training {training}",
+    "levelSummary": "Lv. {level} / {limit} · SP Training {training}",
     "potentialStage": "Bloom {stage}",
     "potentialNone": "Unbloomed",
-    "allStatsUp": "All stats +{percent}%",
+    "allStatsUp": "All Parameters {percent}% UP",
     "animateCard": "Animate card",
-    "showSignature": "Show signature",
+    "showSignature": "Show Signature",
     "backToCards": "Back to cards",
     "fullscreen": "Play fullscreen",
     "closeFullscreen": "Close fullscreen",
@@ -57,7 +57,7 @@
   "cardList": {
     "loading": "Loading cards…",
     "requiresJavaScript": "Enable JavaScript to browse, search, and filter cards.",
-    "statsDescription": "Stats show the card at maximum level, training, and Bloom, based on the card alone.",
+    "statsDescription": "Stats show the card at maximum level, SP Training, and Bloom, based on the card alone.",
     "filters": "Card filters",
     "controls": "Card list controls",
     "filtersAndSort": "Filters and sorting",
@@ -77,7 +77,7 @@
       "activeSkill": "Active Skill",
       "specialSkill": "Special Skill",
       "costume": "Leader Outfit Skill",
-      "connectEffect": "Connect Effect"
+      "connectEffect": "Connect Bonus"
     },
     "connectGraphDescription": "The star marks the connection point; {count} squares show the affected cells.",
     "search": "Search",
@@ -120,7 +120,7 @@
     "resultCount": "Showing {visible} of {total} cards",
     "noResults": "No cards match these filters.",
     "imageUnavailable": "Card image unavailable",
-    "noLeaderSkill": "No leader outfit skill",
+    "noLeaderSkill": "No Leader Outfit Skills",
     "skillUnavailable": "Skill information is unavailable",
     "skills": {
       "label": "Skills",
@@ -147,7 +147,7 @@
         "passive": "Passive",
         "active": "Active",
         "special": "Special",
-        "leader": "Leader outfit"
+        "leader": "Leader Outfit Skill"
       },
       "effect": {
         "performance": "Performance UP",
@@ -257,9 +257,9 @@
       "2": "Cover"
     },
     "singerType": {
-      "1": "Solo",
-      "2": "Group",
-      "3": "All singers"
+      "1": "Solo Songs",
+      "2": "Unit Songs",
+      "3": "Group Songs"
     },
     "difficulty": {
       "1": "EASY",

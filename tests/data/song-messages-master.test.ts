@@ -47,6 +47,7 @@ describe.skipIf(!existsSync(sourcePath))(
             sort: Record<string, string>
             category: Record<string, string>
             difficulty: Record<string, string>
+            singerType: Record<string, string>
             unlockType: Record<string, string>
             video: Record<string, string>
           }
@@ -96,6 +97,35 @@ describe.skipIf(!existsSync(sourcePath))(
               text,
               `LangMusicMvCategory: ${id}`,
             )
+          }
+
+          const singerType = source.prepare(
+            `SELECT source.description_lang_id AS id, wording.text AS text
+             FROM SkillTreeEffectPassiveTrigger AS source
+             JOIN LangGeneratedSkillTreeEffectPassiveTrigger AS wording
+               ON wording.id = source.description_lang_id
+             WHERE wording.language = ? AND source.music_singer_type = ?
+             ORDER BY source.group_id, source.number
+             LIMIT 1`,
+          )
+          for (const [enumValue, key] of [
+            [1, '1'],
+            [2, '2'],
+            [3, '3'],
+          ] as const) {
+            const sourceWording = singerType.get(gameLocale, enumValue) as
+              { id: string; text: string } | undefined
+            expect(
+              sourceWording,
+              `music_singer_type: ${enumValue}`,
+            ).toBeDefined()
+            expect(sourceWording?.id).toContain(
+              `music_singer_type-${['', 'solo', 'group', 'all'][enumValue]}.1-description`,
+            )
+            expect(
+              sourceWording?.text.replace(/\[[^\]]+\]/gu, ''),
+              `LangGeneratedSkillTreeEffectPassiveTrigger: ${sourceWording?.id}`,
+            ).toContain(labels.singerType[key])
           }
 
           const unlock = source.prepare(

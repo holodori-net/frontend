@@ -4,7 +4,7 @@
   "homePage": {
     "description": "本站為非官方資料庫，與 hololive Dreams 官方營運團隊沒有任何關聯。",
     "explore": "探索資料庫",
-    "cards": "瀏覽卡面、能力、技能與 Connect，依條件搜尋與篩選。",
+    "cards": "瀏覽卡面、能力、技能與協力效果，依條件搜尋與篩選。",
     "characters": "依所屬團體瀏覽角色，查看各語言名稱。",
     "songs": "瀏覽樂曲、演唱者、樂曲 Lv. 與解鎖條件。"
   },
@@ -77,9 +77,9 @@
       "activeSkill": "主動技能",
       "specialSkill": "特殊技能",
       "costume": "隊長服裝技能",
-      "connectEffect": "Connect 效果"
+      "connectEffect": "協力效果"
     },
-    "connectGraphDescription": "星號標示連結位置，{count} 個方格為效果範圍。",
+    "connectGraphDescription": "星號標示協力位置，{count} 個方格為效果範圍。",
     "search": "搜尋",
     "searchPlaceholder": "以任一遊戲語言搜尋卡片、角色、服裝名稱與技能描述",
     "character": "角色",
@@ -169,8 +169,8 @@
     },
     "total": "合計",
     "connectFilter": {
-      "label": "Connect 範圍",
-      "title": "Connect 範圍",
+      "label": "協力範圍",
+      "title": "協力範圍",
       "unlimited": "不限範圍",
       "selectedCount": "已選 {count} 種",
       "visibleCardCount": "符合條件 {count} 張卡片",
@@ -257,9 +257,9 @@
       "2": "翻唱"
     },
     "singerType": {
-      "1": "獨唱",
-      "2": "團體",
-      "3": "全體"
+      "1": "個人樂曲",
+      "2": "團體樂曲",
+      "3": "全體樂曲"
     },
     "difficulty": {
       "1": "EASY",
@@ -288,19 +288,19 @@
       "unlock": "解鎖條件",
       "availability": "發行日",
       "musicVideos": "MV／Live 動畫",
-      "streamingMute": "直播模式靜音"
+      "streamingMute": "直播設定下靜音"
     },
     "otherCategory": "其他",
     "levelLabel": "樂曲 Lv.",
     "notesLabel": "音符數量",
     "durationLabel": "曲長",
-    "streamingMuteLabel": "直播模式靜音",
+    "streamingMuteLabel": "直播設定下靜音",
     "mvLabel": "MV",
     "liveLabel": "Live 動畫",
     "unlockLabel": "解鎖條件",
     "members": "演唱成員",
-    "muted": "直播模式靜音",
-    "notMuted": "直播模式不靜音",
+    "muted": "直播設定下靜音",
+    "notMuted": "直播設定下不靜音",
     "unlockType": {
       "member": "Holo 成員關卡",
       "shop": "樂曲商店",
