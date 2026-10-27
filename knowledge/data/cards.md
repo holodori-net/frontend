@@ -194,6 +194,19 @@ ORDER BY extent.position_y, extent.position_x;
 | 2                 | `418372072562689` | 清純     | Pure    | ピュア   |
 | 3                 | `418372072562690` | 快樂     | Happy   | ハッピー |
 
+**CONFIRMED**：同一 `Card` 靜態初始化的篩選、排序與技能資訊標籤如下，文字取自 `LangClientCommon`：
+
+| `LangClientKeyConst.Card` 欄位                             | client_id         | 繁體中文       | English       | 日本語           |
+| ---------------------------------------------------------- | ----------------- | -------------- | ------------- | ---------------- |
+| `CardFilterAbilityOptionTabPageMenuCardAttributeTypeLabel` | `445393519566850` | 類型           | Type          | タイプ           |
+| `CardFilterAbilityOptionTabPageMenuPassiveSkillLabel`      | `445393519566853` | P技能          | P Skill       | Pスキル          |
+| `CardFilterAbilityOptionTabPageMenuActiveSkillLabel`       | `445393519566852` | A技能          | A Skill       | Aスキル          |
+| `CardFilterAbilityOptionTabPageMenuSpecialSkillLabel`      | `445393519566851` | SP技能         | SP Skill      | SPスキル         |
+| `CardSortTypeCharacterOrder`                               | `917361011286016` | 依holo成員排序 | holomem       | ホロメン順       |
+| `SkillInfoPassiveSkillName`                                | `245090959015435` | 被動技能       | Passive Skill | パッシブスキル   |
+| `SkillInfoActiveSkillName`                                 | `27520443343165`  | 主動技能       | Active Skill  | アクティブスキル |
+| `SkillInfoSpecialSkillName`                                | `97133390636399`  | 特殊技能       | Special Skill | スペシャルスキル |
+
 三圍文字同樣取自 `LangClientCommon`：
 
 | 列表欄位    | client_id         | 繁體中文 | English     | 日本語         |
