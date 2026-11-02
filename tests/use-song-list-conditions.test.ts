@@ -8,8 +8,8 @@ import {
   type App,
 } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { SongFilterOptions } from '../shared/game-data/song-list.ts'
-import { useSongListConditions } from '../app/composables/useSongListConditions.ts'
+import type { SongFilterOptions } from '../shared/game-data/songs/list.ts'
+import { useSongListConditions } from '../app/composables/song/useSongListConditions.ts'
 
 type HostNode = {
   type?: string
@@ -216,6 +216,51 @@ describe('useSongListConditions', () => {
     expect(context.result.conditions.value.category).toEqual([2])
     expect(context.result.queryError.value).toBe('write')
     expect(warn).toHaveBeenCalled()
+    context.app.unmount()
+  })
+  it('cancels a debounced search when browser history changes', async () => {
+    vi.useFakeTimers()
+    const context = mountComposable({ custom: 'keep' })
+    await nextTick()
+    context.result.conditions.value.q = 'pending'
+    context.route.query = { q: 'history', custom: 'keep' }
+    context.route.fullPath = '/ja/jpn/songs?q=history&custom=keep'
+    await vi.advanceTimersByTimeAsync(250)
+    expect(context.result.conditions.value.q).toBe('history')
+    expect(context.replace).not.toHaveBeenCalled()
+    expect(context.push).not.toHaveBeenCalled()
+    context.app.unmount()
+  })
+
+  it('cancels a debounced search on unmount', async () => {
+    vi.useFakeTimers()
+    const context = mountComposable()
+    await nextTick()
+    context.result.conditions.value.q = 'pending'
+    context.app.unmount()
+    await vi.advanceTimersByTimeAsync(250)
+    expect(context.replace).not.toHaveBeenCalled()
+  })
+
+  it('ignores a stale navigation rejection after newer conditions succeed', async () => {
+    let rejectOld!: (cause: unknown) => void
+    const context = mountComposable()
+    await settle()
+    context.push.mockImplementationOnce(
+      () =>
+        new Promise((_, reject) => {
+          rejectOld = reject
+        }),
+    )
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    context.result.conditions.value.category = [2]
+    context.result.conditions.value.category = [1]
+    await settle()
+    rejectOld(new Error('stale navigation'))
+    await settle()
+    expect(context.result.conditions.value.category).toEqual([1])
+    expect(context.result.queryError.value).toBeNull()
+    expect(warn).not.toHaveBeenCalled()
     context.app.unmount()
   })
 })

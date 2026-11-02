@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { existsSync } from 'node:fs'
 import { readCardList } from '../server/data/card-list.ts'
-import type { CardListPayload } from '../shared/game-data/card-list-data.ts'
+import type { CardListPayload } from '../shared/game-data/cards/list-data.ts'
 import {
   buildCardSkillFilterCatalog,
   mergeSkillLevelDescriptions,
   mergeStructuredSkillValues,
-} from '../shared/game-data/card-skill-filter.ts'
+} from '../shared/game-data/cards/skill-filter.ts'
 
 const text = {
   jpn: '効果',

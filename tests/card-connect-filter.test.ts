@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import type { CardListItemData } from '../shared/game-data/card-list-data.ts'
+import type { CardListItemData } from '../shared/game-data/cards/list-data.ts'
 import type { LocalizedText } from '../shared/game-data/localized-text.ts'
 import {
   buildCardConnectFilterCatalog,
   countCardConnectOptions,
-} from '../shared/game-data/card-connect-filter.ts'
+} from '../shared/game-data/cards/connect-filter.ts'
 import { gameLocales } from '../shared/language.ts'
 
 const card = (id: string, effectId: string | null) =>

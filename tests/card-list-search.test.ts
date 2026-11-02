@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { gameLocales } from '../shared/language.ts'
-import type { CardListPayload } from '../shared/game-data/card-list-data.ts'
-import { buildCardSearchTextById } from '../shared/game-data/card-list-search.ts'
+import type { CardListPayload } from '../shared/game-data/cards/list-data.ts'
+import { buildCardSearchTextById } from '../shared/game-data/cards/list-search.ts'
 
 const localized = (value: string) =>
   Object.fromEntries(gameLocales.map((locale) => [locale, value])) as Record<

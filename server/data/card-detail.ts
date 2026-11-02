@@ -6,8 +6,8 @@ import type {
   CardDetailGrowthData,
   CardDetailIndex,
   CardDetailPayload,
-} from '#shared/game-data/card-detail'
-import type { CardGrowthData } from '#shared/game-data/card-growth'
+} from '#shared/game-data/cards/detail'
+import type { CardGrowthData } from '#shared/game-data/cards/growth'
 import type { CharacterGroupData } from '#shared/game-data/character-groups'
 import { card } from './schema/cards.ts'
 import { characterVoice } from './schema/character-voices.ts'

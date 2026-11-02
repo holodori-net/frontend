@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildConnectGraphGrid } from '../shared/game-data/connect-graph.ts'
+import { buildConnectGraphGrid } from '../shared/game-data/cards/connect-graph.ts'
 
 describe('buildConnectGraphGrid', () => {
   it('reconstructs the six-point Ayame preview with the origin centered', () => {

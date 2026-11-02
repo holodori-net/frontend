@@ -5,8 +5,8 @@ import {
   getCardSkillAvailableLevels,
   type CardListField,
   type CardSkillLevelSelections,
-} from '../shared/game-data/card-list.ts'
-import { useCardFields } from '../app/composables/useCardFields.ts'
+} from '../shared/game-data/cards/display.ts'
+import { useCardFields } from '../app/composables/card/useCardFields.ts'
 
 const available: CardSkillLevelSelections = {
   passiveSkill: [1, 2, 5],

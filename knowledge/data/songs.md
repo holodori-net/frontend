@@ -70,7 +70,7 @@ JOIN AssetStreamingMute AS a
 
 封面左上以透明底細框膠囊顯示樂曲類別，文字、邊框與唱片圖示使用遊戲原色，右下顯示曲長。封面下方以四個等寬欄位顯示各難度的樂曲 Lv，各欄採中性底色與隨亮暗主題切換的文字，下緣以 4px 遊戲原色細條標示難度。資訊依序為標題、演唱者、各難度音符數量、解鎖條件及發行日，最下方僅為具備 MV、Live 動畫或直播靜音的歌曲顯示對應中性 Tag，曲長角標亦採中性色；無須解鎖的內容簡示為「無」。歌曲副標題與資訊小標使用卡片頁相同的 Divider。演唱者緊接標題下方並與標題共用一個資訊區塊；同排卡片沿用 CSS row subgrid 共用封面、難度及各啟用資訊區塊的列高，展開成員時同步擴高標題區塊；未啟用的區塊移除，缺少標籤的卡片保留該列位置。演唱者的 hover 提示與點擊展開清單由 `characterIds` 查對應角色的當前遊戲語言名稱，展開清單顯示角色頭像；沒有成員清單時保留來源唱者文字。音符數量依各難度的 `fullComboNoteCount` 分開顯示。
 
-**CONFIRMED**：難度色碼集中於 `shared/game-data/song-difficulty.ts`，取自 APK `data.unity3d` 的 `PaletteStore`（MonoBehaviour path ID 12680）。本機來源為 `../extraction/work/decompile/02-extract-apk/apk-contents/game.qualiarts.hololive.dreams.jp/assets/bin/Data/data.unity3d`；色票的 RGBA float32 以 `round(channel × 255)` 轉成 RGB。遊戲色票用於難度列下緣細條，亮暗模式共用色碼。
+**CONFIRMED**：難度色碼集中於 `shared/game-data/songs/difficulty.ts`，取自 APK `data.unity3d` 的 `PaletteStore`（MonoBehaviour path ID 12680）。本機來源為 `../extraction/work/decompile/02-extract-apk/apk-contents/game.qualiarts.hololive.dreams.jp/assets/bin/Data/data.unity3d`；色票的 RGBA float32 以 `round(channel × 255)` 轉成 RGB。遊戲色票用於難度列下緣細條，亮暗模式共用色碼。
 
 | 難度   | 色票名稱   | RGB       |
 | ------ | ---------- | --------- |
@@ -79,7 +79,7 @@ JOIN AssetStreamingMute AS a
 | HARD   | GameHard   | `#FD93B6` |
 | EXPERT | GameExpert | `#9A93FF` |
 
-**CONFIRMED**：類別色取自同一 `PaletteStore`（`globalgamemanagers.assets`，path ID 12680）的完整原始物件，共 18,776 bytes；色票位於自訂序列化資料，Unity 基底 typetree 不含該區段。`shared/game-data/song-category.ts` 依 `MusicCategoryType` 對應下列色值，類別角標的文字、邊框與 Lucide `Disc3` 圖示使用對應色值，透明底上以陰影維持封面上的辨識度。
+**CONFIRMED**：類別色取自同一 `PaletteStore`（`globalgamemanagers.assets`，path ID 12680）的完整原始物件，共 18,776 bytes；色票位於自訂序列化資料，Unity 基底 typetree 不含該區段。`shared/game-data/songs/category.ts` 依 `MusicCategoryType` 對應下列色值，類別角標的文字、邊框與 Lucide `Disc3` 圖示使用對應色值，透明底上以陰影維持封面上的辨識度。
 
 | 類別      | 色票名稱        | RGBA float32                         | RGB       |
 | --------- | --------------- | ------------------------------------ | --------- |

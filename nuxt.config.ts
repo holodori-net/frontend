@@ -71,6 +71,8 @@ const languageEntryBootstrapModule = defineNuxtModule({
 export default defineNuxtConfig({
   compatibilityDate: '2025-09-25',
   devtools: { enabled: true },
+  components: [{ path: '~/components', pathPrefix: false }],
+  imports: { dirs: ['composables', 'composables/card', 'composables/song'] },
   runtimeConfig: {
     public: {
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://holodori.net',
@@ -81,7 +83,7 @@ export default defineNuxtConfig({
       const entries = getLanguageEntryRoutes(
         pages,
         fileURLToPath(
-          new URL('./app/components/LanguageEntry.vue', import.meta.url),
+          new URL('./app/components/site/LanguageEntry.vue', import.meta.url),
         ),
       )
       pages.push(...entries)

@@ -4,10 +4,10 @@ import type {
   CardListItemData,
   CardListPayload,
   CardListSkillData,
-} from '#shared/game-data/card-list-data'
+} from '#shared/game-data/cards/list-data'
 import { gameLocales } from '#shared/language'
 import { composeCostumeSkillDescription } from '#shared/game-data/live-skill-description'
-import { buildCardSearchTextById } from '#shared/game-data/card-list-search'
+import { buildCardSearchTextById } from '#shared/game-data/cards/list-search'
 import { transformCardGrowth } from './converters/card-growth.ts'
 import { transformCards } from './converters/cards.ts'
 import { transformCharacters } from './converters/characters.ts'

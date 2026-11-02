@@ -10,7 +10,7 @@ import type {
   LiveActiveSkillLevelData,
   LivePassiveSkillLevelData,
   LiveSpecialSkillLevelData,
-} from './card-skills.ts'
+} from './cards/skills.ts'
 
 export interface SkillDescriptionData {
   formatSummaryValue?: (

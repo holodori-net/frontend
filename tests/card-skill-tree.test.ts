@@ -6,7 +6,7 @@ import {
   projectCardSkillTreeSelection,
   updateCardSkillTreeSelection,
   type CardSkillTreeNode,
-} from '../shared/game-data/card-skill-tree.ts'
+} from '../shared/game-data/cards/skill-tree.ts'
 
 const effectTree: CardSkillTreeNode[] = [
   {

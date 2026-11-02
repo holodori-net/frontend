@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ref, type Ref } from 'vue'
-import { useCardLayout } from '../app/composables/useCardLayout.ts'
+import { useCardLayout } from '../app/composables/card/useCardLayout.ts'
 
 type TestContext = {
   state: Map<string, Ref<unknown>>

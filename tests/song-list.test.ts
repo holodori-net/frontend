@@ -5,15 +5,17 @@ import {
   filterAndSortSongs,
   getAvailableSongs,
   getSongFilterOptions,
-  getSongImageUrl,
   getSongUnlockType,
   hasSongLive,
   hasSongMv,
-  parseSongListQuery,
-  SONG_LIST_FIELDS,
-  toSongListQuery,
   type SongFilterOptions,
-} from '../shared/game-data/song-list.ts'
+} from '../shared/game-data/songs/list.ts'
+import { getSongImageUrl } from '../shared/game-data/songs/assets.ts'
+import {
+  parseSongListQuery,
+  toSongListQuery,
+} from '../shared/game-data/songs/list-query.ts'
+import { SONG_LIST_FIELDS } from '../shared/game-data/songs/display.ts'
 
 const base = (overrides: Partial<SongListItemData> = {}) =>
   ({

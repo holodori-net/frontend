@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import type { CardDetailGrowthData } from '../shared/game-data/card-detail.ts'
+import type { CardDetailGrowthData } from '../shared/game-data/cards/detail.ts'
 import {
   calculateCardGrowth,
   getMaxCardGrowth,
   normalizeCardGrowthSelection,
   selectCardGrowthLevel,
-} from '../shared/game-data/card-stats.ts'
+} from '../shared/game-data/cards/stats.ts'
 
 const growth: CardDetailGrowthData = {
   weightsPermil: { performance: 400, technique: 306, sense: 294 },

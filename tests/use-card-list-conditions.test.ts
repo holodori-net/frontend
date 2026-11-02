@@ -9,8 +9,8 @@ import {
 } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { CardFilterOptions } from '../shared/game-data/card-list.ts'
-import { useCardListConditions } from '../app/composables/useCardListConditions.ts'
+import type { CardFilterOptions } from '../shared/game-data/cards/list.ts'
+import { useCardListConditions } from '../app/composables/card/useCardListConditions.ts'
 
 const codecControls = vi.hoisted(() => ({
   decode: undefined as ((value: string) => Promise<string[]>) | undefined,
@@ -18,10 +18,10 @@ const codecControls = vi.hoisted(() => ({
     ((ids: readonly string[]) => Promise<string | undefined>) | undefined,
 }))
 
-vi.mock('#shared/game-data/card-skill-query', async () => {
+vi.mock('#shared/game-data/cards/skill-query', async () => {
   const actual = await vi.importActual<
-    typeof import('../shared/game-data/card-skill-query.ts')
-  >('../shared/game-data/card-skill-query.ts')
+    typeof import('../shared/game-data/cards/skill-query.ts')
+  >('../shared/game-data/cards/skill-query.ts')
   return {
     ...actual,
     decodeCardSkillSelection: (value: string) =>
@@ -319,7 +319,7 @@ describe('useCardListConditions', () => {
 
   it('decodes skill query before becoming ready and applies it with other filters', async () => {
     const encoded = await (
-      await import('../shared/game-data/card-skill-query.ts')
+      await import('../shared/game-data/cards/skill-query.ts')
     ).encodeCardSkillSelection(['active:a1'])
     const context = mountComposable({ skill: encoded })
     expect(context.result.ready.value).toBe(false)
@@ -420,7 +420,7 @@ describe('useCardListConditions', () => {
     expect(location.query.skill).toMatch(/^g1\./)
     expect(
       await (
-        await import('../shared/game-data/card-skill-query.ts')
+        await import('../shared/game-data/cards/skill-query.ts')
       ).decodeCardSkillSelection(String(location.query.skill)),
     ).toEqual(['active:a1'])
     context.app.unmount()

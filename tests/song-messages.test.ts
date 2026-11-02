@@ -1,10 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { siteLocales } from '../shared/language.ts'
-import {
-  SONG_LIST_FIELDS,
-  type SongListSort,
-} from '../shared/game-data/song-list.ts'
+import { SONG_LIST_FIELDS } from '../shared/game-data/songs/display.ts'
+import type { SongListSort } from '../shared/game-data/songs/list.ts'
 
 const sorts = [
   'order',

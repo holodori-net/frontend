@@ -26,7 +26,7 @@
 |      | `rarity_type`                   | INTEGER     | 服裝稀有度                                                    |
 |      | `order`                         | INTEGER     | 來源排序                                                      |
 
-**CONFIRMED**：衣裝縮圖使用 `img_cos_2d_thumb_{assetId}`，URL 由 `shared/game-data/card-icons.ts` 的 `getCostumeThumbnailUrl()` 組合。單卡 payload 的 `costumes` 保存 `assetId`；列表投影仍只包含名稱與技能關聯。來源字串為 `img_cos_2d_thumb_{0}`，實際下載 [あやめ的衣裝縮圖](https://assets.holodori.net/cdn/img_cos_2d_thumb_00010-uniq-0069-00/Texture2D/img_cos_2d_thumb_00010-uniq-0069-00.webp) 確認為 256×256 的透明 WebP。
+**CONFIRMED**：衣裝縮圖使用 `img_cos_2d_thumb_{assetId}`，URL 由 `shared/game-data/cards/assets.ts` 的 `getCostumeThumbnailUrl()` 組合。單卡 payload 的 `costumes` 保存 `assetId`；列表投影仍只包含名稱與技能關聯。來源字串為 `img_cos_2d_thumb_{0}`，實際下載 [あやめ的衣裝縮圖](https://assets.holodori.net/cdn/img_cos_2d_thumb_00010-uniq-0069-00/Texture2D/img_cos_2d_thumb_00010-uniq-0069-00.webp) 確認為 256×256 的透明 WebP。
 
 ## LiveLeaderSkill
 

@@ -4,7 +4,7 @@ import type { LocalizedText } from '#shared/game-data/localized-text.ts'
 import type {
   CardSkillData,
   LiveActiveSkillEffectData,
-} from '#shared/game-data/card-skills.ts'
+} from '#shared/game-data/cards/skills.ts'
 import type { ConfirmedDescriptionTemplates } from '#shared/game-data/live-skills.ts'
 import type { GameDatabase } from '../database.ts'
 import {

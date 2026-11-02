@@ -90,7 +90,7 @@ CardPotentialEffectType 的 schema 定義如下（**CONFIRMED**）：
 
 ## 詳細頁的養成計算
 
-`shared/game-data/card-stats.ts` 共用列表與詳細頁的 float32 三圍公式。`CardDetailGrowthData` 投影單卡權重、各等級基礎值、特訓階段上限與全部綻放效果。`CardGrowthSelection` 保存等級、特訓次數及綻放階段。詳細頁以涵蓋完整養成範圍的 Slider 選擇等級；`selectCardGrowthLevel` 先正規化等級與綻放，再由等級推導最低所需特訓，所需特訓與階段上限合併在等級讀數中顯示。綻放以 Select 選擇，收起時以單行摘要顯示階段與新增效果；展開後的選項包含技能目標等級、完整技能描述或全能力百分比，描述跟隨遊戲語言。
+`shared/game-data/cards/stats.ts` 共用列表與詳細頁的 float32 三圍公式。`CardDetailGrowthData` 投影單卡權重、各等級基礎值、特訓階段上限與全部綻放效果。`CardGrowthSelection` 保存等級、特訓次數及綻放階段。詳細頁以涵蓋完整養成範圍的 Slider 選擇等級；`selectCardGrowthLevel` 先正規化等級與綻放，再由等級推導最低所需特訓，所需特訓與階段上限合併在等級讀數中顯示。綻放以 Select 選擇，收起時以單行摘要顯示階段與新增效果；展開後的選項包含技能目標等級、完整技能描述或全能力百分比，描述跟隨遊戲語言。
 
 計算只套用 `upgradeCount` 小於或等於選取階段的綻放效果。`effectType=4` 的三圍加成累加；主動、被動、特殊與 Connect 等級分別取 `effectType=1/2/3/5` 已解鎖效果值的最大值，沒有升級效果時為 Lv. 1。技能效果值代表目標等級。此規則由客戶端 `CardUtility.GetCurrent*Level` 的初始值 1、對應效果值與 `Enumerable.Max` 確認（**CONFIRMED**）。
 

@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import {
   buildCardConnectFilterCatalog,
   countCardConnectOptions,
-} from '../../shared/game-data/card-connect-filter.ts'
+} from '../../shared/game-data/cards/connect-filter.ts'
 import { readCardList } from '../../server/data/card-list.ts'
 
 const sourcePath = new URL('../../.data/master.sqlite', import.meta.url)

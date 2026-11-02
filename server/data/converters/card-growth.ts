@@ -1,5 +1,5 @@
 import { asc } from 'drizzle-orm'
-import type { CardGrowthData } from '#shared/game-data/card-growth'
+import type { CardGrowthData } from '#shared/game-data/cards/growth'
 import type { GameDatabase } from '../database.ts'
 import { parseJsonArray } from '../common/json-array.ts'
 import {

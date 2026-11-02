@@ -1,7 +1,7 @@
 import type { CardData } from '#shared/game-data/cards'
-import type { CardGrowthData } from '#shared/game-data/card-growth'
-import type { CardListItemData } from '#shared/game-data/card-list-data'
-import { calculateCardStats } from '#shared/game-data/card-stats'
+import type { CardGrowthData } from '#shared/game-data/cards/growth'
+import type { CardListItemData } from '#shared/game-data/cards/list-data'
+import { calculateCardStats } from '#shared/game-data/cards/stats'
 const allParameterUpPermilUpEffectType = 4
 
 export function calculateCardListStats(

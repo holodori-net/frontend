@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { CardData } from '../../shared/game-data/cards.ts'
-import type { CardGrowthData } from '../../shared/game-data/card-growth.ts'
+import type { CardGrowthData } from '../../shared/game-data/cards/growth.ts'
 import type { LocalizedNames } from '../../shared/game-data/localized-text.ts'
 import { calculateCardListStats } from '../../server/data/card-list-stats.ts'
 
