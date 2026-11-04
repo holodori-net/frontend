@@ -184,12 +184,24 @@ describe.skipIf(!existsSync(sourcePath))('local master card skills', () => {
             .filter((id) => !referencedActiveIds.has(id))
             .sort(),
         ).toEqual(unreferenced.map((row) => row.id).sort())
-        expect(data.pendingDescriptions).toEqual([
-          expect.objectContaining({
+        const expectedPendingDescriptions = database
+          .prepare(
+            'SELECT id FROM LiveSkillEffectTarget WHERE type = 4 AND target_count IS NULL ORDER BY id',
+          )
+          .all()
+        expect(
+          data.pendingDescriptions.toSorted((left, right) =>
+            left.key.localeCompare(right.key),
+          ),
+        ).toEqual(
+          expectedPendingDescriptions.map(({ id }) => ({
             table: 'LiveSkillEffectTarget',
-            key: 'live_skill_effect_target-character_grouping-grp-indonesia',
-          }),
-        ])
+            key: String(id),
+            type: 4,
+            language: null,
+            reason: 'target_count is null for a character grouping target',
+          })),
+        )
         expect(warnings).toHaveBeenCalledTimes(data.pendingDescriptions.length)
         console.info(
           `[card-skills master] ${mode}: activeEffects=${effects.length}, effectDescriptions=${sources.length}, complete=${complete}, unreferencedActive=${unreferenced.length}, templates=${Object.keys(data.catalog.templates).length}, pending=${JSON.stringify(data.pendingDescriptions)}`,

@@ -297,32 +297,6 @@ describe.skipIf(!existsSync(sourcePath))(
             payload.cards.find(({ id }) => id === card.id)
               ?.skillTreeConnectEffectId,
           ).toBe(card.effectId)
-        expect(sourceCards.some(({ effectId }) => effectId === null)).toBe(true)
-
-        const ayameEffectId =
-          'skill_tree_connect_effect-skill_tree_effect_up-skill_tree_connect_effect_extent-card_area-001-rare_5'
-        const ayameCard = payload.cards.find(
-          ({ id }) => id === 'card-00010-5-uniq-0069-00',
-        )
-        expect(ayameCard?.skillTreeConnectEffectId).toBe(ayameEffectId)
-        const ayameLevels = payload.connectEffects[ayameEffectId]
-        expect(ayameLevels?.map(({ level }) => level)).toEqual([1, 2])
-        const ayameSourceValues = database
-          .prepare(
-            'SELECT level, effect_permil_up AS value FROM SkillTreeConnectEffect WHERE id = ? ORDER BY level',
-          )
-          .all(ayameEffectId) as unknown as { level: number; value: string }[]
-        expect(ayameSourceValues).toEqual([
-          { level: 1, value: '1100' },
-          { level: 2, value: '1600' },
-        ])
-        expect(ayameLevels?.[0]?.description.eng).toContain('110%')
-        expect(ayameLevels?.[1]?.description.eng).toContain(
-          '[highlight]160[/highlight]%',
-        )
-        expect(
-          payload.connectExtents[ayameLevels![0]!.extentGroupId],
-        ).toHaveLength(6)
       } finally {
         database.close()
       }

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { existsSync } from 'node:fs'
 import { readCardList } from '../server/data/card-list.ts'
 import type { CardListPayload } from '../shared/game-data/card-list-data.ts'
+import { gameLocales } from '../shared/language.ts'
 import {
   buildCardSkillFilterCatalog,
   mergeSkillLevelDescriptions,
@@ -384,17 +385,56 @@ describe('buildCardSkillFilterCatalog', () => {
   })
 
   it.skipIf(!existsSync(new URL('../.data/master.sqlite', import.meta.url)))(
-    'builds a stable catalog from the local master snapshot',
+    'builds a complete catalog from the local master snapshot',
     () => {
-      const result = buildCardSkillFilterCatalog(readCardList())
-      expect(Object.keys(result.cardSkills)).toHaveLength(196)
-      expect(result.options).toHaveLength(368)
-      expect(Object.keys(result.canonicalKeys)).toHaveLength(784)
-      expect(
-        result.options.every(
-          ({ descriptions }) => Object.keys(descriptions).length === 6,
+      const payload = readCardList()
+      const result = buildCardSkillFilterCatalog(payload)
+      const sourceKeys = [
+        ...Object.keys(payload.skills.passiveSkills).map(
+          (id) => `passive:${id}`,
         ),
-      ).toBe(true)
+        ...Object.keys(payload.skills.activeSkills).map((id) => `active:${id}`),
+        ...Object.keys(payload.skills.specialSkills).map(
+          (id) => `special:${id}`,
+        ),
+        ...Object.keys(payload.skills.leaderSkills).map((id) => `leader:${id}`),
+      ].sort()
+
+      expect(Object.keys(result.cardSkills).sort()).toEqual(
+        payload.cards.map(({ id }) => id).sort(),
+      )
+      expect(Object.keys(result.canonicalKeys).sort()).toEqual(sourceKeys)
+
+      const optionSourceKeys = result.options.flatMap(
+        ({ sourceKeys }) => sourceKeys,
+      )
+      expect(optionSourceKeys).toHaveLength(new Set(optionSourceKeys).size)
+      expect([...optionSourceKeys].sort()).toEqual(sourceKeys)
+
+      for (const option of result.options) {
+        expect(option.sourceKeys).toContain(option.key)
+        expect(option.key).toBe([...option.sourceKeys].sort()[0])
+        for (const sourceKey of option.sourceKeys)
+          expect(result.canonicalKeys[sourceKey]).toBe(option.key)
+        expect(Object.keys(option.descriptions).sort()).toEqual(
+          [...gameLocales].sort(),
+        )
+        for (const locale of gameLocales)
+          expect(option.descriptions[locale]).toEqual(expect.any(String))
+      }
+
+      for (const card of payload.cards) {
+        const costume = payload.costumes[card.costumeId ?? '']
+        const expectedKeys = [
+          `passive:${card.livePassiveSkillId}`,
+          `active:${card.liveActiveSkillId}`,
+          `special:${card.liveSpecialSkillId}`,
+          ...(costume?.leaderSkillId
+            ? [`leader:${costume.leaderSkillId}`]
+            : []),
+        ].map((sourceKey) => result.canonicalKeys[sourceKey])
+        expect(result.cardSkills[card.id]).toEqual([...new Set(expectedKeys)])
+      }
     },
   )
 })
