@@ -21,6 +21,7 @@ import { useCardListConditions } from '~/composables/card/useCardListConditions'
 import { useCardLayout } from '~/composables/card/useCardLayout'
 import { useCardFields } from '~/composables/card/useCardFields'
 import { useCardDeferredContent } from '~/composables/card/useCardDeferredContent'
+import { useListPanels } from '~/composables/useListPanels'
 
 const props = defineProps<{
   payload: CardListPayload
@@ -87,11 +88,15 @@ function resetDisplay() {
   resetLayout()
   resetFields()
 }
+const { panels: openPanels, initialized: panelsInitialized } =
+  useListPanels('cards')
 const ready = computed(
   () =>
-    conditionsReady.value && layoutInitialized.value && fieldsInitialized.value,
+    conditionsReady.value &&
+    layoutInitialized.value &&
+    fieldsInitialized.value &&
+    panelsInitialized.value,
 )
-const openPanels = ref<string[]>(['filters', 'display'])
 const cardListElement = ref<HTMLElement | null>(null)
 const { revision: deferRevision, scheduleRecheck } =
   useCardDeferredContent(cardListElement)

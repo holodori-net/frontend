@@ -8,6 +8,7 @@ import {
 } from '#shared/game-data/songs/list'
 import { useSongListConditions } from '~/composables/song/useSongListConditions'
 import { useSongFields } from '~/composables/song/useSongFields'
+import { useListPanels } from '~/composables/useListPanels'
 
 const props = defineProps<{
   payload: SongListPayload
@@ -34,8 +35,11 @@ const visibleSongs = computed(() =>
     props.payload.searchTextBySongId,
   ),
 )
-const openPanels = ref<string[]>([])
-const readyForDisplay = computed(() => ready.value && initialized.value)
+const { panels: openPanels, initialized: panelsInitialized } =
+  useListPanels('songs')
+const readyForDisplay = computed(
+  () => ready.value && initialized.value && panelsInitialized.value,
+)
 const filterTotal = computed(() => availableSongs.value.length)
 </script>
 
