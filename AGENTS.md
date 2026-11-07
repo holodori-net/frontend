@@ -1,5 +1,11 @@
 # Frontend Repository Context
 
+## 實作原則
+
+- 新增或修改遊戲相關文案時，先查對應 `Lang*` 表、`LangClientCommon` 與既有知識文件，確認實際用途後沿用各語言原文。網站特有功能才補充必要文字；使用者明確指定的用語優先。來源對照記錄於對應知識文件。
+- 使用既有頁面作為參考時，先閱讀相關元件、composable 與樣式，核對控制項、文案、間距、載入及空值行為。沿用成熟模式，並依新功能的實際需求決定哪些行為適用。
+- UI 變更須以實際瀏覽器檢查與變更相關的桌機／窄螢幕、亮暗主題及載入狀態；有參考圖時並排比對。未完成視覺檢查時，回報中明確註明驗證限制。
+
 ## 產品與技術基線
 
 - hololive Dreams 非官方資料庫使用 Nuxt 4、Vue 3、TypeScript、PrimeVue、Tailwind CSS、Nuxt i18n 與自訂 PWA Service Worker。
