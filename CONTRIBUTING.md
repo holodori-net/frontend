@@ -27,7 +27,7 @@ Components are grouped under `app/components/card/list`, `card/detail`, `card/co
 
 `CardListView` and `SongListView` coordinate list state, compute results, and assemble their lists. Their `Filters` components own filter controls and localized options; `DisplaySettings` components render display controls and emit preference changes. Card panels emit `afterToggle` when their transitions finish so deferred card content can recheck its position.
 
-Shared card and song UI logic lives under `shared/game-data/cards` and `songs`. Each has `list.ts` for filtering and sorting, `list-query.ts` for URL serialization, `display.ts` for display fields, and `assets.ts` for asset URLs.
+Shared card and song UI logic lives under `shared/game-data/cards` and `songs`. Each has `list.ts` for filtering and sorting, `list-query.ts` for URL serialization, `display.ts` for display fields, and `assets.ts` for asset URLs. `useListRouteSync` owns route synchronization, search debounce, navigation revisions, pending navigations, and cleanup. Domain condition composables supply parsing, serialization, and error handling; cards also supply asynchronous skill compression and the URL byte budget.
 
 ### Game data layer
 
