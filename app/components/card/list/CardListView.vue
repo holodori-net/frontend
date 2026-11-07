@@ -21,6 +21,7 @@ import { useCardLayout } from '~/composables/card/useCardLayout'
 import { useCardFields } from '~/composables/card/useCardFields'
 import { useCardSkillFilterCatalog } from '~/composables/card/useCardSkillFilterCatalog'
 import { useListPanels } from '~/composables/useListPanels'
+import { useProgressiveList } from '~/composables/useProgressiveList'
 
 const props = defineProps<{
   payload: CardListPayload
@@ -106,6 +107,8 @@ const visibleCards = computed(() =>
     searchTextByCardId.value,
   ),
 )
+const { visibleItems: renderedCards, isLoading: isLoadingCards } =
+  useProgressiveList(visibleCards, 'cards')
 const visibleCardIds = computed(() => visibleCards.value.map(({ id }) => id))
 const connectCountCards = computed(() =>
   filterAndSortCards(
@@ -169,6 +172,9 @@ const selectedGroups = computed(() => getCardListFieldGroups(fields.value))
         total: cardItems.length,
       })
     }}
+    <span v-if="isLoadingCards" class="ml-2" role="status">
+      {{ t('cardList.loading') }}
+    </span>
   </p>
 
   <p
@@ -197,6 +203,7 @@ const selectedGroups = computed(() => getCardListFieldGroups(fields.value))
   >
     <ul
       class="grid list-none p-0"
+      :aria-busy="isLoadingCards"
       :class="
         layout === 'full'
           ? 'grid-cols-[repeat(auto-fill,minmax(min(100%,350px),1fr))] gap-x-5 gap-y-0'
@@ -209,7 +216,7 @@ const selectedGroups = computed(() => getCardListFieldGroups(fields.value))
       :aria-label="t('cards')"
     >
       <CardListItem
-        v-for="card in visibleCards"
+        v-for="card in renderedCards"
         :key="card.id"
         :card="card"
         :costumes="costumes"

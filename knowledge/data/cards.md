@@ -466,3 +466,5 @@ ORDER BY extent.position_y, extent.position_x;
 完整卡圖共用列數為一列卡圖加上已選資訊項目數，卡名與角色名各自一列，每種技能使用一列；各卡片技能區塊內的已選等級自然排列。關閉選項時移除對應列及間距；個別卡片缺少服裝或已選技能等級時保留其列位置，後續區塊維持對齊。`li`、`article` 與資訊容器使用巢狀 row subgrid；完整卡圖停用 layout containment，直式版型保留 `content-visibility: auto`，資訊列使用 24rem 初始高度估算。純卡圖估算依限制為最大 256px 的卡片寬度計算。
 
 `CardListItem` 保留 `li`、完整卡片 HTML 與可操作的詳細頁連結。`CardListContent` 正常 hydration 後啟用互動；卡片圖片使用原生 `loading="lazy"`。完整卡圖版型沿用 row subgrid。站內搜尋直接比對完整索引。
+
+站內切頁以 `useProgressiveList` 先顯示 12 張卡片，再跨瀏覽器幀逐批補齊，每批 12 張；生成 HTML 與首次 hydration 保留完整列表。篩選與結果數量依完整結果計算，補齊期間顯示載入文字並將列表標記為 `aria-busy`；結果改變或離開頁面時取消舊排程。全站以 Nuxt 原生進度條提供即時切頁回饋。

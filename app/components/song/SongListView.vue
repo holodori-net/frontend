@@ -9,6 +9,7 @@ import {
 import { useSongListConditions } from '~/composables/song/useSongListConditions'
 import { useSongFields } from '~/composables/song/useSongFields'
 import { useListPanels } from '~/composables/useListPanels'
+import { useProgressiveList } from '~/composables/useProgressiveList'
 
 const props = defineProps<{
   payload: SongListPayload
@@ -35,6 +36,8 @@ const visibleSongs = computed(() =>
     props.payload.searchTextBySongId,
   ),
 )
+const { visibleItems: renderedSongs, isLoading: isLoadingSongs } =
+  useProgressiveList(visibleSongs, 'songs')
 const { panels: openPanels, initialized: panelsInitialized } =
   useListPanels('songs')
 const readyForDisplay = computed(
@@ -68,7 +71,6 @@ const filterTotal = computed(() => availableSongs.value.length)
   </section>
   <p
     class="mx-auto mb-4 w-full max-w-[100rem] text-sm text-muted-color"
-    role="status"
     aria-live="polite"
   >
     {{
@@ -77,6 +79,9 @@ const filterTotal = computed(() => availableSongs.value.length)
         total: filterTotal,
       })
     }}
+    <span v-if="isLoadingSongs" class="ml-2" role="status">
+      {{ t('songList.loading') }}
+    </span>
   </p>
   <p
     v-if="!visibleSongs.length"
@@ -86,11 +91,12 @@ const filterTotal = computed(() => availableSongs.value.length)
   </p>
   <ul
     v-else
+    :aria-busy="isLoadingSongs"
     class="mx-auto grid w-full list-none grid-cols-[repeat(auto-fill,minmax(min(100%,16.875rem),1fr))] gap-x-5 gap-y-0 p-0"
     :aria-label="t('songs')"
   >
     <SongListItem
-      v-for="song in visibleSongs"
+      v-for="song in renderedSongs"
       :key="song.id"
       :song="song"
       :payload="payload"

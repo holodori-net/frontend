@@ -63,6 +63,8 @@
 
 ## 驗證與維護
 
+- 站內切頁以 Nuxt 原生進度條提供即時回饋。卡片與歌曲列表的 client navigation 使用 `useProgressiveList` 先顯示 12 筆，再跨瀏覽器幀逐批補齊；生成 HTML 與首次 hydration 保留完整列表。結果數、搜尋與篩選依完整結果計算，補齊期間提供載入狀態與列表 `aria-busy`，結果改變或離開頁面時取消舊排程。六語技能目錄以 `useCardSkillFilterCatalog` 在同一個 Nuxt app 重用，不增加序列化 payload。
+
 - 容器內會寫入專案產物的開發與驗證指令須使用本機 UID/GID（`--user "$(id -u):$(id -g)"`）；掛載路徑須與主機絕對路徑相同，或使用獨立產物目錄。
 
 - 本專案知識文件保存在 `knowledge/`，以 [knowledge/README.md](knowledge/README.md) 作為索引。處理相關主題前，先閱讀索引及對應文件。

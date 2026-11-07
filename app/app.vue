@@ -184,6 +184,7 @@ async function keepLinkedLanguages() {
   </svg>
   <div class="min-h-screen">
     <VitePwaManifest />
+    <NuxtLoadingIndicator :throttle="0" color="var(--p-primary-color)" />
     <NuxtPage />
     <PwaStatus />
   </div>
