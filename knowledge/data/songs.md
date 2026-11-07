@@ -66,6 +66,8 @@ JOIN AssetStreamingMute AS a
 
 ## 歌曲列表介面
 
+歌曲頁以 Nuxt SSR async data 將完整預設列表輸出於 HTML 和 Nuxt 頁面 payload，client hydration 重用 payload，不會再次取得相同列表 JSON；未快取的 client navigation 才延後取得共用 `/data/songs.json`。頁面 payload 序列化可用時間以保留 hydration 的初始列表，mounted 後依裝置時間更新一次，並排除教學及當下尚未可用的歌曲。停用 JavaScript 時顯示建置當時可用的預設列表。
+
 列表預設依發行日（`startTime`）數值倒序，日期相同時依來源 order 倒序及 ID 排列。排序可分別選擇 EASY、NORMAL、HARD 或 EXPERT 的樂曲 Lv。六語全文搜尋沿用完整文字索引，角色條件依歌曲的明確 `characterIds` 比對。
 
 封面左上以透明底細框膠囊顯示樂曲類別，文字、邊框與唱片圖示使用遊戲原色，右下顯示曲長。封面下方以四個等寬欄位顯示各難度的樂曲 Lv，各欄採中性底色與隨亮暗主題切換的文字，下緣以 4px 遊戲原色細條標示難度。資訊依序為標題、演唱者、各難度音符數量、解鎖條件及發行日，最下方僅為具備 MV、Live 動畫或直播靜音的歌曲顯示對應中性 Tag，曲長角標亦採中性色；無須解鎖的內容簡示為「無」。歌曲副標題與資訊小標使用卡片頁相同的 Divider。演唱者緊接標題下方並與標題共用一個資訊區塊；同排卡片沿用 CSS row subgrid 共用封面、難度及各啟用資訊區塊的列高，展開成員時同步擴高標題區塊；未啟用的區塊移除，缺少標籤的卡片保留該列位置。演唱者的 hover 提示與點擊展開清單由 `characterIds` 查對應角色的當前遊戲語言名稱，展開清單顯示角色頭像；沒有成員清單時保留來源唱者文字。音符數量依各難度的 `fullComboNoteCount` 分開顯示。

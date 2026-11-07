@@ -63,7 +63,7 @@
   "siteLanguage": "サイトの言語",
   "cardList": {
     "loading": "カード一覧を読み込み中…",
-    "requiresJavaScript": "カードの閲覧・検索・絞り込みには JavaScript を有効にしてください。",
+    "requiresJavaScript": "カードの検索・絞り込み・表示設定には JavaScript を有効にしてください。",
     "statsDescription": "ステータスはカード単体の最大レベル・最大特訓・最大開花時の値です。",
     "filters": "カードの絞り込み",
     "controls": "カード一覧の操作",
@@ -235,7 +235,7 @@
   "songs": "楽曲",
   "songList": {
     "description": "楽曲、歌唱者、楽曲 Lv.、解放条件を確認できます。",
-    "requiresJavaScript": "楽曲の閲覧、検索、絞り込みには JavaScript が必要です。",
+    "requiresJavaScript": "楽曲の検索、絞り込み、表示設定には JavaScript が必要です。",
     "loading": "楽曲を読み込み中…",
     "controls": "楽曲リストの操作",
     "filters": "楽曲の絞り込み",

@@ -226,6 +226,30 @@ describe('useCardFields', () => {
     expect(result.skillLevels.value.specialSkill).not.toContain(1)
   })
 
+  it.each([false, true])(
+    'keeps default preference references (stored: %s)',
+    (stored) => {
+      const getItem = vi.fn((): string | null => null)
+      start({
+        getItem,
+        setItem: vi.fn(),
+      } as unknown as Storage)
+      const result = useCardFields(available)
+      const fields = result.fields.value
+      const skillLevels = result.skillLevels.value
+      const passiveLevels = skillLevels.passiveSkill
+      if (stored) {
+        getItem.mockReturnValue(JSON.stringify({ fields, skillLevels }))
+      }
+
+      mount()
+
+      expect(result.fields.value).toBe(fields)
+      expect(result.skillLevels.value).toBe(skillLevels)
+      expect(result.skillLevels.value.passiveSkill).toBe(passiveLevels)
+    },
+  )
+
   it('groups interleaved basic fields without changing their group position', () => {
     start({
       getItem: vi.fn(() =>

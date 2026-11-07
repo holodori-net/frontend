@@ -4,7 +4,7 @@ import type { SongListPayload } from '#shared/game-data/songs'
 import { pageDataPaths } from '#shared/page-data'
 
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const runtimeConfig = useRuntimeConfig()
 const gameLocale = computed(() => String(route.params.gameLocale) as GameLocale)
 definePageMeta({
@@ -15,21 +15,42 @@ const {
   error,
   status,
   refresh,
-} = useLazyAsyncData<SongListPayload>(
+} = await useLazyAsyncData<SongListPayload>(
   'song-list',
-  (_nuxtApp, { signal }) =>
-    $fetch<SongListPayload>(pageDataPaths.songs, {
-      signal,
-      query: { _b: runtimeConfig.app.buildId },
-      retry: 0,
-    }),
-  { server: false },
+  async (_nuxtApp, { signal }) => {
+    try {
+      if (import.meta.server) {
+        const { readSongList } = await import('~~/server/data/song-list')
+        return readSongList()
+      }
+      return await $fetch<SongListPayload>(pageDataPaths.songs, {
+        signal,
+        query: { _b: runtimeConfig.app.buildId },
+        retry: 0,
+      })
+    } catch (cause) {
+      if (import.meta.server) {
+        console.error('Holodori song data generation failed', cause)
+      }
+      throw cause
+    }
+  },
 )
+if (import.meta.server && error.value) {
+  throw createError({
+    statusCode: 500,
+    statusMessage: 'Song list data failed to load',
+    cause: error.value,
+  })
+}
 watch(error, (value) => {
   if (value) console.error('Holodori song data loading failed', value)
 })
-const availableAt = ref<number | null>(null)
+const availableAt = useState('song-list-available-at', () => Date.now())
 onMounted(() => {
+  availableAt.value = Date.now()
+})
+watch([gameLocale, locale], () => {
   availableAt.value = Date.now()
 })
 </script>
@@ -45,17 +66,17 @@ onMounted(() => {
         </p>
       </div>
       <noscript>{{ t('songList.requiresJavaScript') }}</noscript>
-      <Suspense v-if="payload && availableAt !== null">
+      <Suspense v-if="payload">
         <LazySongListView
           :payload="payload"
           :game-locale="gameLocale"
           :available-at="availableAt"
         />
-        <template #fallback
-          ><p class="py-16 text-center text-sm text-muted-color" role="status">
+        <template #fallback>
+          <p class="py-16 text-center text-sm text-muted-color" role="status">
             {{ t('pageLoading') }}
-          </p></template
-        >
+          </p>
+        </template>
       </Suspense>
       <section
         v-else-if="status === 'error'"

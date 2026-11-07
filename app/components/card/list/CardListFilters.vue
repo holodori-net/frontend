@@ -34,14 +34,8 @@ const conditions = defineModel<CardListConditions>({ required: true })
 const selectedSkillKeys = defineModel<string[]>('selectedSkillKeys', {
   required: true,
 })
-const emit = defineEmits<{ reset: []; afterToggle: [] }>()
+const emit = defineEmits<{ reset: [] }>()
 const { t } = useI18n()
-const accordionContentPt = {
-  transition: {
-    onAfterEnter: () => emit('afterToggle'),
-    onAfterLeave: () => emit('afterToggle'),
-  },
-}
 const characterOptions = computed(() => {
   const characters = new Map(
     props.cards.map((card) => [card.characterId, card]),
@@ -120,7 +114,7 @@ const selectedSortOption = computed(() =>
         />
       </Button>
     </div>
-    <AccordionContent :pt="accordionContentPt">
+    <AccordionContent>
       <div class="space-y-4">
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <label class="col-span-full block min-w-0">

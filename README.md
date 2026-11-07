@@ -26,7 +26,7 @@ Combine search with character, rarity, attribute, specialization, skill, and Con
 
 Search, filters, and sorting are saved in the URL and restored when reloading, changing languages, or using browser history. Layout, selected information, and skill levels are saved in this browser and shared across languages, including offline use. **Reset display** restores the default layout and information while keeping search and filters.
 
-The page shows a loading message until it restores display preferences and URL conditions. Cards outside the view show placeholders until you scroll to them, then retain their details. JavaScript is required to browse cards. Card art and icons load from `assets.holodori.net`. Loading card art shows a skeleton placeholder; reduced motion disables its shimmer. Unavailable card art shows a text placeholder while retaining card details; unavailable attribute and stat icons show their names. Stars play as animated WebP images managed by the browser; if star images are unavailable, rarity text appears.
+The full default card list, including names, skills, and detail links, is available immediately, even without JavaScript. Once the interactive controls are ready, saved display preferences and URL conditions are applied. Filtering, sorting, and display controls require JavaScript. Card art and icons load from `assets.holodori.net`; card art shows a skeleton while loading, with reduced motion disabling its shimmer. Unavailable card art shows a text placeholder while retaining card details; unavailable attribute and stat icons show their names. Stars play as animated WebP images; if star images are unavailable, rarity text appears.
 
 ### Card details
 
@@ -44,13 +44,13 @@ Open **Songs** to browse jacket images, singers, four chart difficulties, Song L
 
 **Filters and sorting** and **Song display** start collapsed and can be expanded independently. Resetting either panel preserves both panels' open or closed state. Song display options stay in a fixed order, with one Song Level toggle for all four difficulties; singer names can be expanded to show member avatars. Display preferences are saved in this browser across languages, while filters and sorting are saved in the URL.
 
-Songs are checked against the device time whenever you enter the page. Tutorial songs and songs whose source availability time has not arrived are hidden. Reopen or reload the page after the availability time to see a song already included in the site's data. Dates are displayed in JST. JavaScript is required to browse songs. Jackets load on demand from `assets.holodori.net`; unavailable images retain a placeholder and the song name.
+Without JavaScript, the song list reflects what was available when the site was built. With JavaScript enabled, each page entry checks device time once and updates the list, hiding tutorial songs and songs whose availability time has not arrived. Reopen or reload after a song's availability time to see it if it is already in the site's data. Dates are displayed in JST. Jackets load from `assets.holodori.net`; unavailable images retain a placeholder and the song name.
 
 ## Characters
 
 Open **Characters** to browse members grouped by production. Only playable characters are shown by default; turn on **Show unplayable characters** to include the others. Character and production names follow the selected game content language. The default character list is available without JavaScript. Character icons load from `assets.holodori.net`; unavailable icons show a placeholder while retaining the character's name.
 
-Cards, songs, and characters show a loading status while their data downloads. If loading fails, select **Retry** to try again.
+During in-site navigation, a list that is not cached shows a loading status. If loading fails, select **Retry** to try again.
 
 ## Theme and appearance
 

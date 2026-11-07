@@ -63,7 +63,7 @@
   "siteLanguage": "網站語言",
   "cardList": {
     "loading": "正在載入卡片列表…",
-    "requiresJavaScript": "請啟用 JavaScript 以瀏覽、搜尋及篩選卡片。",
+    "requiresJavaScript": "請啟用 JavaScript 以搜尋、篩選及調整卡片顯示設定。",
     "statsDescription": "三圍為卡片自身在滿等、滿特訓、滿綻放時的數值。",
     "filters": "卡片篩選",
     "controls": "卡片列表控制項",
@@ -235,7 +235,7 @@
   "songs": "樂曲",
   "songList": {
     "description": "瀏覽樂曲、演唱者、樂曲 Lv. 與解鎖條件。",
-    "requiresJavaScript": "瀏覽、搜尋與篩選樂曲需要啟用 JavaScript。",
+    "requiresJavaScript": "搜尋、篩選與調整樂曲顯示設定需要啟用 JavaScript。",
     "loading": "正在載入樂曲…",
     "controls": "樂曲列表控制項",
     "filters": "樂曲篩選",

@@ -63,7 +63,7 @@
   "siteLanguage": "Site language",
   "cardList": {
     "loading": "Loading cards…",
-    "requiresJavaScript": "Enable JavaScript to browse, search, and filter cards.",
+    "requiresJavaScript": "Enable JavaScript to search, filter, and customize the card list.",
     "statsDescription": "Stats show the card at maximum level, SP Training, and Bloom, based on the card alone.",
     "filters": "Card filters",
     "controls": "Card list controls",
@@ -235,7 +235,7 @@
   "songs": "Songs",
   "songList": {
     "description": "Browse songs, singers, song levels, and unlock conditions.",
-    "requiresJavaScript": "Enable JavaScript to browse, search, and filter songs.",
+    "requiresJavaScript": "Enable JavaScript to search, filter, and customize the song list.",
     "loading": "Loading songs…",
     "controls": "Song list controls",
     "filters": "Song filters",

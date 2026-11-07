@@ -369,7 +369,7 @@ ORDER BY extent.position_y, extent.position_x;
 
 ### 列表 payload
 
-**CONFIRMED**：Nitro 於建置時將 `CardListPayload` 產生為共用靜態 `/data/cards.json`。卡片頁以 client-side `useLazyAsyncData` 先顯示頁首、標題與載入狀態，再取得列表資料；`CardListView` 於資料就緒後初始化網址條件、顯示偏好及技能／Connect 索引。失敗時提供重試，離線同步將此 JSON 與卡片頁保存於同一份快照。
+**CONFIRMED**：Nitro 於建置時將 `CardListPayload` 產生為共用靜態 `/data/cards.json` 及 Nuxt 頁面 payload。卡片頁以 Nuxt SSR async data 輸出完整預設列表 HTML；client hydration 重用頁面 payload，不會再次取得相同列表 JSON。未快取資料的 client navigation 才延後取得共用 JSON。列表控制於偏好和網址條件還原前保持 inert 與 `aria-busy`，列表內容持續可見。失敗時提供重試，離線同步將此 JSON 與卡片頁保存於同一份快照。
 
 `readCardList()` 重用卡片、角色與成長 converter，回傳 `CardListPayload`，包含 `cards`、依 ID 共用的 `costumes` 與精簡 `skills`。卡片列保留角色順序、角色素材 ID、名稱、卡圖素材、篩選欄位、已計算的滿養成三圍、`costumeId` 及三類卡片技能 ID。`skills` 依技能 ID 保存被引用技能的全部來源等級，並共用條件、效果、Target、模板與標籤；主動效果使用獨立的 `activeEffects` 字典。`characterAssetId` 取自 `Character.assetId`；角色篩選選項以 `img_chr_icon_normal_${characterAssetId}` 素材顯示名稱旁圖示，保留素材 ID 前導零，缺圖時保留名稱。列表資料保存角色順序與六語卡名及角色名；角色排序依 `Character.order`，角色篩選選項依其遞增排列。同順序時角色選項依 ID 遞增，卡片排序則依卡片 `order` 遞減及 ID 遞增排列。角色下拉選單可搜尋所有已設定遊戲語言的名稱，選項與已選標籤仍依目前遊戲語言顯示。六語名稱支援跨語搜尋，成長表保留於生成階段。三圍公式、特化判定與固定案例見 [卡片成長資料](card-growth.md#列表的滿養成三圍)。
 
@@ -465,4 +465,4 @@ ORDER BY extent.position_y, extent.position_x;
 
 完整卡圖共用列數為一列卡圖加上已選資訊項目數，卡名與角色名各自一列，每種技能使用一列；各卡片技能區塊內的已選等級自然排列。關閉選項時移除對應列及間距；個別卡片缺少服裝或已選技能等級時保留其列位置，後續區塊維持對齊。`li`、`article` 與資訊容器使用巢狀 row subgrid；完整卡圖停用 layout containment，直式版型保留 `content-visibility: auto`，資訊列使用 24rem 初始高度估算。純卡圖估算依限制為最大 256px 的卡片寬度計算。
 
-`CardListItem` 立即建立列表項目、可存取卡名與靜態佔位，PrimeVue `DeferredContent` 在位置進入可見範圍後建立完整的 `CardListContent`，並保留至該項目卸載。完整卡圖的 DeferredContent 容器延續 row subgrid。佔位依卡圖比例及所選來源等級數估算高度，載入前不組合技能描述。結果順序、版型、資訊與等級選擇、語言、面板收合、列表寬度、卡片載入及字型就緒後，於 DOM 更新後合併重檢尚未載入的容器；已載入內容保留元件狀態。站內搜尋直接比對完整索引。
+`CardListItem` 保留 `li`、完整卡片 HTML 與可操作的詳細頁連結。`CardListContent` 正常 hydration 後啟用互動；卡片圖片使用原生 `loading="lazy"`。完整卡圖版型沿用 row subgrid。站內搜尋直接比對完整索引。

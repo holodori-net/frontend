@@ -22,15 +22,8 @@ const emit = defineEmits<{
   reset: []
   toggleField: [field: CardListField, selected: boolean]
   toggleSkillLevel: [field: CardSkillField, level: number, selected: boolean]
-  afterToggle: []
 }>()
 const { t } = useI18n()
-const accordionContentPt = {
-  transition: {
-    onAfterEnter: () => emit('afterToggle'),
-    onAfterLeave: () => emit('afterToggle'),
-  },
-}
 const layoutOptions = computed<{ value: CardListLayout; label: string }[]>(() =>
   (['full', 'vertical'] as const).map((value) => ({
     value,
@@ -93,7 +86,7 @@ function selectedOrder(group: CardListFieldGroup['key']) {
         />
       </Button>
     </div>
-    <AccordionContent :pt="accordionContentPt">
+    <AccordionContent>
       <div class="flex flex-col gap-5 sm:flex-row sm:items-start">
         <fieldset class="w-full border-0 p-0 sm:w-52">
           <legend class="mb-1.5 text-sm font-medium">

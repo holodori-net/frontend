@@ -17,16 +17,34 @@ const {
   error,
   status,
   refresh,
-} = useLazyAsyncData<CardListPayload>(
+} = await useLazyAsyncData<CardListPayload>(
   'card-list',
-  (_nuxtApp, { signal }) =>
-    $fetch<CardListPayload>(pageDataPaths.cards, {
-      signal,
-      query: { _b: runtimeConfig.app.buildId },
-      retry: 0,
-    }),
-  { server: false },
+  async (_nuxtApp, { signal }) => {
+    try {
+      if (import.meta.server) {
+        const { readCardList } = await import('~~/server/data/card-list')
+        return readCardList()
+      }
+      return await $fetch<CardListPayload>(pageDataPaths.cards, {
+        signal,
+        query: { _b: runtimeConfig.app.buildId },
+        retry: 0,
+      })
+    } catch (cause) {
+      if (import.meta.server) {
+        console.error('Holodori card data generation failed', cause)
+      }
+      throw cause
+    }
+  },
 )
+if (import.meta.server && error.value) {
+  throw createError({
+    statusCode: 500,
+    statusMessage: 'Card list data failed to load',
+    cause: error.value,
+  })
+}
 watch(error, (value) => {
   if (value) console.error('Holodori card data loading failed', value)
 })

@@ -83,6 +83,13 @@ function isCardListField(value: unknown): value is CardListField {
   )
 }
 
+function hasSameValues<T>(left: readonly T[], right: readonly T[]) {
+  return (
+    left.length === right.length &&
+    left.every((value, index) => value === right[index])
+  )
+}
+
 function readStoredPreference(
   stored: string | null,
   availableLevels: CardSkillLevelSelections,
@@ -170,8 +177,20 @@ export function useCardFields(availableLevels: CardSkillLevelSelections) {
       next.skillLevels,
       availableLevels,
     )
-    fieldsState.value = normalized.fields
-    skillLevelsState.value = normalized.skillLevels
+    if (!hasSameValues(fieldsState.value, normalized.fields)) {
+      fieldsState.value = normalized.fields
+    }
+    if (
+      CARD_SKILL_FIELDS.some(
+        (field) =>
+          !hasSameValues(
+            skillLevelsState.value[field],
+            normalized.skillLevels[field],
+          ),
+      )
+    ) {
+      skillLevelsState.value = normalized.skillLevels
+    }
     if (!persist || !initializedState.value) return
 
     try {

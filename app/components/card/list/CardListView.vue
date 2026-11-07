@@ -20,14 +20,13 @@ import {
 import { useCardListConditions } from '~/composables/card/useCardListConditions'
 import { useCardLayout } from '~/composables/card/useCardLayout'
 import { useCardFields } from '~/composables/card/useCardFields'
-import { useCardDeferredContent } from '~/composables/card/useCardDeferredContent'
 import { useListPanels } from '~/composables/useListPanels'
 
 const props = defineProps<{
   payload: CardListPayload
   gameLocale: GameLocale
 }>()
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const gameLocale = computed(() => props.gameLocale)
 const payload = computed(() => props.payload)
 
@@ -97,9 +96,6 @@ const ready = computed(
     fieldsInitialized.value &&
     panelsInitialized.value,
 )
-const cardListElement = ref<HTMLElement | null>(null)
-const { revision: deferRevision, scheduleRecheck } =
-  useCardDeferredContent(cardListElement)
 const visibleCards = computed(() =>
   filterAndSortCards(
     cardItems.value,
@@ -128,133 +124,106 @@ const connectCounts = computed(() =>
     connectCatalog.cardExtents,
   ),
 )
-watch(
-  [
-    () => visibleCardIds.value.join('\n'),
-    layout,
-    fields,
-    skillLevels,
-    gameLocale,
-    locale,
-    openPanels,
-  ],
-  () => scheduleRecheck(),
-  { deep: true, flush: 'post' },
-)
 const statKeys: CardStatKey[] = ['performance', 'technique', 'sense']
 const selectedGroups = computed(() => getCardListFieldGroups(fields.value))
 </script>
 
 <template>
+  <section
+    class="mx-auto mb-4 w-full max-w-[100rem] overflow-hidden rounded-xl border border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900"
+    :aria-label="t('cardList.controls')"
+    :aria-busy="!ready"
+    :inert="!ready"
+  >
+    <Accordion v-model:value="openPanels" multiple>
+      <CardListFilters
+        v-model="conditions"
+        v-model:selected-skill-keys="selectedSkillKeys"
+        :cards="cardItems"
+        :filter-options="filterOptions"
+        :game-locale="gameLocale"
+        :skill-catalog="skillCatalog"
+        :connect-catalog="connectCatalog"
+        :connect-counts="connectCounts"
+        :visible-card-ids="visibleCardIds"
+        :skill-query-supported="skillQuerySupported"
+        :skill-query-error="skillQueryError"
+        @reset="resetConditions"
+      />
+      <CardListDisplaySettings
+        v-model:layout="layout"
+        :fields="fields"
+        :skill-levels="skillLevels"
+        :available-skill-levels="availableSkillLevels"
+        @reset="resetDisplay"
+        @toggle-field="toggleField"
+        @toggle-skill-level="toggleSkillLevel"
+      />
+    </Accordion>
+  </section>
+
+  <p class="mb-4 text-sm text-muted-color" aria-live="polite">
+    {{
+      t('cardList.resultCount', {
+        visible: visibleCards.length,
+        total: cardItems.length,
+      })
+    }}
+  </p>
+
   <p
-    v-if="!ready"
+    v-if="visibleCards.length === 0"
     class="py-16 text-center text-sm text-muted-color"
     role="status"
   >
-    {{ t('cardList.loading') }}
+    {{ t('cardList.noResults') }}
   </p>
-  <template v-else>
-    <section
-      class="mx-auto mb-4 w-full max-w-[100rem] overflow-hidden rounded-xl border border-surface-200 bg-surface-0 dark:border-surface-700 dark:bg-surface-900"
-      :aria-label="t('cardList.controls')"
-    >
-      <Accordion v-model:value="openPanels" multiple>
-        <CardListFilters
-          v-model="conditions"
-          v-model:selected-skill-keys="selectedSkillKeys"
-          :cards="cardItems"
-          :filter-options="filterOptions"
-          :game-locale="gameLocale"
-          :skill-catalog="skillCatalog"
-          :connect-catalog="connectCatalog"
-          :connect-counts="connectCounts"
-          :visible-card-ids="visibleCardIds"
-          :skill-query-supported="skillQuerySupported"
-          :skill-query-error="skillQueryError"
-          @reset="resetConditions"
-          @after-toggle="scheduleRecheck"
-        />
-        <CardListDisplaySettings
-          v-model:layout="layout"
-          :fields="fields"
-          :skill-levels="skillLevels"
-          :available-skill-levels="availableSkillLevels"
-          @reset="resetDisplay"
-          @toggle-field="toggleField"
-          @toggle-skill-level="toggleSkillLevel"
-          @after-toggle="scheduleRecheck"
-        />
-      </Accordion>
-    </section>
-
-    <p class="mb-4 text-sm text-muted-color" aria-live="polite">
-      {{
-        t('cardList.resultCount', {
-          visible: visibleCards.length,
-          total: cardItems.length,
-        })
-      }}
-    </p>
-
-    <p
-      v-if="visibleCards.length === 0"
-      class="py-16 text-center text-sm text-muted-color"
-      role="status"
-    >
-      {{ t('cardList.noResults') }}
-    </p>
-    <div
-      v-else
+  <div
+    v-else
+    :class="
+      layout === 'vertical' && selectedGroups.length > 0 && 'overflow-x-auto'
+    "
+    :tabindex="
+      layout === 'vertical' && selectedGroups.length > 0 ? 0 : undefined
+    "
+    :role="
+      layout === 'vertical' && selectedGroups.length > 0 ? 'region' : undefined
+    "
+    :aria-label="
+      layout === 'vertical' && selectedGroups.length > 0
+        ? t('cards')
+        : undefined
+    "
+  >
+    <ul
+      class="grid list-none p-0"
       :class="
-        layout === 'vertical' && selectedGroups.length > 0 && 'overflow-x-auto'
+        layout === 'full'
+          ? 'grid-cols-[repeat(auto-fill,minmax(min(100%,350px),1fr))] gap-x-5 gap-y-0'
+          : [
+              'grid-cols-1 gap-y-5',
+              selectedGroups.length > 0 && 'card-list-vertical-has-info',
+            ]
       "
-      :tabindex="
-        layout === 'vertical' && selectedGroups.length > 0 ? 0 : undefined
-      "
-      :role="
-        layout === 'vertical' && selectedGroups.length > 0
-          ? 'region'
-          : undefined
-      "
-      :aria-label="
-        layout === 'vertical' && selectedGroups.length > 0
-          ? t('cards')
-          : undefined
-      "
+      :style="{ '--card-list-field-count': selectedGroups.length }"
+      :aria-label="t('cards')"
     >
-      <ul
-        ref="cardListElement"
-        class="grid list-none p-0"
-        :class="
-          layout === 'full'
-            ? 'grid-cols-[repeat(auto-fill,minmax(min(100%,350px),1fr))] gap-x-5 gap-y-0'
-            : [
-                'grid-cols-1 gap-y-5',
-                selectedGroups.length > 0 && 'card-list-vertical-has-info',
-              ]
-        "
-        :style="{ '--card-list-field-count': selectedGroups.length }"
-        :aria-label="t('cards')"
-      >
-        <CardListItem
-          v-for="card in visibleCards"
-          :key="card.id"
-          :card="card"
-          :costumes="costumes"
-          :skills="skills"
-          :connect-effects="connectEffects"
-          :connect-extents="connectExtents"
-          :game-locale="gameLocale"
-          :stat-keys="statKeys"
-          :layout="layout"
-          :fields="fields"
-          :skill-levels="skillLevels"
-          :defer-revision="deferRevision"
-          @content-loaded="scheduleRecheck"
-        />
-      </ul>
-    </div>
-  </template>
+      <CardListItem
+        v-for="card in visibleCards"
+        :key="card.id"
+        :card="card"
+        :costumes="costumes"
+        :skills="skills"
+        :connect-effects="connectEffects"
+        :connect-extents="connectExtents"
+        :game-locale="gameLocale"
+        :stat-keys="statKeys"
+        :layout="layout"
+        :fields="fields"
+        :skill-levels="skillLevels"
+      />
+    </ul>
+  </div>
 </template>
 
 <style scoped>
