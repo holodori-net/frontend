@@ -27,6 +27,8 @@ Components are grouped under `app/components/card/list`, `card/detail`, `card/co
 
 `CardListView` and `SongListView` coordinate list state, compute results, and assemble their lists. Their `Filters` components own filter controls and localized options; `DisplaySettings` components render display controls and emit preference changes.
 
+`useCardSkillFilterCatalog` reuses the six-language skill catalog within one Nuxt app without adding it to the serialized payload; separate server requests have separate caches.
+
 `MemberSelect` reads member names in the active route's game locale and selection and search placeholders in the site language. It shares avatar-and-name rows and multilingual search across the header theme selector and card and song filters. The header uses single selection; filters use multiple selection with localized Chips. Regular groups and their member order come from `CharacterGrouping` through the `member-groups` Nuxt payload. Members in multiple groups appear in each, with a shared selection and one stored ID. Empty groups are omitted; ungrouped members appear under Other. Consumers supply eligible members and retain ownership of filter or theme state.
 
 Shared card and song UI logic lives under `shared/game-data/cards` and `songs`. Each has `list.ts` for filtering and sorting, `list-query.ts` for URL serialization, `display.ts` for display fields, and `assets.ts` for asset URLs. `useListRouteSync` owns route synchronization, search debounce, navigation revisions, pending navigations, and cleanup. Domain condition composables supply parsing, serialization, and error handling; cards also supply asynchronous skill compression and the URL byte budget.

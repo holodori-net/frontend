@@ -4,7 +4,6 @@ import type {
   CardListPayload,
   CardStatKey,
 } from '#shared/game-data/cards/list-data'
-import { buildCardSkillFilterCatalog } from '#shared/game-data/cards/skill-filter'
 import {
   buildCardConnectFilterCatalog,
   countCardConnectOptions,
@@ -20,6 +19,7 @@ import {
 import { useCardListConditions } from '~/composables/card/useCardListConditions'
 import { useCardLayout } from '~/composables/card/useCardLayout'
 import { useCardFields } from '~/composables/card/useCardFields'
+import { useCardSkillFilterCatalog } from '~/composables/card/useCardSkillFilterCatalog'
 import { useListPanels } from '~/composables/useListPanels'
 
 const props = defineProps<{
@@ -36,7 +36,7 @@ const skills = computed(() => payload.value.skills)
 const connectEffects = computed(() => payload.value.connectEffects)
 const connectExtents = computed(() => payload.value.connectExtents)
 const searchTextByCardId = computed(() => payload.value.searchTextByCardId)
-const skillCatalog = buildCardSkillFilterCatalog(payload.value)
+const skillCatalog = useCardSkillFilterCatalog(payload.value)
 const connectCatalog = buildCardConnectFilterCatalog(payload.value)
 const skillKeys = Object.keys(skillCatalog.canonicalKeys)
 const filterOptions = computed(() =>
