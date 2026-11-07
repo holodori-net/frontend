@@ -5,7 +5,7 @@ import type {
   LiveActiveSkillLevelData,
   LivePassiveSkillLevelData,
   LiveSpecialSkillLevelData,
-} from '../../shared/game-data/card-skills.ts'
+} from '../../shared/game-data/cards/skills.ts'
 import {
   costumeIdsForCards,
   projectCardListSkills,

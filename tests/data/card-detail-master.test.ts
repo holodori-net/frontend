@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import {
   calculateCardGrowth,
   getMaxCardGrowth,
-} from '../../shared/game-data/card-stats.ts'
+} from '../../shared/game-data/cards/stats.ts'
 import {
   readCardDetail,
   readCardDetailIndex,

@@ -7,8 +7,8 @@ import {
   type SiteLocale,
 } from '#shared/language'
 import { cardDetailDataPath } from '#shared/page-data'
-import { getCardImageUrl } from '#shared/game-data/card-list'
-import type { CardDetailPayload } from '#shared/game-data/card-detail'
+import { getCardImageUrl } from '#shared/game-data/cards/assets'
+import type { CardDetailPayload } from '#shared/game-data/cards/detail'
 
 const route = useRoute()
 const { t, locale } = useI18n()

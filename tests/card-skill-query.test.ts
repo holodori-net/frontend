@@ -4,7 +4,7 @@ import {
   decodeCardSkillSelection,
   encodeCardSkillSelection,
   isCardSkillQuerySupported,
-} from '../shared/game-data/card-skill-query.ts'
+} from '../shared/game-data/cards/skill-query.ts'
 
 describe('card skill query codec', () => {
   it('encodes sorted unique UTF-8 IDs and decodes them through gzip', async () => {

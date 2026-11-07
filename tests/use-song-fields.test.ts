@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ref, type Ref } from 'vue'
-import { SONG_LIST_FIELDS } from '../shared/game-data/song-list.ts'
-import { useSongFields } from '../app/composables/useSongFields.ts'
+import { SONG_LIST_FIELDS } from '../shared/game-data/songs/display.ts'
+import { useSongFields } from '../app/composables/song/useSongFields.ts'
 
 type TestContext = { mounted: Array<() => void>; restoreStorage: () => void }
 let context: TestContext | undefined

@@ -6,7 +6,7 @@ import {
 
 describe('language entry routes', () => {
   it('derives entries from localized pages and excludes routes disabled for i18n', () => {
-    const componentFile = '/project/app/components/LanguageEntry.vue'
+    const componentFile = '/project/app/components/site/LanguageEntry.vue'
     const pages = [
       {
         path: '/:gameLocale()',
@@ -80,7 +80,7 @@ describe('language entry routes', () => {
         { path: '/:gameLocale()/foo/bar', name: 'language-entry-foo-bar' },
         { path: '/:gameLocale()/foo-bar' },
       ],
-      '/project/app/components/LanguageEntry.vue',
+      '/project/app/components/site/LanguageEntry.vue',
     )
 
     expect(routes.map(({ name }) => name)).toEqual([

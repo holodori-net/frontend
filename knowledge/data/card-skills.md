@@ -1,6 +1,6 @@
 # 卡片被動、主動與特殊技能資料字典
 
-`transformCardSkillData(database, confirmedTemplates?)` 回傳 `CardSkillData`，包含依技能 ID 分組的 `passiveSkills`、`activeSkills`、`specialSkills`，以及共用 `effects`、`activeEffects`、`triggers`、`targets`、`catalog`、`pendingDescriptions`。技能等級依來源 `level` 排序；效果與條件依 `number` 排序。型別見 [card-skills.ts](../../shared/game-data/card-skills.ts)，轉換見 [card-skills.ts](../../server/data/converters/card-skills.ts)。
+`transformCardSkillData(database, confirmedTemplates?)` 回傳 `CardSkillData`，包含依技能 ID 分組的 `passiveSkills`、`activeSkills`、`specialSkills`，以及共用 `effects`、`activeEffects`、`triggers`、`targets`、`catalog`、`pendingDescriptions`。技能等級依來源 `level` 排序；效果與條件依 `number` 排序。型別見 [card-skills.ts](../../shared/game-data/cards/skills.ts)，轉換見 [card-skills.ts](../../server/data/converters/card-skills.ts)。
 
 以下欄位、型別、主鍵與資料關聯為 **CONFIRMED**，由本機 SQLite `PRAGMA table_info`、唯讀查詢及轉換程式確認。`✓` 表示已轉換；關聯不等同 SQLite 外鍵約束。
 

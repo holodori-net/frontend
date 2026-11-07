@@ -1,8 +1,8 @@
 import type {
   CardListCostumeData,
   CardListSkillData,
-} from '#shared/game-data/card-list-data'
-import type { CardSkillData } from '#shared/game-data/card-skills'
+} from '#shared/game-data/cards/list-data'
+import type { CardSkillData } from '#shared/game-data/cards/skills'
 import type {
   CostumeData,
   DescriptionEntity,

@@ -8,8 +8,8 @@ import {
   type App,
 } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { SongFilterOptions } from '../shared/game-data/song-list.ts'
-import { useSongListConditions } from '../app/composables/useSongListConditions.ts'
+import type { SongFilterOptions } from '../shared/game-data/songs/list.ts'
+import { useSongListConditions } from '../app/composables/song/useSongListConditions.ts'
 
 type HostNode = {
   type?: string

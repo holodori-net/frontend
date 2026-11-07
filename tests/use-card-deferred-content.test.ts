@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { nextTick, ref, type Ref } from 'vue'
-import { useCardDeferredContent } from '../app/composables/useCardDeferredContent.ts'
+import { useCardDeferredContent } from '../app/composables/card/useCardDeferredContent.ts'
 
 type TestContext = {
   mounted: Array<() => void>

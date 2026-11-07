@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { isGameLocale, type GameLocale } from '#shared/language'
-import type { CardListPayload } from '#shared/game-data/card-list-data'
+import type { CardListPayload } from '#shared/game-data/cards/list-data'
 import { pageDataPaths } from '#shared/page-data'
 
 const route = useRoute()

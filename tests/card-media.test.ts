@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getCardMovieUrl,
   getCardVoiceUrl,
-} from '../shared/game-data/card-icons.ts'
+} from '../shared/game-data/cards/assets.ts'
 
 describe('card movie URLs', () => {
   it('preserves the asset ID and builds each movie variant URL', () => {

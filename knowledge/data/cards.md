@@ -219,7 +219,7 @@ ORDER BY extent.position_y, extent.position_x;
 
 **CONFIRMED**：簽名開關標籤沿用 `LangClientCommon.client_id=49606730009678` 的「顯示簽名／サイン表示／Show Signature」。
 
-完整卡圖使用 `https://assets.holodori.net/cdn/img_card_full_{assetId}/Texture2D/img_card_full_{assetId}.thumb-640-v1.webp` 的 640×360 縮圖，以 16:9 顯示。直式卡圖使用 `https://assets.holodori.net/cdn/img_card_vert_{assetId}/Texture2D/img_card_vert_{assetId}.webp`，以 256:366 顯示。素材用途與 URL 由 `shared/game-data/card-list.ts` 的 `getCardImageUrl()` 管理，保留素材 ID 的前導零。卡圖以單一 `src` 載入，並共用 `useImageLoading` 處理 Skeleton、失敗占位及快取圖片狀態。
+完整卡圖使用 `https://assets.holodori.net/cdn/img_card_full_{assetId}/Texture2D/img_card_full_{assetId}.thumb-640-v1.webp` 的 640×360 縮圖，以 16:9 顯示。直式卡圖使用 `https://assets.holodori.net/cdn/img_card_vert_{assetId}/Texture2D/img_card_vert_{assetId}.webp`，以 256:366 顯示。素材用途與 URL 由 `shared/game-data/cards/assets.ts` 的 `getCardImageUrl()` 管理，保留素材 ID 的前導零。卡圖以單一 `src` 載入，並共用 `useImageLoading` 處理 Skeleton、失敗占位及快取圖片狀態。
 
 **CONFIRMED**：2026-10-23 讀取 `04014-5-uniq-0094-00` 的 CDN WebP 檔頭，[縮圖](https://assets.holodori.net/cdn/img_card_full_04014-5-uniq-0094-00/Texture2D/img_card_full_04014-5-uniq-0094-00.thumb-640-v1.webp)為 640×360、49,850 bytes，原圖為 2048×1152、2,178,246 bytes。
 
@@ -227,7 +227,7 @@ ORDER BY extent.position_y, extent.position_x;
 
 **CONFIRMED**：「篩選與排序」與「卡片顯示」面板預設皆展開；各標題列提供同樣式的 `RotateCcw` 圖示按鈕，分別重設對應設定，保留本地化提示與可存取名稱。收合時仍可重設，並保留面板收合狀態。重設按鈕寬 56px，填滿標題列高度且至少 44px 高；圖示為 20px。
 
-**CONFIRMED**：列表的「卡片顯示」提供版型及基礎資訊、被動技能、主動技能、特殊技能、隊長服裝技能、Connect 六個群組；摘要計算已選群組數。基礎資訊包含可獨立選取的卡名、角色名、三圍與合計。資訊選項使用緊湊的小圓角 PrimeVue Button，以 primary 色表示選取、secondary outlined 樣式表示未選，並提供 aria-pressed。各群組名稱左側以圓形 Badge 顯示共用排序號，未選時顯示「−」。基礎資訊、三類卡片技能與 Connect 使用 PrimeVue InputGroup 將名稱、排序號與子項按鈕相連；群組內高度、字級與內距一致，只有外側保留小圓角。所有選項共用同一層靠上排列，基本高度為 32px；基礎資訊子項依內容寬度排列，空間不足時換行。技能群組依可用寬度整組換行；窄螢幕允許技能名稱折行，等級 chip 維持並排。預設開啟一般資訊，三類卡片技能只選 Lv. 2，Connect 選取所有可用等級；各等級可獨立選取。關閉時移除對應內容與間距。全部關閉時只顯示填滿卡片寬度的卡圖、屬性與星級，保留所選版型比例及可存取卡名；直式純卡圖每列一張、靠左排列，卡片最大寬度為 256px。資訊項目定義由 `shared/game-data/card-list.ts` 的 `CARD_LIST_FIELDS` 管理；`useCardFields` 以 `holodori-card-fields` 保存 `{ fields, skillLevels }` JSON 物件，`fields` 保存群組與組內選取順序，基礎資訊成員連續排列，空陣列表示純卡圖；`skillLevels` 保存各技能已選等級。既有偏好保留選取項目，以最早的基礎資訊項目決定群組位置，組內維持選取順序；舊版陣列的三類卡片技能使用 Lv. 2，已選 Connect 使用所有可用等級。缺少 `skillLevels.connectEffect` 的舊 JSON 補空選取，不套用新預設或更改既有欄位與技能等級。兩種版型的基礎資訊與各技能群組都只占一個排序位置。新增部分子項保留群組位置，全部清除後再選取移至最後；技能等級遞增排列。顯示偏好跨語言共用，搜尋與排序仍使用完整列表資料。「重設顯示」重新套用目前版本的預設版型、資訊項目、技能等級與順序並儲存偏好，保留篩選、網址與面板收合狀態。
+**CONFIRMED**：列表的「卡片顯示」提供版型及基礎資訊、被動技能、主動技能、特殊技能、隊長服裝技能、Connect 六個群組；摘要計算已選群組數。基礎資訊包含可獨立選取的卡名、角色名、三圍與合計。資訊選項使用緊湊的小圓角 PrimeVue Button，以 primary 色表示選取、secondary outlined 樣式表示未選，並提供 aria-pressed。各群組名稱左側以圓形 Badge 顯示共用排序號，未選時顯示「−」。基礎資訊、三類卡片技能與 Connect 使用 PrimeVue InputGroup 將名稱、排序號與子項按鈕相連；群組內高度、字級與內距一致，只有外側保留小圓角。所有選項共用同一層靠上排列，基本高度為 32px；基礎資訊子項依內容寬度排列，空間不足時換行。技能群組依可用寬度整組換行；窄螢幕允許技能名稱折行，等級 chip 維持並排。預設開啟一般資訊，三類卡片技能只選 Lv. 2，Connect 選取所有可用等級；各等級可獨立選取。關閉時移除對應內容與間距。全部關閉時只顯示填滿卡片寬度的卡圖、屬性與星級，保留所選版型比例及可存取卡名；直式純卡圖每列一張、靠左排列，卡片最大寬度為 256px。資訊項目定義由 `shared/game-data/cards/display.ts` 的 `CARD_LIST_FIELDS` 管理；`useCardFields` 以 `holodori-card-fields` 保存 `{ fields, skillLevels }` JSON 物件，`fields` 保存群組與組內選取順序，基礎資訊成員連續排列，空陣列表示純卡圖；`skillLevels` 保存各技能已選等級。既有偏好保留選取項目，以最早的基礎資訊項目決定群組位置，組內維持選取順序；舊版陣列的三類卡片技能使用 Lv. 2，已選 Connect 使用所有可用等級。缺少 `skillLevels.connectEffect` 的舊 JSON 補空選取，不套用新預設或更改既有欄位與技能等級。兩種版型的基礎資訊與各技能群組都只占一個排序位置。新增部分子項保留群組位置，全部清除後再選取移至最後；技能等級遞增排列。顯示偏好跨語言共用，搜尋與排序仍使用完整列表資料。「重設顯示」重新套用目前版本的預設版型、資訊項目、技能等級與順序並儲存偏好，保留篩選、網址與面板收合狀態。
 
 **CONFIRMED**：`06003-5-uniq-0091-00`、`00034-5-uniq-0090-00` 與 `00001-3-nrml-0000-00` 的來源完整卡圖尺寸均為 2048×1152。每張圖的 RGBA8 像素資料為 9 MiB。
 
@@ -250,7 +250,7 @@ ORDER BY extent.position_y, extent.position_x;
 
 客戶端對應：`../extraction/work/decompile/05-annotate-decompiled-code/annotated-csharp/Vision.Common.Core/Vision/Common/AddressDefinition.cs` 的 `LocalSpriteAtlas`；屬性由 `Vision.Common/Vision/Common/CardAttributeTypeIcon.cs` 的 `Set` 選取。屬性 1／2／3 引用的靜態欄位 offset 分別為 8120／8168／8144，對應 `cute_cl`／`pure_cl`／`happy_cl`。觀察日期為 2026-10-14。
 
-前端 URL 對照集中於 `shared/game-data/card-icons.ts`。卡片上的屬性與三圍使用圖示；兩種版型共用「圖示 數值 + 圖示 數值 + 圖示 數值 = 合計」算式，完整版型於圖片下方呈現，直式版型放在圖片右側的三圍欄。窄螢幕與缺圖文字按數值項目換行。篩選與三圍排序選項保留圖示及文字。`CardListIcon` 提供名稱、tooltip、尺寸選擇及載入失敗時的文字 fallback；三圍圖示使用透明背景，亮模式顯示黑色、暗模式顯示白色。
+前端 URL 對照集中於 `shared/game-data/cards/assets.ts`。卡片上的屬性與三圍使用圖示；兩種版型共用「圖示 數值 + 圖示 數值 + 圖示 數值 = 合計」算式，完整版型於圖片下方呈現，直式版型放在圖片右側的三圍欄。窄螢幕與缺圖文字按數值項目換行。篩選與三圍排序選項保留圖示及文字。`CardListIcon` 提供名稱、tooltip、尺寸選擇及載入失敗時的文字 fallback；三圍圖示使用透明背景，亮模式顯示黑色、暗模式顯示白色。
 
 ### 動態卡面與簽名影片
 
@@ -341,7 +341,7 @@ ORDER BY extent.position_y, extent.position_x;
 
 ### 詳細頁技能圖示
 
-**CONFIRMED**：技能圖示由彩色底圖、中央效果圖與左下類型字標組成。底圖及字標來自 [技能圖集](https://assets.holodori.net/apk/bundle/5c7dca536fc387da111cc16aed58d394.bundle/index.json)：`ui_800_thm_skill_{sp,active,passive}_base` 及 `ui_800_ico_thm_skill_{sp,active,passive}_txt`。底圖約 120×120；特殊、主動、被動字標分別為 70×53、50×52、45×52。前端以透明圖片疊加，URL 集中於 `shared/game-data/card-icons.ts`。
+**CONFIRMED**：技能圖示由彩色底圖、中央效果圖與左下類型字標組成。底圖及字標來自 [技能圖集](https://assets.holodori.net/apk/bundle/5c7dca536fc387da111cc16aed58d394.bundle/index.json)：`ui_800_thm_skill_{sp,active,passive}_base` 及 `ui_800_ico_thm_skill_{sp,active,passive}_txt`。底圖約 120×120；特殊、主動、被動字標分別為 70×53、50×52、45×52。前端以透明圖片疊加，URL 集中於 `shared/game-data/cards/assets.ts`。
 
 **CONFIRMED**：中央效果圖沿用 `RemoteAddress.LiveActiveSkillEffect.GetSkillThumb()` 與 `LivePassiveSkillEffect.GetSkillThumb()` 的 enum 名稱轉小寫規則。主動與特殊技能使用 `img_skill_icon_active_{effectName}`，被動使用 `img_skill_icon_passive_{effectName}`；`effectName` 為對應 `LiveActiveSkillEffectType`／`LivePassiveSkillEffectType` 名稱的小寫，不加底線。詳細頁取目前技能等級主要效果群組的第一項效果型別，未知型別或缺圖時保留類型底圖與字標。實際下載確認主動分數提升、特殊分數加成效果提升及被動主動技能效果提升的中央圖案。衣裝縮圖來源見 [服裝資料](costume-live-skills.md#costume)。
 
@@ -355,7 +355,7 @@ ORDER BY extent.position_y, extent.position_x;
 
 **CONFIRMED**：來源第一格 Sprite 裁切尺寸為 198×189；在 200×200 影格中的位置為 x=1、y=5。
 
-前端動畫 URL 集中於 `shared/game-data/card-icons.ts`。`CardListRarity` 在卡片依星級垂直排列三／四／五顆星星，在稀有度選項依星級橫向顯示三／四／五顆星星及完整文字。每顆星使用單一 `<img>` 顯示完整 200×200 動畫 WebP，播放交由瀏覽器管理。稀有度選項載入時顯示 Skeleton，成功載入後移除；快取圖片於 mount 時確認載入狀態，載入失敗時保留星級文字。
+前端動畫 URL 集中於 `shared/game-data/cards/assets.ts`。`CardListRarity` 在卡片依星級垂直排列三／四／五顆星星，在稀有度選項依星級橫向顯示三／四／五顆星星及完整文字。每顆星使用單一 `<img>` 顯示完整 200×200 動畫 WebP，播放交由瀏覽器管理。稀有度選項載入時顯示 Skeleton，成功載入後移除；快取圖片於 mount 時確認載入狀態，載入失敗時保留星級文字。
 
 **CONFIRMED**：主要圖示圖集包含以下透明底星形 Sprite，名稱、尺寸及 WebP 路徑由圖集索引確認。
 
