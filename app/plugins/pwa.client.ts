@@ -1,8 +1,6 @@
-import {
-  getOfflinePages,
-  syncOfflinePages,
-} from '~/composables/useOfflinePages'
+import { getOfflinePages, syncOfflinePages } from '~/utils/offline-pages'
 import { isGameLocale, isSiteLocale } from '#shared/language'
+import type { OfflineWorkerRequest } from '#shared/offline-protocol'
 import { nextTick, watch } from 'vue'
 
 export default defineNuxtPlugin(() => {
@@ -71,7 +69,8 @@ export default defineNuxtPlugin(() => {
     const activateWaitingWorker = () => {
       if (!hadController || !registration?.waiting || updateAccepted) return
       updateAccepted = true
-      registration.waiting.postMessage({ type: 'SKIP_WAITING' })
+      const request: OfflineWorkerRequest = { type: 'SKIP_WAITING' }
+      registration.waiting.postMessage(request)
     }
 
     const watchedWorkers = new Map<ServiceWorker, () => void>()

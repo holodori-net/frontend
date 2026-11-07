@@ -1,19 +1,14 @@
-import type { GameLocale, SiteLocale, offlinePageKinds } from '#shared/language'
-
-export type OfflinePage = (typeof offlinePageKinds)[number]
-
-export interface OfflineSelection {
-  siteLocale: SiteLocale
-  gameLocale: GameLocale
-  pages: OfflinePage[]
-}
-
-export interface OfflineProgress {
-  type: 'progress'
-  completed: number
-  total: number
-  url?: string
-}
+import type {
+  OfflinePage,
+  OfflineProgress,
+  OfflineSelection,
+  OfflineStatusResult,
+  OfflineSyncResult,
+  OfflineWorkerRequest,
+  OfflineWorkerResult,
+  OfflineWorkerResponse,
+} from '#shared/offline-protocol'
+import type { GameLocale, SiteLocale } from '#shared/language'
 
 const DEFAULT_PAGES: OfflinePage[] = ['home', 'cards']
 const STORAGE_KEY = 'holodori-offline-pages'
@@ -55,10 +50,18 @@ export function saveOfflinePages(
   localStorage.setItem(STORAGE_KEY, JSON.stringify(selections))
 }
 
-export async function sendOfflineWorkerMessage<T>(
-  message: Record<string, unknown>,
+function sendOfflineWorkerMessage(
+  message: Extract<OfflineWorkerRequest, { type: 'SYNC_OFFLINE_PAGES' }>,
   onProgress?: (message: OfflineProgress) => void,
-): Promise<T> {
+): Promise<OfflineSyncResult>
+function sendOfflineWorkerMessage(
+  message: Extract<OfflineWorkerRequest, { type: 'GET_OFFLINE_STATUS' }>,
+  onProgress?: (message: OfflineProgress) => void,
+): Promise<OfflineStatusResult>
+async function sendOfflineWorkerMessage(
+  message: OfflineWorkerRequest,
+  onProgress?: (message: OfflineProgress) => void,
+): Promise<OfflineWorkerResult> {
   if (!('serviceWorker' in navigator)) {
     throw new Error('Service workers are unavailable in this browser')
   }
@@ -74,7 +77,7 @@ export async function sendOfflineWorkerMessage<T>(
   const worker = navigator.serviceWorker.controller ?? registration.active
   if (!worker) throw new Error('Offline storage is not ready')
 
-  return new Promise<T>((resolve, reject) => {
+  return new Promise<OfflineWorkerResult>((resolve, reject) => {
     const channel = new MessageChannel()
     let timeout = 0
     const resetTimeout = (message: string) => {
@@ -85,9 +88,9 @@ export async function sendOfflineWorkerMessage<T>(
       }, 120_000)
     }
     resetTimeout('Offline storage did not respond')
-    channel.port1.onmessage = (event: MessageEvent<T & { type?: string }>) => {
+    channel.port1.onmessage = (event: MessageEvent<OfflineWorkerResponse>) => {
       if (event.data?.type === 'progress') {
-        onProgress?.(event.data as unknown as OfflineProgress)
+        onProgress?.(event.data)
         resetTimeout('Offline storage stopped responding')
         return
       }
@@ -109,14 +112,7 @@ export function syncOfflinePages(
   selection: OfflineSelection,
   options: { onProgress?: (message: OfflineProgress) => void } = {},
 ) {
-  return sendOfflineWorkerMessage<{
-    type?: 'result'
-    success: boolean
-    error?: string
-    siteLocale?: SiteLocale
-    gameLocale?: GameLocale
-    pages?: OfflinePage[]
-  }>(
+  return sendOfflineWorkerMessage(
     {
       type: 'SYNC_OFFLINE_PAGES',
       ...selection,
@@ -124,4 +120,8 @@ export function syncOfflinePages(
     },
     options.onProgress,
   )
+}
+
+export function getOfflineStatus() {
+  return sendOfflineWorkerMessage({ type: 'GET_OFFLINE_STATUS' })
 }

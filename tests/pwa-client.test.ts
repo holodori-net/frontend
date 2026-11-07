@@ -45,7 +45,7 @@ async function startPlugin(options: { registrationFails?: boolean } = {}) {
   const syncOfflinePages = vi.fn().mockResolvedValue({ success: true })
 
   vi.doMock('#shared/language', () => import('../shared/language'))
-  vi.doMock('~/composables/useOfflinePages', () => ({
+  vi.doMock('~/utils/offline-pages', () => ({
     getOfflinePages: vi.fn(() => ['home']),
     syncOfflinePages,
   }))
@@ -103,7 +103,7 @@ async function settle() {
 
 afterEach(() => {
   for (const context of contexts.splice(0)) context.scope.stop()
-  vi.doUnmock('~/composables/useOfflinePages')
+  vi.doUnmock('~/utils/offline-pages')
   vi.doUnmock('#shared/language')
   vi.unstubAllGlobals()
   vi.restoreAllMocks()

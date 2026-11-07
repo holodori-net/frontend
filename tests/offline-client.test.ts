@@ -3,8 +3,9 @@ import { reactive } from 'vue'
 import {
   getOfflinePages,
   saveOfflinePages,
+  getOfflineStatus,
   syncOfflinePages,
-} from '../app/composables/useOfflinePages'
+} from '../app/utils/offline-pages'
 
 afterEach(() => {
   vi.useRealTimers()
@@ -82,4 +83,89 @@ it('times out while waiting for service worker readiness', async () => {
   ).rejects.toThrow('Service worker is not ready')
   await vi.advanceTimersByTimeAsync(10_000)
   await pending
+})
+
+it('uses the typed status request and returns the worker selection', async () => {
+  const worker = {
+    postMessage: vi.fn((_message: unknown, ports: MessagePort[]) => {
+      ports[0]!.postMessage({
+        type: 'result',
+        success: true,
+        selection: {
+          cacheName: 'offline',
+          siteLocale: 'ja',
+          gameLocale: 'jpn',
+          pages: ['home'],
+        },
+        urls: ['/ja/jpn/'],
+      })
+      ports[0]!.close()
+    }),
+  }
+  const registration = { active: worker }
+  vi.stubGlobal('window', { setTimeout, clearTimeout })
+  vi.stubGlobal('navigator', {
+    serviceWorker: {
+      getRegistration: async () => registration,
+      ready: Promise.resolve(registration),
+      controller: worker,
+    },
+  })
+
+  await expect(getOfflineStatus()).resolves.toMatchObject({
+    selection: { cacheName: 'offline', pages: ['home'] },
+    urls: ['/ja/jpn/'],
+  })
+  expect(worker.postMessage).toHaveBeenCalledWith(
+    { type: 'GET_OFFLINE_STATUS' },
+    [expect.any(MessagePort)],
+  )
+})
+
+it('refreshes the inactivity deadline on progress and rejects a stalled transfer', async () => {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+  let workerPort: MessagePort | undefined
+  let notifyPosted!: () => void
+  const posted = new Promise<void>((resolve) => (notifyPosted = resolve))
+  const worker = {
+    postMessage(_message: unknown, ports: MessagePort[]) {
+      workerPort = ports[0]!
+      notifyPosted()
+    },
+  }
+  const registration = { active: worker }
+  vi.stubGlobal('window', { setTimeout, clearTimeout })
+  vi.stubGlobal('navigator', {
+    serviceWorker: {
+      getRegistration: async () => registration,
+      ready: Promise.resolve(registration),
+      controller: worker,
+    },
+  })
+  let notifyProgress!: () => void
+  const progress = new Promise<void>((resolve) => (notifyProgress = resolve))
+  const pending = syncOfflinePages(
+    { siteLocale: 'ja', gameLocale: 'jpn', pages: ['home'] },
+    { onProgress: () => notifyProgress() },
+  )
+  let settled = false
+  void pending.then(
+    () => (settled = true),
+    () => (settled = true),
+  )
+  const rejected = expect(pending).rejects.toThrow(
+    'Offline storage stopped responding',
+  )
+  try {
+    await posted
+    await vi.advanceTimersByTimeAsync(119_000)
+    workerPort!.postMessage({ type: 'progress', completed: 1, total: 4 })
+    await progress
+    await vi.advanceTimersByTimeAsync(119_000)
+    expect(settled).toBe(false)
+    await vi.advanceTimersByTimeAsync(1_000)
+    await rejected
+  } finally {
+    workerPort?.close()
+  }
 })

@@ -12,11 +12,18 @@ import {
   isSiteLocale,
   offlinePageKinds,
   siteLanguageMetadata,
-  type GameLocale,
-  type SiteLocale,
 } from '../shared/language'
 import { fetchWithProgress, mapConcurrent } from './transfer'
 import { cardDetailDataPath, pageDataPaths } from '../shared/page-data'
+import type {
+  OfflineProgress,
+  OfflineSelection,
+  OfflineStatusSuccess,
+  OfflineStatusSelection,
+  OfflineSyncSuccess,
+  OfflineWorkerFailure,
+  OfflineWorkerRequest,
+} from '#shared/offline-protocol'
 
 declare const self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: Array<{ revision?: string | null; url: string }>
@@ -67,7 +74,7 @@ function payloadPath(page: string) {
   return `${page.replace(/\/$/, '')}/_payload.json`
 }
 
-function validSelection(data: Record<string, unknown>) {
+function validSelection(data: OfflineSelection) {
   return (
     typeof data.siteLocale === 'string' &&
     isSiteLocale(data.siteLocale) &&
@@ -81,25 +88,16 @@ function validSelection(data: Record<string, unknown>) {
 async function currentSelection() {
   const core = await caches.open(CORE_CACHE)
   const response = await core.match(SELECTION_URL)
-  return response
-    ? ((await response.json()) as {
-        cacheName: string
-        siteLocale: string
-        gameLocale: string
-        pages: string[]
-        assetUrls?: string[]
-      })
-    : null
+  return response ? ((await response.json()) as OfflineStatusSelection) : null
 }
 
 async function syncSelection(
-  data: Record<string, unknown>,
+  data: OfflineSelection,
   port?: MessagePort,
-) {
+): Promise<OfflineSyncSuccess> {
   if (!validSelection(data)) throw new Error('Invalid offline page selection')
-  const siteLocale = data.siteLocale as SiteLocale
-  const gameLocale = data.gameLocale as GameLocale
-  const pages = [...new Set(data.pages as string[])]
+  const { siteLocale, gameLocale } = data
+  const pages = [...new Set(data.pages)]
   const includesCardDetails = pages.includes('cardDetails')
   const routes = [
     ...new Set([...pages.filter((page) => page !== 'cardDetails'), 'settings']),
@@ -112,7 +110,11 @@ async function syncSelection(
     ...new Set([
       ...routes.flatMap((route) => [route, payloadPath(route)]),
       ...Object.entries(pageDataPaths)
-        .filter(([page]) => pages.includes(page) && page !== 'cardDetails')
+        .filter(
+          ([page]) =>
+            pages.some((selected) => selected === page) &&
+            page !== 'cardDetails',
+        )
         .map(([, path]) => path),
     ]),
   ]
@@ -123,7 +125,12 @@ async function syncSelection(
     : resources.length + PRECACHE_ASSET_URLS.length
   let completed = 0
   const report = (url: string) =>
-    port?.postMessage({ type: 'progress', completed, total, url })
+    port?.postMessage({
+      type: 'progress',
+      completed,
+      total,
+      url,
+    } satisfies OfflineProgress)
   let committed = false
 
   try {
@@ -222,7 +229,7 @@ async function syncSelection(
 }
 
 self.addEventListener('message', (event: ExtendableMessageEvent) => {
-  const data = event.data as Record<string, unknown> | undefined
+  const data = event.data as OfflineWorkerRequest | undefined
   const port = event.ports[0]
   if (!data || typeof data.type !== 'string') return
   if (data.type === 'SKIP_WAITING') {
@@ -240,19 +247,21 @@ self.addEventListener('message', (event: ExtendableMessageEvent) => {
           const current = await currentSelection()
           const cache = current ? await caches.open(current.cacheName) : null
           const requests = cache ? await cache.keys() : []
-          port?.postMessage({
+          const result: OfflineStatusSuccess = {
             type: 'result',
             success: true,
             selection: current,
             urls: requests.map((request) => new URL(request.url).pathname),
-          })
+          }
+          port?.postMessage(result)
         }
       } catch (error) {
-        port?.postMessage({
+        const failure: OfflineWorkerFailure = {
           type: 'result',
           success: false,
           error: error instanceof Error ? error.message : 'Offline sync failed',
-        })
+        }
+        port?.postMessage(failure)
       }
     })(),
   )

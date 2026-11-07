@@ -7,11 +7,11 @@ import {
 } from '#shared/language'
 import {
   getOfflinePages,
+  getOfflineStatus,
   saveOfflinePages,
-  sendOfflineWorkerMessage,
   syncOfflinePages,
-  type OfflinePage,
-} from '~/composables/useOfflinePages'
+} from '~/utils/offline-pages'
+import type { OfflinePage } from '#shared/offline-protocol'
 
 definePageMeta({
   key: (pageRoute) => pageRoute.path,
@@ -97,9 +97,8 @@ onMounted(async () => {
   updateOfflineStatus()
 
   try {
-    const status = await sendOfflineWorkerMessage<{
-      selection: typeof savedSelection.value
-    }>({ type: 'GET_OFFLINE_STATUS' })
+    const status = await getOfflineStatus()
+    if (!status.success) throw new Error(status.error)
     savedSelection.value = status.selection
   } catch (error) {
     console.warn('Holodori offline status unavailable', error)
