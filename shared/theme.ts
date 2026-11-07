@@ -5,7 +5,6 @@ export const memberThemeCookieName = 'holodori-theme-id'
 export const memberThemeFaviconKey = 'site-favicon'
 export const memberThemeFaviconPlaceholderUrl = '/icons/favicon-placeholder.svg'
 export const memberThemeFallbackLogoUrl = '/icons/icon-192.png'
-export const memberThemesDataKey = 'member-themes'
 
 export function getMemberThemeLogoType(source: string): string {
   return source.endsWith('.webp') ? 'image/webp' : 'image/png'

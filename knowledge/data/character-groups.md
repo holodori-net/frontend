@@ -4,9 +4,9 @@
 
 欄位名稱、SQLite 型別、schema 宣告的關聯與轉換對應均為 **CONFIRMED**。宣告的關聯不等同 SQLite 外鍵約束。`✓` 表示已直接轉換或經查表產生回傳值。
 
-## 成員選單 payload
+## 成員選單資料
 
-`server/data/member-groups.ts` 重用 `transformCharacterGroups(database)`，只選取 `isRegular` 為 true 的群組，投影 `id`、六語 `name`、`characterIds` 與 `order`。`app/plugins/member-groups.ts` 以 `useAsyncData('member-groups', ...)` 保存於 Nuxt payload；讀取或轉換錯誤使生成失敗並保留來源錯誤。離線頁面沿用同一快照中的 payload。
+`server/data/member-groups.ts` 重用 `transformCharacterGroups(database)`，只選取 `isRegular` 為 true 的群組，投影 `id`、六語 `name`、`characterIds` 與 `order`。`nuxt.config.ts` 透過 Nuxt `addTemplate` 將群組與主題資料生成為 `#build/member-data`，`MemberSelect` 直接引用群組資料。讀取或轉換錯誤使建置失敗並保留來源錯誤；共用應用 JavaScript 隨離線頁面的應用資源保存於同一快照。
 
 頁首主題與卡片／歌曲篩選共用 `MemberSelect`，群組名稱跟隨遊戲語言，排序依群組 `order`、`id`，組內依來源 `characterIds` 順序。成員同時屬於多個群組時，各組皆顯示相同成員 ID，選取同步且不重複保存 ID 或 Chip。空群組省略；沒有群組的可選成員置於最後的「其他」。例如 `chr-00006` 同時顯示於 `grp-gen_1` 與 `grp-gamers`。
 

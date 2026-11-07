@@ -1,44 +1,12 @@
 import {
   defaultThemeId,
   memberThemeCookieName,
-  memberThemesDataKey,
   resolveMemberTheme,
-  type MemberTheme,
 } from '#shared/theme'
 import type { Ref } from 'vue'
 
-export default defineNuxtPlugin(async () => {
-  const { data: themes, error } = await useAsyncData<MemberTheme[]>(
-    memberThemesDataKey,
-    async () => {
-      if (import.meta.server) {
-        const { readMemberThemes } =
-          await import('~~/server/data/member-themes')
-        return readMemberThemes()
-      }
-
-      const payloadThemes = useNuxtApp().payload.data[memberThemesDataKey] as
-        MemberTheme[] | undefined
-      if (payloadThemes) return payloadThemes
-
-      throw createError({
-        statusCode: 500,
-        statusMessage: 'Member theme data is unavailable',
-        fatal: true,
-      })
-    },
-  )
-
-  if (error.value) throw error.value
-  if (themes.value === null || themes.value === undefined) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Member theme data is unavailable',
-      fatal: true,
-    })
-  }
-
-  const { theme, setTheme, initialized } = useMemberTheme()
+export default defineNuxtPlugin(() => {
+  const { themes, theme, setTheme, initialized } = useMemberTheme()
   let initialPreferredThemeId = defaultThemeId
   let preferredThemeId: Ref<string | null> | undefined
 

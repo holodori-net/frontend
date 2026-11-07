@@ -6,11 +6,8 @@ import {
   siteLocaleLanguages,
   type SiteLocale,
 } from '#shared/language'
-import {
-  groupMembers,
-  memberGroupsDataKey,
-  type MemberGroup,
-} from '#shared/game-data/member-select'
+import { groupMembers } from '#shared/game-data/member-select'
+import { memberGroups } from '#build/member-data'
 import MultiSelect from 'primevue/multiselect'
 import Select from 'primevue/select'
 import type { LocalizedNames } from '#shared/game-data/localized-text'
@@ -38,7 +35,6 @@ const model = defineModel<T>({
 })
 const route = useRoute()
 const { locale, t } = useI18n()
-const { data: memberGroups } = useNuxtData<MemberGroup[]>(memberGroupsDataKey)
 const gameLocale = computed(() => {
   const value = route.params.gameLocale
   return typeof value === 'string' && isGameLocale(value) ? value : 'jpn'
@@ -58,7 +54,7 @@ const options = computed(() =>
   }),
 )
 const groupedOptions = computed(() =>
-  groupMembers(options.value, memberGroups.value ?? []).map((group) => {
+  groupMembers(options.value, memberGroups).map((group) => {
     const localizedName = group.name
       ? resolveLocalizedName(group.name, gameLocale.value)
       : {

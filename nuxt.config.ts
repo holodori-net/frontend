@@ -16,6 +16,7 @@ import {
 } from './shared/theme'
 import { createMemberThemePalette } from './app/themes/member-palettes'
 import { readMemberThemes } from './server/data/member-themes'
+import { readMemberGroups } from './server/data/member-groups'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
 import { generateSiteSeo } from './scripts/site-seo'
@@ -64,6 +65,23 @@ const languageEntryBootstrapModule = defineNuxtModule({
       filename: 'language-entry-bootstrap.ts',
       write: true,
       getContents: () => `export default ${JSON.stringify(script)}`,
+    })
+  },
+})
+const memberDataModule = defineNuxtModule({
+  meta: { name: 'member-data' },
+  setup() {
+    const memberGroups = readMemberGroups()
+    addTemplate({
+      filename: 'member-data.ts',
+      write: true,
+      getContents: () =>
+        [
+          "import type { MemberTheme } from '#shared/theme'",
+          "import type { MemberGroup } from '#shared/game-data/member-select'",
+          `export const memberThemes: readonly MemberTheme[] = ${JSON.stringify(memberThemes)}`,
+          `export const memberGroups: readonly MemberGroup[] = ${JSON.stringify(memberGroups)}`,
+        ].join('\n'),
     })
   },
 })
@@ -162,6 +180,7 @@ export default defineNuxtConfig({
   },
   modules: [
     languageEntryBootstrapModule,
+    memberDataModule,
     '@nuxtjs/i18n',
     '@nuxt/eslint',
     '@vite-pwa/nuxt',

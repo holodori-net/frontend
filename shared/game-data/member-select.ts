@@ -1,7 +1,5 @@
 import type { CharacterGroupData } from './character-groups.ts'
 
-export const memberGroupsDataKey = 'member-groups'
-
 export type MemberGroup = Pick<
   CharacterGroupData,
   'id' | 'name' | 'characterIds' | 'order'
