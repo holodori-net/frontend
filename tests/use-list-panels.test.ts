@@ -51,7 +51,7 @@ describe('useListPanels', () => {
     const cards = useListPanels('cards')
     const songs = useListPanels('songs')
 
-    expect(cards.panels.value).toEqual(['filters', 'display'])
+    expect(cards.panels.value).toEqual([])
     expect(songs.panels.value).toEqual([])
     expect(cards.initialized.value).toBe(false)
     expect(getItem).not.toHaveBeenCalled()
@@ -66,7 +66,7 @@ describe('useListPanels', () => {
   })
 
   it('restores a selection after reload', () => {
-    const session = new Map([['holodori-cards-panels', '["filters"]']])
+    const session = new Map([['holodori-cards-panels', '["display"]']])
     const storage = {
       getItem: vi.fn((key: string) => session.get(key) ?? null),
       setItem: vi.fn((key: string, value: string) => session.set(key, value)),
@@ -74,7 +74,7 @@ describe('useListPanels', () => {
     start(storage)
     const first = useListPanels('cards')
     mount()
-    first.panels.value = ['display']
+    first.panels.value = ['filters']
 
     context?.restoreStorage()
     context = undefined
@@ -83,7 +83,7 @@ describe('useListPanels', () => {
     const reloaded = useListPanels('cards')
     mount()
 
-    expect(reloaded.panels.value).toEqual(['display'])
+    expect(reloaded.panels.value).toEqual(['filters'])
   })
 
   it('shares state across remounts and language changes, while isolating pages', () => {
@@ -138,7 +138,7 @@ describe('useListPanels', () => {
     } as unknown as Storage)
     const panels = useListPanels('cards')
     mount()
-    expect(panels.panels.value).toEqual(['filters', 'display'])
+    expect(panels.panels.value).toEqual([])
     expect(panels.initialized.value).toBe(true)
     expect(warning).toHaveBeenCalledWith(
       'Holodori list panel preference could not be read',

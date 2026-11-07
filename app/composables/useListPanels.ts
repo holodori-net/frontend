@@ -4,7 +4,7 @@ type ListPage = 'cards' | 'songs'
 type Panel = 'filters' | 'display'
 
 const DEFAULT_PANELS: Record<ListPage, Panel[]> = {
-  cards: ['filters', 'display'],
+  cards: [],
   songs: [],
 }
 
