@@ -1,5 +1,3 @@
-import { resolve } from 'node:path'
-import { DatabaseSync } from 'node:sqlite'
 import type { GameLocale } from '#shared/language'
 import type { LocalizedText } from '#shared/game-data/localized-text.ts'
 import type {
@@ -11,7 +9,7 @@ import type {
 } from '#shared/game-data/songs.ts'
 import { transformCharacters } from './converters/characters.ts'
 import { transformSongData } from './converters/songs.ts'
-import { createGameDatabase } from './database.ts'
+import { withGameDatabase } from './database.ts'
 
 function collectLocalizedText(
   value: LocalizedText | SongOptionalText | null,
@@ -64,12 +62,7 @@ function songSearchText(
 }
 
 export function readSongList(): SongListPayload {
-  const databasePath = resolve(process.cwd(), '.data/master.sqlite')
-  console.info(`Loading song list from ${databasePath}`)
-  let database: DatabaseSync | undefined
-  try {
-    database = new DatabaseSync(databasePath, { readOnly: true })
-    const gameDatabase = createGameDatabase(database)
+  return withGameDatabase((gameDatabase) => {
     const payload = transformSongData(gameDatabase)
     const characterIds = new Set(
       payload.songs.flatMap((song) => song.characterIds),
@@ -144,13 +137,5 @@ export function readSongList(): SongListPayload {
       `Loaded ${songs.length} songs and ${characters.length} referenced characters`,
     )
     return result
-  } catch (cause) {
-    const error = new Error(`Unable to read song data from ${databasePath}`, {
-      cause,
-    })
-    console.error(error)
-    throw error
-  } finally {
-    database?.close()
-  }
+  })
 }

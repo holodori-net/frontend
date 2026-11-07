@@ -161,17 +161,14 @@ describe('member theme reader', () => {
     expect(console.info).toHaveBeenCalledWith('Loaded 1 member themes')
   })
 
-  it('retains missing database errors with the source path', () => {
+  it('retains the missing database error', () => {
     let failure: unknown
     try {
       readMemberThemes()
     } catch (error) {
       failure = error
     }
-    expect(failure).toMatchObject({
-      message: `Unable to read member themes from ${resolve(directory, '.data/master.sqlite')}`,
-      cause: { message: 'unable to open database file' },
-    })
+    expect(failure).toMatchObject({ message: 'unable to open database file' })
   })
 
   it('retains conversion errors and closes the connection', () => {
@@ -188,7 +185,7 @@ describe('member theme reader', () => {
     } catch (error) {
       failure = error
     }
-    expect(failure).toMatchObject({ cause })
+    expect(failure).toBe(cause)
     expect(close).toHaveBeenCalledOnce()
   })
 })

@@ -1,5 +1,3 @@
-import { resolve } from 'node:path'
-import { DatabaseSync } from 'node:sqlite'
 import { asc, eq } from 'drizzle-orm'
 import type { CardData } from '#shared/game-data/cards'
 import type {
@@ -11,7 +9,7 @@ import type { CardGrowthData } from '#shared/game-data/cards/growth'
 import type { CharacterGroupData } from '#shared/game-data/character-groups'
 import { card } from './schema/cards.ts'
 import { characterVoice } from './schema/character-voices.ts'
-import { createGameDatabase } from './database.ts'
+import { withGameDatabase } from './database.ts'
 import { transformCards } from './converters/cards.ts'
 import { transformCharacters } from './converters/characters.ts'
 import { transformCharacterGroups } from './converters/character-groups.ts'
@@ -25,31 +23,10 @@ import {
 } from './card-list-skills.ts'
 import { calculateCardListStats } from './card-list-stats.ts'
 
-function withDatabase<T>(
-  operation: (database: ReturnType<typeof createGameDatabase>) => T,
-): T {
-  const path = resolve(process.cwd(), '.data/master.sqlite')
-  let client: DatabaseSync | undefined
-  try {
-    client = new DatabaseSync(path, { readOnly: true })
-    return operation(createGameDatabase(client))
-  } catch (cause) {
-    const error = new Error(`Unable to read card data from ${path}`, { cause })
-    console.error(error)
-    throw error
-  } finally {
-    client?.close()
-  }
-}
-
-function databasePath() {
-  return resolve(process.cwd(), '.data/master.sqlite')
-}
-
 let cardDetailIndex: CardDetailIndex | undefined
 export function readCardDetailIndex(): CardDetailIndex {
   if (!cardDetailIndex) {
-    cardDetailIndex = withDatabase((database) => ({
+    cardDetailIndex = withGameDatabase((database) => ({
       cardIds: database
         .select({ id: card.id })
         .from(card)
@@ -58,7 +35,7 @@ export function readCardDetailIndex(): CardDetailIndex {
         .map(({ id }) => id),
     }))
     console.info(
-      `Loaded card detail index from ${databasePath()}: ${cardDetailIndex.cardIds.length} cards`,
+      `Loaded card detail index: ${cardDetailIndex.cardIds.length} cards`,
     )
   }
   return cardDetailIndex
@@ -85,7 +62,7 @@ interface DetailSources {
 let sourcesCache: DetailSources | undefined
 function getSources() {
   if (sourcesCache) return sourcesCache
-  sourcesCache = withDatabase((database) => ({
+  sourcesCache = withGameDatabase((database) => ({
     cards: transformCards(database),
     voiceAssetsByCardId: new Map(
       database
@@ -113,9 +90,7 @@ function getSources() {
     cardSkills: transformCardSkillData(database),
     connect: transformSkillTreeConnectEffects(database),
   }))
-  console.info(
-    `Loaded card detail sources from ${databasePath()}: ${sourcesCache.cards.length} cards`,
-  )
+  console.info(`Loaded card detail sources: ${sourcesCache.cards.length} cards`)
   return sourcesCache
 }
 

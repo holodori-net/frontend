@@ -1,9 +1,7 @@
-import { resolve } from 'node:path'
-import { DatabaseSync } from 'node:sqlite'
 import type { CharacterData } from '#shared/game-data/characters.ts'
 import { getMemberThemeAssets, type MemberTheme } from '#shared/theme'
 import { transformCharacters } from './converters/characters.ts'
-import { createGameDatabase } from './database.ts'
+import { withGameDatabase } from './database.ts'
 
 type ThemeCharacter = Pick<
   CharacterData,
@@ -46,25 +44,9 @@ export function projectMemberThemes(
 }
 
 export function readMemberThemes(): MemberTheme[] {
-  const databasePath = resolve(process.cwd(), '.data/master.sqlite')
-  console.info(`Loading member themes from ${databasePath}`)
-
-  let database: DatabaseSync | undefined
-  try {
-    database = new DatabaseSync(databasePath, { readOnly: true })
-    const themes = projectMemberThemes(
-      transformCharacters(createGameDatabase(database)),
-    )
+  return withGameDatabase((database) => {
+    const themes = projectMemberThemes(transformCharacters(database))
     console.info(`Loaded ${themes.length} member themes`)
     return themes
-  } catch (cause) {
-    const error = new Error(
-      `Unable to read member themes from ${databasePath}`,
-      { cause },
-    )
-    console.error(error)
-    throw error
-  } finally {
-    database?.close()
-  }
+  })
 }

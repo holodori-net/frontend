@@ -127,27 +127,14 @@ describe('character list reader', () => {
     expect(consoleInfoSpy).toHaveBeenCalledWith('Loaded 1 characters')
   })
 
-  it('reports the path and cause when the database is missing', () => {
-    const databasePath = resolve(process.cwd(), '.data/master.sqlite')
-
+  it('reports the SQLite error when the database is missing', () => {
     try {
       readCharacterList()
       throw new Error('Expected the database open to fail')
     } catch (error) {
-      expect(error).toMatchObject({
-        message: `Unable to read character data from ${databasePath}`,
-        cause: { message: 'unable to open database file' },
-      })
+      expect(error).toMatchObject({ message: 'unable to open database file' })
     }
     expect(closeSpy).not.toHaveBeenCalled()
-    expect(console.error).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: `Unable to read character data from ${databasePath}`,
-        cause: expect.objectContaining({
-          message: 'unable to open database file',
-        }),
-      }),
-    )
   })
 
   it('reports a query failure for a corrupted database and closes it', async () => {
@@ -163,11 +150,8 @@ describe('character list reader', () => {
       throw new Error('Expected a query against the corrupted database to fail')
     } catch (error) {
       expect(error).toMatchObject({
-        message: `Unable to read character data from ${databasePath}`,
-        cause: expect.objectContaining({
-          query: 'SELECT name FROM sqlite_master',
-          cause: expect.objectContaining({ message: 'file is not a database' }),
-        }),
+        query: 'SELECT name FROM sqlite_master',
+        cause: expect.objectContaining({ message: 'file is not a database' }),
       })
     }
     expect(transformCharactersMock).toHaveBeenCalledOnce()
@@ -221,10 +205,7 @@ describe('character list reader', () => {
     } catch (caughtError) {
       error = caughtError
     }
-    expect(error).toMatchObject({
-      message: /Unable to read character data/,
-      cause: { message: 'Invalid character data' },
-    })
+    expect(error).toMatchObject({ message: 'Invalid character data' })
     expect(closeSpy).toHaveBeenCalledOnce()
   })
 })

@@ -1,5 +1,3 @@
-import { resolve } from 'node:path'
-import { DatabaseSync } from 'node:sqlite'
 import type {
   CardListItemData,
   CardListPayload,
@@ -11,7 +9,7 @@ import { buildCardSearchTextById } from '#shared/game-data/cards/list-search'
 import { transformCardGrowth } from './converters/card-growth.ts'
 import { transformCards } from './converters/cards.ts'
 import { transformCharacters } from './converters/characters.ts'
-import { createGameDatabase } from './database.ts'
+import { withGameDatabase } from './database.ts'
 import { calculateCardListStats } from './card-list-stats.ts'
 import { transformLiveSkillData } from './converters/live-skills.ts'
 import { transformCardSkillData } from './converters/card-skills.ts'
@@ -22,13 +20,7 @@ import {
 } from './card-list-skills.ts'
 
 export function readCardList(): CardListPayload {
-  const databasePath = resolve(process.cwd(), '.data/master.sqlite')
-  console.info(`Loading card list from ${databasePath}`)
-
-  let database: DatabaseSync | undefined
-  try {
-    database = new DatabaseSync(databasePath, { readOnly: true })
-    const gameDatabase = createGameDatabase(database)
+  return withGameDatabase((gameDatabase) => {
     const cards = transformCards(gameDatabase)
     if (cards.length === 0) {
       console.info('Loaded 0 cards, 0 costumes, 0 leader skills')
@@ -164,15 +156,7 @@ export function readCardList(): CardListPayload {
       connectExtents,
       searchTextByCardId,
     }
-  } catch (cause) {
-    const error = new Error(`Unable to read card data from ${databasePath}`, {
-      cause,
-    })
-    console.error(error)
-    throw error
-  } finally {
-    database?.close()
-  }
+  })
 }
 
 function emptySkills(): CardListSkillData {

@@ -550,14 +550,11 @@ describe('card list reader', () => {
 
       const error = captureError(readCardList)
       expect(error).toMatchObject({
-        message: expect.stringContaining('Unable to read card data'),
-        cause: {
-          message: expect.stringContaining(
-            missing === 'effect'
-              ? 'Card card-1 references missing SkillTreeConnectEffect connect-1'
-              : 'SkillTreeConnectEffect connect-1 level 1 references missing SkillTreeConnectEffectExtent extent-1',
-          ),
-        },
+        message: expect.stringContaining(
+          missing === 'effect'
+            ? 'Card card-1 references missing SkillTreeConnectEffect connect-1'
+            : 'SkillTreeConnectEffect connect-1 level 1 references missing SkillTreeConnectEffectExtent extent-1',
+        ),
       })
       expect(closeSpy).toHaveBeenCalledOnce()
     },
@@ -654,10 +651,7 @@ describe('card list reader', () => {
     transformCardGrowthMock.mockReturnValue(createGrowth())
 
     expect(captureError(readCardList)).toMatchObject({
-      message: expect.stringContaining('Unable to read card data'),
-      cause: {
-        message: 'Card card-1 references missing Character chr-1',
-      },
+      message: 'Card card-1 references missing Character chr-1',
     })
     expect(closeSpy).toHaveBeenCalledOnce()
   })
@@ -676,10 +670,8 @@ describe('card list reader', () => {
     })
 
     expect(captureError(readCardList)).toMatchObject({
-      cause: {
-        message:
-          'Card card-1 references missing CardLevelLimit group limit-group',
-      },
+      message:
+        'Card card-1 references missing CardLevelLimit group limit-group',
     })
     expect(closeSpy).toHaveBeenCalledOnce()
   })
@@ -698,10 +690,8 @@ describe('card list reader', () => {
     })
 
     expect(captureError(readCardList)).toMatchObject({
-      cause: {
-        message:
-          'Card card-1 has no CardLevel row for group level-group at level 80',
-      },
+      message:
+        'Card card-1 has no CardLevel row for group level-group at level 80',
     })
     expect(closeSpy).toHaveBeenCalledOnce()
   })
@@ -720,15 +710,13 @@ describe('card list reader', () => {
     })
 
     expect(captureError(readCardList)).toMatchObject({
-      cause: {
-        message:
-          'Card card-1 references missing CardPotential group potential-group',
-      },
+      message:
+        'Card card-1 references missing CardPotential group potential-group',
     })
     expect(closeSpy).toHaveBeenCalledOnce()
   })
 
-  it('wraps converter failures with the source path and cause, then closes', () => {
+  it('preserves converter failures and closes', () => {
     const setup = new DatabaseSync(
       resolve(process.cwd(), '.data/master.sqlite'),
     )
@@ -739,8 +727,7 @@ describe('card list reader', () => {
     })
 
     expect(captureError(readCardList)).toMatchObject({
-      message: `Unable to read card data from ${resolve(process.cwd(), '.data/master.sqlite')}`,
-      cause: { message: 'Invalid card data' },
+      message: 'Invalid card data',
     })
     expect(closeSpy).toHaveBeenCalledOnce()
   })
