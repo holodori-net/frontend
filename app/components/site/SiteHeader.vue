@@ -5,7 +5,6 @@ import {
   buildLocalizedRoute,
   gameLanguageOptions,
   isGameLocale,
-  resolveLocalizedName,
   siteLanguageOptions,
   sitePages,
   type GameLocale,
@@ -102,19 +101,12 @@ const preferredGameLocale = useCookie<string | null>('holodori-game-locale', {
 
 const localizedRoute = (site: SiteLocale, game: GameLocale) =>
   buildLocalizedRoute(site, game, route)
-const themeName = computed(() =>
-  resolveLocalizedName(theme.value.name, activeGameLocale.value),
-)
 const themeOptions = computed(() =>
-  (themes.value ?? []).map((memberTheme) => {
-    const name = resolveLocalizedName(memberTheme.name, activeGameLocale.value)
-    return {
-      ...memberTheme,
-      ...name,
-      label: name.text,
-      searchNames: Object.values(memberTheme.name).join(' '),
-    }
-  }),
+  (themes.value ?? []).map((memberTheme) => ({
+    id: memberTheme.id,
+    name: memberTheme.name,
+    icon: memberTheme.assets.avatar,
+  })),
 )
 const appearanceOptions = computed(() => [
   { value: 'system', label: t('modeSystem'), icon: Monitor },
@@ -311,76 +303,16 @@ async function chooseGameLocale(value: GameLocale) {
         </fieldset>
         <div class="grid gap-2 text-sm font-medium">
           {{ t('themeTitle') }}
-          <Select
+          <MemberSelect
             v-model="selectedThemeId"
-            :options="themeOptions"
-            option-label="label"
-            option-value="id"
-            :filter-fields="['searchNames', 'id']"
+            :members="themeOptions"
+            :game-locale="activeGameLocale"
+            :placeholder="t('selectMemberTheme')"
             :filter-placeholder="t('searchMembers')"
             :aria-label="t('themeTitle')"
-            :virtual-scroller-options="
-              themeOptions.length > 50
-                ? { itemSize: 56, showLoader: false }
-                : undefined
-            "
             append-to="self"
-            size="large"
-            filter
             class="w-full"
-          >
-            <template #value="slotProps">
-              <span
-                v-if="slotProps.value"
-                class="flex min-w-0 items-center gap-3"
-              >
-                <MemberThemeAvatar
-                  :src="theme.assets.avatar"
-                  :color="theme.color1"
-                />
-                <span class="truncate" :lang="themeName.lang">{{
-                  themeName.text
-                }}</span>
-                <span class="ml-auto flex shrink-0 gap-1" aria-hidden="true">
-                  <span
-                    class="size-3 rounded-full border border-surface-400/50"
-                    :style="{ backgroundColor: theme.color2 }"
-                  />
-                  <span
-                    class="size-3 rounded-full border border-surface-400/50"
-                    :style="{ backgroundColor: theme.color3 }"
-                  />
-                </span>
-              </span>
-              <span v-else>{{ t('selectMemberTheme') }}</span>
-            </template>
-            <template #option="slotProps">
-              <span class="flex min-w-0 items-center gap-3">
-                <MemberThemeAvatar
-                  :src="slotProps.option.assets.avatar"
-                  :color="slotProps.option.color1"
-                />
-                <span class="flex shrink-0 gap-1" aria-hidden="true">
-                  <span
-                    class="size-3 rounded-full border border-surface-400/50"
-                    :style="{ backgroundColor: slotProps.option.color2 }"
-                  />
-                  <span
-                    class="size-3 rounded-full border border-surface-400/50"
-                    :style="{ backgroundColor: slotProps.option.color3 }"
-                  />
-                </span>
-                <span class="grid min-w-0">
-                  <span class="truncate" :lang="slotProps.option.lang">{{
-                    slotProps.option.text
-                  }}</span>
-                  <span class="truncate text-xs text-muted-color">{{
-                    slotProps.option.id
-                  }}</span>
-                </span>
-              </span>
-            </template>
-          </Select>
+          />
         </div>
       </section>
     </Popover>

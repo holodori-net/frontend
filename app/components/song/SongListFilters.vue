@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowDownWideNarrow, ArrowUpNarrowWide, RotateCcw } from '@lucide/vue'
-import { resolveLocalizedName, type GameLocale } from '#shared/language'
+import type { GameLocale } from '#shared/language'
 import { getCharacterIconUrl } from '#shared/game-data/character-list'
 import type { SongListItemData, SongListPayload } from '#shared/game-data/songs'
 import type {
@@ -55,16 +55,11 @@ const difficultyOptions = computed(() =>
 const characterOptions = computed(() =>
   props.characters
     .filter((character) => props.options.character.includes(character.id))
-    .map((character) => {
-      const name = resolveLocalizedName(character.name, props.gameLocale)
-      return {
-        value: character.id,
-        icon: getCharacterIconUrl(character.assetId),
-        text: name.text,
-        lang: name.lang,
-        searchNames: Object.values(character.name).join(' '),
-      }
-    }),
+    .map((character) => ({
+      id: character.id,
+      name: character.name,
+      icon: getCharacterIconUrl(character.assetId),
+    })),
 )
 type RangeValue = [number, number]
 const levelBounds = computed(() => {
@@ -234,45 +229,15 @@ const videoOptions = computed(() =>
             <span class="mb-1.5 block text-sm font-medium">{{
               t('songList.character')
             }}</span>
-            <MultiSelect
+            <MemberSelect
               v-model="conditions.character"
+              multiple
               class="w-full"
-              :options="characterOptions"
-              option-label="text"
-              option-value="value"
+              :members="characterOptions"
+              :game-locale="gameLocale"
               :placeholder="t('songList.allCharacters')"
               :aria-label="t('songList.character')"
-              filter
-              :filter-fields="['searchNames', 'value']"
-              display="chip"
-            >
-              <template #option="{ option }">
-                <div class="flex items-center gap-2">
-                  <CardListIcon
-                    :src="option.icon"
-                    label=""
-                    size="large"
-                    loading-skeleton
-                  />
-                  <span :lang="option.lang">{{ option.text }}</span>
-                </div>
-              </template>
-              <template #chip="{ value, removeCallback }">
-                <Chip
-                  class="p-multiselect-chip"
-                  :label="
-                    characterOptions.find((option) => option.value === value)
-                      ?.text ?? value
-                  "
-                  :lang="
-                    characterOptions.find((option) => option.value === value)
-                      ?.lang
-                  "
-                  removable
-                  @remove="removeCallback($event, value)"
-                />
-              </template>
-            </MultiSelect>
+            />
           </label>
           <fieldset class="min-w-0">
             <legend class="mb-1.5 text-sm font-medium">

@@ -30,7 +30,7 @@
 - 主題 ID 使用 `Character.id`，預設為みこ `chr-00015`。
 - `shared/theme.ts` 定義主題型別、預設及 `logo`／`avatar`／`motifMain`／`motifLight` 素材用途；素材網址保留 `assetId` 前導零。頁首 logo 與瀏覽器分頁 favicon 隨主題角色切換，使用 `img_card_thumb_${assetId}-4-cmmn-0000-00`，缺圖或載入失敗時使用本機 `/icons/icon-192.png`；其他素材缺圖時保留成員色票或漸層底色。
 - `app/plugins/member-theme.ts` 以 `useAsyncData('member-themes', ...)` 保存 Nuxt payload，初始化偏好並更新 `data-theme-id`；composable 以 `useNuxtData` 與 `useState` 共用資料、選擇及初始化狀態。靜態 HTML 使用みこ配色與中性 logo／favicon 占位，head 同步腳本於首次繪製前讀取 `holodori-theme-id` cookie 並套用有效主題配色與 favicon；favicon 標籤先於腳本解析。Hydration 保留該配色與 favicon，主題初始化後顯示背景圖案，logo 另等待頁首自身 mounted，期間保留 32px 寬高占位。無效 ID 或偏好讀取失敗使用預設，讀取例外記錄警告。
-- 主題四色來自角色資料，缺少選填色時使用主色；`color1` 衍生頁面、surface 與 topbar 底色、`color2/3` 裝飾與色票、`color4` 互動色、topbar 品牌文字與顯示設定圖示。共用規則生成亮暗色階，主要文字及按鈕文字須維持 4.5:1 對比。
+- 主題四色來自角色資料，缺少選填色時使用主色；`color1` 衍生頁面、surface 與 topbar 底色、`color2/3` 背景漸層與首頁裝飾、`color4` 互動色、topbar 品牌文字與顯示設定圖示。共用規則生成亮暗色階，主要文字及按鈕文字須維持 4.5:1 對比。
 - CSS 與 PWA manifest 直接使用同一 reader；主題資料沿用 Nuxt payload。選單名稱跟隨遊戲語言並支援六語搜尋；離線切換保留配色並提供遠端素材 fallback。
 - 角色列表的 production 分區與 `icon` 素材用途集中在 `shared/game-data/character-list.ts`；圖示缺失時保留角色名稱與占位。
 - 遊戲資料層位於 `server/data/`，共用資料型別位於 `shared/game-data/`。卡片、歌曲與角色資料路由於 prerender 時直接唯讀讀取 `.data/master.sqlite`；converter 回傳完整資料，reader 選取列表欄位並產生共用靜態 `/data/cards.json`、`/data/songs.json` 與 `/data/characters.json`，路徑集中於 `shared/page-data.ts`。站內切頁以 client-side `useLazyAsyncData` 先顯示頁首、標題及載入狀態，再取得資料；請求附上 Nuxt build ID，失敗時提供重試並記錄來源錯誤。角色頁以 `onServerPrefetch` 讀取初始列表，透過 `useState` 保存於 HTML 並供 hydration 重用；預設列表可在停用 JavaScript 時顯示。卡片資料就緒後由 `CardListView` 初始化篩選與顯示偏好。生成失敗時須保留來源錯誤。

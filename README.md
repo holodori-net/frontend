@@ -56,7 +56,7 @@ Cards, songs, and characters show a loading status while their data downloads. I
 
 Open the display and language menu in the top-right corner to change site language, game content language, appearance, and member theme. Appearance is saved in this browser; **System** follows the device setting.
 
-Member themes use official character colors, avatars, and motifs. Names follow the game content language; search matches names in all game languages. Sakura Miko is the default, and your selection is saved in this browser. Themes remain available offline; unavailable avatars show a member color swatch and unavailable motifs retain the background gradients.
+Member themes use official character colors, avatars, and motifs. Names follow the game content language; search matches names in all game languages. Sakura Miko is the default, and your selection is saved in this browser. Themes remain available offline; member names remain visible when avatars are unavailable, and unavailable motifs retain the background gradients.
 
 ## Install and use offline
 

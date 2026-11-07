@@ -23,7 +23,7 @@
 
 **CONFIRMED**：`server/data/member-themes.ts` 重用完整角色 converter，選取角色 ID、六語名稱、來源排序、官方 `color1`～`color4` 與素材網址，回傳 `MemberTheme[]`。主題 ID 使用 `Character.id`，預設為みこ `chr-00015`；目前快照 62 位角色皆具備主色，包括 8 位非可遊玩角色。缺少主色時不收錄，選填色缺失時使用主色；色值轉為 `#RRGGBB`，格式錯誤回報角色與來源欄位。
 
-`color1` 衍生頁面、surface 與 topbar 底色，`color2/3` 用於背景漸層、首頁裝飾與選單色票，`color4` 衍生互動主色、topbar 品牌文字與顯示設定圖示。亮暗配色透過共用規則生成，主要文字及按鈕文字含 hover／active 維持至少 4.5:1 對比。
+`color1` 衍生頁面、surface 與 topbar 底色，`color2/3` 用於背景漸層與首頁裝飾，`color4` 衍生互動主色、topbar 品牌文字與顯示設定圖示。亮暗配色透過共用規則生成，主要文字及按鈕文字含 hover／active 維持至少 4.5:1 對比。
 
 素材用途由 `shared/theme.ts` 定義，保留 `assetId` 前導零：頁首 logo 與瀏覽器分頁 favicon 為 `img_card_thumb_${assetId}-4-cmmn-0000-00`，頭像為 `img_chr_icon_normal_${assetId}`，motif 使用 `img_chr_motif_icon_default_main_${assetId}` 與 `img_chr_motif_icon_light_main_${assetId}`；網址為 `https://assets.holodori.net/cdn/${name}/Texture2D/${name}.webp`。Logo 與 favicon 隨主題角色切換，缺圖或載入失敗時使用本機 `/icons/icon-192.png`。背景交錯排列兩種 motif，並以主題色套用透明遮罩；缺少素材時保留背景漸層與底色。
 
