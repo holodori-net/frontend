@@ -222,8 +222,6 @@ const selectedSortOption = computed(() =>
               multiple
               class="w-full"
               :members="characterOptions"
-              :game-locale="gameLocale"
-              :placeholder="t('cardList.allCharacters')"
               :aria-label="t('cardList.character')"
             />
           </label>

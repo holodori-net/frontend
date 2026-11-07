@@ -306,9 +306,6 @@ async function chooseGameLocale(value: GameLocale) {
           <MemberSelect
             v-model="selectedThemeId"
             :members="themeOptions"
-            :game-locale="activeGameLocale"
-            :placeholder="t('selectMemberTheme')"
-            :filter-placeholder="t('searchMembers')"
             :aria-label="t('themeTitle')"
             append-to="self"
             class="w-full"

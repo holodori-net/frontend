@@ -62,7 +62,6 @@ const filterTotal = computed(() => availableSongs.value.length)
           :songs="availableSongs"
           :characters="payload.characters"
           :options="options"
-          :game-locale="gameLocale"
           :query-error="queryError"
           @reset="resetConditions"
         />

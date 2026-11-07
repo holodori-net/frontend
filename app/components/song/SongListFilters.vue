@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ArrowDownWideNarrow, ArrowUpNarrowWide, RotateCcw } from '@lucide/vue'
-import type { GameLocale } from '#shared/language'
 import { getCharacterIconUrl } from '#shared/game-data/character-list'
 import type { SongListItemData, SongListPayload } from '#shared/game-data/songs'
 import type {
@@ -13,7 +12,6 @@ const props = defineProps<{
   songs: readonly SongListItemData[]
   characters: SongListPayload['characters']
   options: SongFilterOptions
-  gameLocale: GameLocale
   queryError: string | null
 }>()
 const conditions = defineModel<SongListConditions>({ required: true })
@@ -234,8 +232,6 @@ const videoOptions = computed(() =>
               multiple
               class="w-full"
               :members="characterOptions"
-              :game-locale="gameLocale"
-              :placeholder="t('songList.allCharacters')"
               :aria-label="t('songList.character')"
             />
           </label>

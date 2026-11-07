@@ -51,25 +51,32 @@ describe('song interface translations', () => {
   it.each(siteLocales)(
     'keeps shared card and song labels aligned in %s',
     (locale) => {
-      const messages = JSON.parse(
+      const translations = JSON.parse(
         readFileSync(
           new URL(`../i18n/locales/${locale}.json`, import.meta.url),
           'utf8',
         ),
       ) as {
+        selectMembers: string
+        searchMembers: string
         cardList: Record<string, string>
         songList: Record<string, string>
       }
+      expect(translations.selectMembers, `${locale}: selectMembers`).toEqual(
+        expect.stringMatching(/\S/),
+      )
+      expect(translations.searchMembers, `${locale}: searchMembers`).toEqual(
+        expect.stringMatching(/\S/),
+      )
       for (const key of [
         'resetDisplay',
         'search',
         'character',
-        'allCharacters',
         'sortLabel',
         'reset',
       ]) {
-        expect(messages.songList[key], `${locale}: ${key}`).toBe(
-          messages.cardList[key],
+        expect(translations.songList[key], `${locale}: ${key}`).toBe(
+          translations.cardList[key],
         )
       }
     },

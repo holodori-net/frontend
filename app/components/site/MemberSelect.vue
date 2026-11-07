@@ -1,8 +1,8 @@
 <script setup lang="ts" generic="T extends string | string[]">
 import {
   gameLocaleLanguages,
+  isGameLocale,
   resolveLocalizedName,
-  type GameLocale,
 } from '#shared/language'
 import MultiSelect from 'primevue/multiselect'
 import Select from 'primevue/select'
@@ -19,18 +19,23 @@ interface MemberOption {
 const props = withDefaults(
   defineProps<{
     members: readonly MemberOption[]
-    gameLocale: GameLocale
     multiple?: boolean
   }>(),
   { multiple: false },
 )
 const model = defineModel<T>({ required: true })
+const route = useRoute()
+const { t } = useI18n()
+const gameLocale = computed(() => {
+  const value = route.params.gameLocale
+  return typeof value === 'string' && isGameLocale(value) ? value : 'jpn'
+})
 
 const options = computed(() =>
   props.members.map((member) => {
     const localizedName = member.name
-      ? resolveLocalizedName(member.name, props.gameLocale)
-      : { text: member.id, lang: gameLocaleLanguages[props.gameLocale] }
+      ? resolveLocalizedName(member.name, gameLocale.value)
+      : { text: member.id, lang: gameLocaleLanguages[gameLocale.value] }
     return {
       ...member,
       ...localizedName,
@@ -46,7 +51,7 @@ const selectedOption = (value: unknown) =>
 const selectedName = (value: unknown) =>
   selectedOption(value)?.text ?? (typeof value === 'string' ? value : '')
 const selectedLanguage = (value: unknown) =>
-  selectedOption(value)?.lang ?? gameLocaleLanguages[props.gameLocale]
+  selectedOption(value)?.lang ?? gameLocaleLanguages[gameLocale.value]
 </script>
 
 <template>
@@ -57,6 +62,8 @@ const selectedLanguage = (value: unknown) =>
     :options="options"
     option-label="label"
     option-value="id"
+    :placeholder="t('selectMembers')"
+    :filter-placeholder="t('searchMembers')"
     :filter-fields="['searchNames', 'id']"
     filter
     display="chip"
@@ -85,6 +92,8 @@ const selectedLanguage = (value: unknown) =>
     :options="options"
     option-label="label"
     option-value="id"
+    :placeholder="t('selectMembers')"
+    :filter-placeholder="t('searchMembers')"
     :filter-fields="['searchNames', 'id']"
     filter
   >
