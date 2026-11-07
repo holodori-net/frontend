@@ -3,7 +3,14 @@ import {
   gameLocaleLanguages,
   isGameLocale,
   resolveLocalizedName,
+  siteLocaleLanguages,
+  type SiteLocale,
 } from '#shared/language'
+import {
+  groupMembers,
+  memberGroupsDataKey,
+  type MemberGroup,
+} from '#shared/game-data/member-select'
 import MultiSelect from 'primevue/multiselect'
 import Select from 'primevue/select'
 import type { LocalizedNames } from '#shared/game-data/localized-text'
@@ -23,9 +30,15 @@ const props = withDefaults(
   }>(),
   { multiple: false },
 )
-const model = defineModel<T>({ required: true })
+const model = defineModel<T>({
+  required: true,
+  set(value) {
+    return Array.isArray(value) ? ([...new Set(value)] as T) : value
+  },
+})
 const route = useRoute()
-const { t } = useI18n()
+const { locale, t } = useI18n()
+const { data: memberGroups } = useNuxtData<MemberGroup[]>(memberGroupsDataKey)
 const gameLocale = computed(() => {
   const value = route.params.gameLocale
   return typeof value === 'string' && isGameLocale(value) ? value : 'jpn'
@@ -44,6 +57,17 @@ const options = computed(() =>
     }
   }),
 )
+const groupedOptions = computed(() =>
+  groupMembers(options.value, memberGroups.value ?? []).map((group) => {
+    const localizedName = group.name
+      ? resolveLocalizedName(group.name, gameLocale.value)
+      : {
+          text: t('charactersOtherGroup'),
+          lang: siteLocaleLanguages[locale.value as SiteLocale],
+        }
+    return { ...group, label: localizedName.text, lang: localizedName.lang }
+  }),
+)
 const selectedOption = (value: unknown) =>
   typeof value === 'string'
     ? options.value.find((option) => option.id === value)
@@ -59,9 +83,11 @@ const selectedLanguage = (value: unknown) =>
     v-if="multiple"
     v-model="model"
     v-bind="$attrs"
-    :options="options"
+    :options="groupedOptions"
     option-label="label"
     option-value="id"
+    option-group-label="label"
+    option-group-children="members"
     :placeholder="t('selectMembers')"
     :filter-placeholder="t('searchMembers')"
     :filter-fields="['searchNames', 'id']"
@@ -74,6 +100,9 @@ const selectedLanguage = (value: unknown) =>
         :text="option.text"
         :lang="option.lang"
       />
+    </template>
+    <template #optiongroup="{ option }">
+      <span :lang="option.lang" class="text-base">{{ option.label }}</span>
     </template>
     <template #chip="{ value, removeCallback }">
       <Chip
@@ -89,9 +118,11 @@ const selectedLanguage = (value: unknown) =>
     v-else
     v-model="model"
     v-bind="$attrs"
-    :options="options"
+    :options="groupedOptions"
     option-label="label"
     option-value="id"
+    option-group-label="label"
+    option-group-children="members"
     :placeholder="t('selectMembers')"
     :filter-placeholder="t('searchMembers')"
     :filter-fields="['searchNames', 'id']"
@@ -103,6 +134,9 @@ const selectedLanguage = (value: unknown) =>
         :text="option.text"
         :lang="option.lang"
       />
+    </template>
+    <template #optiongroup="{ option }">
+      <span :lang="option.lang" class="text-base">{{ option.label }}</span>
     </template>
     <template #value="{ value, placeholder }">
       <MemberSelectLabel
