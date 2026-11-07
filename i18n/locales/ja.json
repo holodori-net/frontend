@@ -87,8 +87,8 @@
     "rarity": "レアリティ",
     "allRarities": "すべてのレアリティ",
     "rarityOption": "★{count}",
-    "attribute": "属性",
-    "allAttributes": "すべての属性",
+    "attribute": "タイプ",
+    "allAttributes": "すべてのタイプ",
     "attribute1": "キュート",
     "attribute2": "ピュア",
     "attribute3": "ハッピー",
@@ -144,9 +144,9 @@
         "length": "スキル条件を保存するには URL が長すぎます。"
       },
       "kind": {
-        "passive": "パッシブ",
-        "active": "アクティブ",
-        "special": "スペシャル",
+        "passive": "パッシブスキル",
+        "active": "アクティブスキル",
+        "special": "スペシャルスキル",
         "leader": "リーダー衣装スキル"
       },
       "effect": {

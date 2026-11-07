@@ -81,14 +81,14 @@
     },
     "connectGraphDescription": "The star marks the connection point; {count} squares show the affected cells.",
     "search": "Search",
-    "searchPlaceholder": "Search card, character, costume, and skill descriptions in any game language",
+    "searchPlaceholder": "Search card, character, outfit, and skill descriptions in any game language",
     "character": "Character",
     "allCharacters": "All characters",
     "rarity": "Rarity",
     "allRarities": "All rarities",
     "rarityOption": "{count} stars",
-    "attribute": "Attribute",
-    "allAttributes": "All attributes",
+    "attribute": "Type",
+    "allAttributes": "All types",
     "attribute1": "Cute",
     "attribute2": "Pure",
     "attribute3": "Happy",
@@ -144,9 +144,9 @@
         "length": "The URL is too long to save this skill filter."
       },
       "kind": {
-        "passive": "Passive",
-        "active": "Active",
-        "special": "Special",
+        "passive": "Passive Skill",
+        "active": "Active Skill",
+        "special": "Special Skill",
         "leader": "Leader Outfit Skill"
       },
       "effect": {

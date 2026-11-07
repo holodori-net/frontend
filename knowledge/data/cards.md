@@ -207,6 +207,8 @@ ORDER BY extent.position_y, extent.position_x;
 | `SkillInfoActiveSkillName`                                 | `27520443343165`  | 主動技能       | Active Skill  | アクティブスキル |
 | `SkillInfoSpecialSkillName`                                | `97133390636399`  | 特殊技能       | Special Skill | スペシャルスキル |
 
+目前介面來源映射：屬性篩選標籤採 `CardFilterAbilityOptionTabPageMenuCardAttributeTypeLabel`；技能標題與類型採 `SkillInfoPassiveSkillName`、`SkillInfoActiveSkillName`、`SkillInfoSpecialSkillName` 的完整名稱。
+
 三圍文字同樣取自 `LangClientCommon`：
 
 | 列表欄位    | client_id         | 繁體中文 | English     | 日本語         |
