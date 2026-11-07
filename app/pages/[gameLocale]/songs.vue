@@ -7,7 +7,6 @@ const route = useRoute()
 const { t } = useI18n()
 const runtimeConfig = useRuntimeConfig()
 const gameLocale = computed(() => String(route.params.gameLocale) as GameLocale)
-useHead(() => ({ title: `${t('songs')} | ${t('siteName')}` }))
 definePageMeta({
   validate: (pageRoute) => isGameLocale(String(pageRoute.params.gameLocale)),
 })

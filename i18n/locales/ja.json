@@ -1,6 +1,13 @@
 {
   "siteName": "hololive Dreams 非公式データベース",
   "mainNavigation": "メインナビゲーション",
+  "seo": {
+    "home": "hololive Dreamsの非公式データベース。カード、スキル、楽曲、キャラクターの情報を各言語で確認できます。",
+    "cards": "hololive Dreamsのカードイラスト、パラメーター、スキル、コネクト効果を掲載。キャラクターやスキルで検索・絞り込みできます。",
+    "songs": "hololive Dreamsの楽曲、歌唱者、楽曲 Lv.、ノーツ数、解放条件を確認できます。",
+    "characters": "hololive Dreamsのキャラクターを所属グループごとに閲覧し、各言語の名前を確認できます。",
+    "settings": "データベースの言語、外観、メンバーテーマ、オフラインで保存するページを設定できます。"
+  },
   "homePage": {
     "description": "本サイトは非公式データベースであり、hololive Dreams の運営チームとは一切関係ありません。",
     "explore": "データベースを探索",
@@ -19,7 +26,7 @@
     "statsDescription": "レベルと開花に応じてパラメーターを表示し、特訓段階はレベルから決定します。",
     "notFound": "カードが見つかりません",
     "notFoundDescription": "このカードは表示できません。",
-    "description": "{name}のカード情報、スキル、育成状態に応じたパラメーターを確認できます。",
+    "description": "hololive Dreamsの{character}「{name}」のカード情報、スキル、育成状態に応じたパラメーターを確認できます。",
     "requiresJavaScript": "育成状態の変更とパラメーターの計算にはJavaScriptを有効にしてください。",
     "levelSummary": "Lv. {level} / {limit} · 特訓 {training}",
     "potentialStage": "開花 {stage}",

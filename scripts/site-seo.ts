@@ -1,12 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import {
-  buildLocalizedPath,
-  buildCardDetailPath,
-  gameLocales,
-  sitePages,
-  siteLocales,
-} from '../shared/language.ts'
+import { gameLocales, sitePages, siteLocales } from '../shared/language.ts'
+import { getCanonicalSeoPath } from '../shared/seo.ts'
 
 export function escapeXml(value: string) {
   return value
@@ -18,16 +13,26 @@ export function escapeXml(value: string) {
 }
 
 export function getSiteSeoRoutes(cardIds: readonly string[] = []) {
-  return siteLocales.flatMap((siteLocale) =>
-    gameLocales.flatMap((gameLocale) => [
-      ...sitePages
-        .filter((page) => page !== 'settings')
-        .map((page) => `${buildLocalizedPath(siteLocale, gameLocale, page)}/`),
-      ...cardIds.map(
-        (id) => `${buildCardDetailPath(siteLocale, gameLocale, id)}/`,
-      ),
-    ]),
-  )
+  const routes = new Set<string>()
+  for (const siteLocale of siteLocales) {
+    for (const gameLocale of gameLocales) {
+      for (const page of sitePages) {
+        if (page === 'settings') continue
+        routes.add(`${getCanonicalSeoPath({ siteLocale, gameLocale, page })}/`)
+      }
+      for (const cardId of cardIds) {
+        routes.add(
+          `${getCanonicalSeoPath({
+            siteLocale,
+            gameLocale,
+            page: 'cards',
+            cardId,
+          })}/`,
+        )
+      }
+    }
+  }
+  return [...routes]
 }
 
 function parseSiteOrigin(value: string) {

@@ -1,20 +1,18 @@
 <script setup lang="ts">
 import {
-  buildCardDetailPath,
   isGameLocale,
   resolveLocalizedName,
   type GameLocale,
-  type SiteLocale,
 } from '#shared/language'
+import { formatSeoTitle } from '#shared/seo'
 import { cardDetailDataPath } from '#shared/page-data'
 import { getCardImageUrl } from '#shared/game-data/cards/assets'
 import type { CardDetailPayload } from '#shared/game-data/cards/detail'
 
 const route = useRoute()
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const runtimeConfig = useRuntimeConfig()
 const gameLocale = computed(() => String(route.params.gameLocale) as GameLocale)
-const siteLocale = computed(() => String(locale.value) as SiteLocale)
 const cardId = computed(() => String(route.params.id))
 definePageMeta({
   validate: (pageRoute) => isGameLocale(String(pageRoute.params.gameLocale)),
@@ -72,17 +70,23 @@ const cardName = computed(() =>
     ? resolveLocalizedName(data.value.card.name, gameLocale.value).text
     : t('cardDetails'),
 )
+const characterName = computed(() =>
+  data.value
+    ? resolveLocalizedName(data.value.card.characterName, gameLocale.value).text
+    : '',
+)
+const cardTitle = computed(() =>
+  characterName.value
+    ? `${cardName.value} — ${characterName.value}`
+    : cardName.value,
+)
 const description = computed(() =>
   data.value
-    ? t('cardDetail.description', { name: cardName.value })
+    ? t('cardDetail.description', {
+        name: cardName.value,
+        character: characterName.value,
+      })
     : t('cardDetail.notFoundDescription'),
-)
-const canonicalUrl = computed(
-  () =>
-    new URL(
-      `${buildCardDetailPath(siteLocale.value, gameLocale.value, cardId.value)}/`,
-      runtimeConfig.public.siteUrl,
-    ).href,
 )
 const imageUrl = computed(() =>
   data.value
@@ -90,18 +94,16 @@ const imageUrl = computed(() =>
     : undefined,
 )
 useHead(() => ({
-  title: `${cardName.value} | ${t('siteName')}`,
+  title: cardTitle.value,
   meta: [
     { name: 'description', content: description.value },
-    { property: 'og:title', content: `${cardName.value} | ${t('siteName')}` },
+    { property: 'og:title', content: formatSeoTitle(cardTitle.value) },
     { property: 'og:description', content: description.value },
     { property: 'og:type', content: 'website' },
-    { property: 'og:url', content: canonicalUrl.value },
     ...(imageUrl.value
       ? [{ property: 'og:image', content: imageUrl.value }]
       : []),
   ],
-  link: [{ rel: 'canonical', href: canonicalUrl.value }],
 }))
 
 const isNotFound = computed(

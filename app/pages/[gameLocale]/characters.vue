@@ -7,7 +7,6 @@ import { getCharacterSections } from '#shared/game-data/character-list'
 const route = useRoute()
 const { t } = useI18n()
 const runtimeConfig = useRuntimeConfig()
-useHead(() => ({ title: `${t('characters')} | ${t('siteName')}` }))
 
 definePageMeta({
   validate: (pageRoute) => isGameLocale(String(pageRoute.params.gameLocale)),

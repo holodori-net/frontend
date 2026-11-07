@@ -1,6 +1,13 @@
 {
   "siteName": "hololive Dreams Unofficial Database",
   "mainNavigation": "Main navigation",
+  "seo": {
+    "home": "Browse the unofficial hololive Dreams database for cards, skills, songs, and characters in multiple languages.",
+    "cards": "Browse hololive Dreams card art, stats, skills, and Connect bonuses. Search and filter by character and skill.",
+    "songs": "Browse hololive Dreams songs, singers, song levels, note counts, and unlock conditions.",
+    "characters": "Browse hololive Dreams characters by production and view their names in multiple languages.",
+    "settings": "Choose the database languages, appearance, member theme, and pages to save offline."
+  },
   "homePage": {
     "description": "This is an unofficial database and is not affiliated with the hololive Dreams official team.",
     "explore": "Explore the database",
@@ -19,7 +26,7 @@
     "statsDescription": "Stats reflect the selected level and Bloom; SP Training follows the level.",
     "notFound": "Card not found",
     "notFoundDescription": "This card is unavailable.",
-    "description": "View {name}, its skills, and stats at your selected growth levels.",
+    "description": "View {character}'s {name} card in hololive Dreams, including skills and stats at your selected growth levels.",
     "requiresJavaScript": "Enable JavaScript to adjust growth and calculate stats.",
     "levelSummary": "Lv. {level} / {limit} · SP Training {training}",
     "potentialStage": "Bloom {stage}",

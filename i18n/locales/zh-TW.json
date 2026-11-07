@@ -1,6 +1,13 @@
 {
   "siteName": "hololive Dreams 非官方資料庫",
   "mainNavigation": "主要導覽",
+  "seo": {
+    "home": "hololive Dreams 非官方資料庫，提供各語言的卡片、技能、樂曲與角色資訊。",
+    "cards": "瀏覽 hololive Dreams 卡面、三圍、技能與協力效果，依角色與技能搜尋及篩選卡片。",
+    "songs": "查看 hololive Dreams 樂曲、演唱者、樂曲 Lv.、音符數與解鎖條件。",
+    "characters": "依所屬團體瀏覽 hololive Dreams 角色，查看各語言的角色名稱。",
+    "settings": "設定資料庫語言、外觀、成員主題與離線保存的頁面。"
+  },
   "homePage": {
     "description": "本站為非官方資料庫，與 hololive Dreams 官方營運團隊沒有任何關聯。",
     "explore": "探索資料庫",
@@ -19,7 +26,7 @@
     "statsDescription": "數值依等級與綻放計算，特訓階段隨等級決定。",
     "notFound": "找不到卡片",
     "notFoundDescription": "目前無法顯示這張卡片。",
-    "description": "查看 {name} 的卡片資訊、技能與各養成狀態的數值。",
+    "description": "查看 hololive Dreams 中{character}的「{name}」卡片資訊、技能與各養成狀態的三圍。",
     "requiresJavaScript": "請啟用 JavaScript 以調整養成狀態並即時計算數值。",
     "levelSummary": "Lv. {level} / {limit} · 特訓 {training}",
     "potentialStage": "綻放 {stage}",

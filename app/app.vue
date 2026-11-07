@@ -3,17 +3,68 @@ import {
   buildLocalizedRoute,
   getManualPreferenceConflict,
   isGameLocale,
+  isSiteLocale,
+  sitePages,
   siteLocaleLanguages,
+  type PageKind,
   type SiteLocale,
 } from '#shared/language'
+import { formatSeoTitle, getSeoLinks, seoSiteName } from '#shared/seo'
 
 const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n()
 const { theme, initialized } = useMemberTheme()
+const runtimeConfig = useRuntimeConfig()
+const seoPage = computed<PageKind | null>(() => {
+  const segments = route.path.split('/').filter(Boolean)
+  if (segments[0] && isSiteLocale(segments[0])) segments.shift()
+  if (segments[0] && isGameLocale(segments[0])) segments.shift()
+  if (!segments.length) return 'home'
+  const page = segments[0] as PageKind
+  return sitePages.includes(page) ? page : null
+})
+const seoLinks = computed(() => {
+  if (!seoPage.value) return null
+  const gameLocale = String(route.params.gameLocale ?? 'jpn')
+  return getSeoLinks(
+    {
+      siteLocale: isSiteLocale(locale.value) ? locale.value : 'ja',
+      gameLocale: isGameLocale(gameLocale) ? gameLocale : 'jpn',
+      page: seoPage.value,
+      ...(route.params.id ? { cardId: String(route.params.id) } : {}),
+    },
+    runtimeConfig.public.siteUrl,
+  )
+})
+const pageTitle = computed(() =>
+  !seoPage.value || seoPage.value === 'home' ? t('siteName') : t(seoPage.value),
+)
+const pageDescription = computed(() => t(`seo.${seoPage.value ?? 'home'}`))
 useHead(() => ({
-  title: t('siteName'),
-  meta: [{ name: 'description', content: t('homePage.description') }],
+  title: pageTitle.value,
+  titleTemplate: formatSeoTitle('%s'),
+  meta: [
+    { name: 'description', content: pageDescription.value },
+    { property: 'og:title', content: formatSeoTitle(pageTitle.value) },
+    { property: 'og:description', content: pageDescription.value },
+    { property: 'og:site_name', content: seoSiteName },
+    { property: 'og:type', content: 'website' },
+    ...(seoLinks.value
+      ? [{ property: 'og:url', content: seoLinks.value.canonical }]
+      : []),
+  ],
+  link: seoLinks.value
+    ? [
+        { key: 'canonical', rel: 'canonical', href: seoLinks.value.canonical },
+        ...seoLinks.value.alternates.map(({ hreflang, href }) => ({
+          key: `alternate-${hreflang}`,
+          rel: 'alternate' as const,
+          hreflang,
+          href,
+        })),
+      ]
+    : [],
   htmlAttrs: {
     lang: siteLocaleLanguages[locale.value as SiteLocale],
   },

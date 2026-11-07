@@ -21,7 +21,7 @@
 - 語言入口 HTML 以同步 head script 在 Nuxt 載入前導向，保留原始 query 與 hash；程式由 TypeScript 共用語言邏輯經 Vite 搭配獨立 `tsconfig.language-entry.json` 打包，於 Nuxt 產生型別設定前完成。停用 JavaScript 或導向錯誤時保留日文「繼續」連結，站內入口導覽使用 Vue Router replace。
 - 完整語言網址先依網址顯示；與已儲存偏好衝突時提供確認。切換語言須保留目前頁面、實體 ID、query 與 hash。
 - 新增網站語言需提供介面翻譯；新增遊戲語言需驗證來源文字。語言測試涵蓋設定一致性、實際組合及 fallback。
-- Sitemap 收錄已設定語言組合的首頁、cards、songs 與 characters 入口，以及全部卡片詳細頁；設定頁不列入 sitemap。網站網址由 `NUXT_PUBLIC_SITE_URL` 設定。
+- `shared/seo.ts` 是 canonical 與 hreflang URL 的共用政策。首頁依網站語言使用三個代表網址；cards、songs、characters 與卡片詳細頁依遊戲語言使用六個代表網址，hreflang 取自 `gameLocaleLanguages`，x-default 指向 `ja/jpn`。設定頁使用自身 canonical，不提供 alternate。全部 18 個語言組合仍生成；sitemap 僅列代表網址並排除設定頁。網站網址由 `NUXT_PUBLIC_SITE_URL` 設定。
 - 靜態生成保留明確路由並啟用連結發現；任一路由生成失敗時，建置應失敗。
 
 ## 主題與素材
