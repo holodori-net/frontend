@@ -8,20 +8,16 @@ import {
   type GameLocale,
   type SiteLocale,
 } from '#shared/language'
-import { onBeforeRouteLeave } from 'vue-router'
-import type {
-  CardDetailPayload,
-  CardGrowthSelection,
-} from '#shared/game-data/cards/detail'
+import type { CardDetailPayload } from '#shared/game-data/cards/detail'
 import type {
   CardListSkillData,
   CardStatKey,
 } from '#shared/game-data/cards/list-data'
 import {
   calculateCardGrowth,
-  getMaxCardGrowth,
   selectCardGrowthLevel,
 } from '#shared/game-data/cards/stats'
+import { useCardDetailState } from '~/composables/card/useCardDetailState'
 import {
   composeActiveSkillDescription,
   composeCostumeSkillDescription,
@@ -36,115 +32,22 @@ const props = defineProps<{
   gameLocale: GameLocale
 }>()
 const { t, locale } = useI18n()
-const fullscreenVisible = ref(false)
 const fullscreenPlayer = ref<{ open: () => void } | null>(null)
-watch([() => props.payload.card.id, () => props.gameLocale, locale], () => {
-  fullscreenVisible.value = false
-})
-const maximum = computed(() => getMaxCardGrowth(props.payload.growth))
-const persistedSelection = useState<{
-  cardId: string
-  selection: CardGrowthSelection
-} | null>('card-growth-selection', () => null)
-const selection = ref<CardGrowthSelection>(
-  persistedSelection.value?.cardId === props.payload.card.id
-    ? selectCardGrowthLevel(
-        props.payload.growth,
-        persistedSelection.value.selection,
-      )
-    : { ...maximum.value },
-)
-const normalizedSelection = computed(() =>
-  selectCardGrowthLevel(props.payload.growth, selection.value),
-)
-const mediaState = useState<{
-  cardId: string
-  animate: boolean
-  showSignature: boolean
-} | null>('card-detail-media-state', () => null)
-let hasSavedMediaState = mediaState.value?.cardId === props.payload.card.id
-const mediaEnabled = computed(() => props.payload.card.assetType === 2)
-const animateCard = ref(true)
-const showSignature = ref(true)
-const mediaVariant = computed(() =>
-  normalizedSelection.value.potentialUpgradeCount ===
-  maximum.value.potentialUpgradeCount
-    ? 'full_1'
-    : 'full_0',
-)
-function restoreMediaState(cardId: string) {
-  const saved = mediaState.value
-  hasSavedMediaState = saved?.cardId === cardId
-  if (saved?.cardId === cardId) {
-    animateCard.value = saved.animate
-    showSignature.value = saved.showSignature
-  } else {
-    animateCard.value = true
-    showSignature.value = true
-  }
-}
-restoreMediaState(props.payload.card.id)
-function saveMediaState(cardId = props.payload.card.id) {
-  mediaState.value = {
-    cardId,
-    animate: animateCard.value,
-    showSignature: showSignature.value,
-  }
-  hasSavedMediaState = true
-}
-watch([animateCard, showSignature], ([animate, signature]) => {
-  mediaState.value = {
-    cardId: props.payload.card.id,
-    animate,
-    showSignature: signature,
-  }
-  hasSavedMediaState = true
-})
-watch(
-  () => props.payload.card.id,
-  (id) => {
-    restoreMediaState(id)
-    if (
-      !hasSavedMediaState &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    )
-      animateCard.value = false
-    if (!hasSavedMediaState) saveMediaState(id)
-  },
-)
-onMounted(() => {
-  if (!hasSavedMediaState) {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-      animateCard.value = false
-    saveMediaState()
-  }
-})
-watch(
+const {
+  maximum,
   selection,
-  (value) => {
-    persistedSelection.value = {
-      cardId: props.payload.card.id,
-      selection: selectCardGrowthLevel(props.payload.growth, value),
-    }
-  },
-  { deep: true },
-)
-watch(
-  () => props.payload.card.id,
-  (id) => {
-    const saved = persistedSelection.value
-    selection.value =
-      saved?.cardId === id
-        ? selectCardGrowthLevel(props.payload.growth, saved.selection)
-        : { ...maximum.value }
-  },
-)
-onBeforeRouteLeave((to) => {
-  fullscreenVisible.value = false
-  if (String(to.params.id) !== props.payload.card.id) {
-    persistedSelection.value = null
-    mediaState.value = null
-  }
+  normalizedSelection,
+  fullscreenVisible,
+  mediaEnabled,
+  mediaVariant,
+  animateCard,
+  showSignature,
+} = useCardDetailState({
+  cardId: computed(() => props.payload.card.id),
+  growth: computed(() => props.payload.growth),
+  assetType: computed(() => props.payload.card.assetType),
+  siteLocale: locale,
+  gameLocale: computed(() => props.gameLocale),
 })
 const growth = computed(() =>
   calculateCardGrowth(props.payload.growth, normalizedSelection.value),

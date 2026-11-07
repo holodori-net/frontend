@@ -29,6 +29,8 @@ Components are grouped under `app/components/card/list`, `card/detail`, `card/co
 
 Shared card and song UI logic lives under `shared/game-data/cards` and `songs`. Each has `list.ts` for filtering and sorting, `list-query.ts` for URL serialization, `display.ts` for display fields, and `assets.ts` for asset URLs. `useListRouteSync` owns route synchronization, search debounce, navigation revisions, pending navigations, and cleanup. Domain condition composables supply parsing, serialization, and error handling; cards also supply asynchronous skill compression and the URL byte budget.
 
+`useCardDetailState` owns detail-page growth selections, media preferences, fullscreen visibility, and navigation cleanup. `CardDetailView` composes the controls and localized descriptions, while media components own playback.
+
 ### Game data layer
 
 The data layer uses `drizzle-orm` with the built-in `node:sqlite` driver and synchronous query methods. The RC version is pinned in `pnpm-lock.yaml`.
