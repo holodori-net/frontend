@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import {
-  isGameLocale,
-  resolveLocalizedName,
-  type GameLocale,
-} from '#shared/language'
+import { isGameLocale, type GameLocale } from '#shared/language'
 import { formatSeoTitle } from '#shared/seo'
 import { cardDetailDataPath } from '#shared/page-data'
 import { getCardImageUrl } from '#shared/game-data/cards/assets'
 import type { CardDetailPayload } from '#shared/game-data/cards/detail'
+import { localizeCardDetailPayload } from '#shared/game-data/cards/detail-page'
+import type { CardDetailPagePayload } from '#shared/game-data/cards/detail-page'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -19,26 +17,32 @@ definePageMeta({
 })
 
 const { data, error, status, refresh } =
-  await useLazyAsyncData<CardDetailPayload | null>(
-    () => `card-detail:${cardId.value}`,
+  await useLazyAsyncData<CardDetailPagePayload | null>(
+    () => `card-detail:${gameLocale.value}:${cardId.value}`,
     async (_nuxtApp, { signal }) => {
+      const requestedCardId = cardId.value
+      const requestedGameLocale = gameLocale.value
       try {
         if (import.meta.server) {
           const { readCardDetail } = await import('~~/server/data/card-detail')
-          return await readCardDetail(cardId.value)
+          const payload = await readCardDetail(requestedCardId)
+          return payload
+            ? localizeCardDetailPayload(payload, requestedGameLocale)
+            : null
         }
-        return await $fetch<CardDetailPayload>(
-          cardDetailDataPath(cardId.value),
+        const payload = await $fetch<CardDetailPayload>(
+          cardDetailDataPath(requestedCardId),
           {
             signal,
             query: { _b: runtimeConfig.app.buildId },
             retry: 0,
           },
         )
+        return localizeCardDetailPayload(payload, requestedGameLocale)
       } catch (cause) {
         console.error('Holodori card detail loading failed', {
-          cardId: cardId.value,
-          gameLocale: gameLocale.value,
+          cardId: requestedCardId,
+          gameLocale: requestedGameLocale,
           cause,
         })
         if (import.meta.server) {
@@ -66,14 +70,10 @@ if (import.meta.server) {
 }
 
 const cardName = computed(() =>
-  data.value
-    ? resolveLocalizedName(data.value.card.name, gameLocale.value).text
-    : t('cardDetails'),
+  data.value ? data.value.card.name.text : t('cardDetails'),
 )
 const characterName = computed(() =>
-  data.value
-    ? resolveLocalizedName(data.value.card.characterName, gameLocale.value).text
-    : '',
+  data.value ? data.value.card.characterName.text : '',
 )
 const cardTitle = computed(() =>
   characterName.value

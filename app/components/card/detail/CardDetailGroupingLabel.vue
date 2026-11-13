@@ -1,15 +1,11 @@
 <script setup lang="ts">
-import type { CharacterGroupData } from '#shared/game-data/character-groups'
 import { getCardDetailGroupingArtworkUrl } from '#shared/game-data/cards/assets'
-import { resolveLocalizedName, type GameLocale } from '#shared/language'
+import type { CardDetailPagePayload } from '#shared/game-data/cards/detail-page'
 
 const props = defineProps<{
-  group: Pick<CharacterGroupData, 'id' | 'name' | 'color1' | 'color2'>
-  gameLocale: GameLocale
+  group: CardDetailPagePayload['characterGroups'][number]
 }>()
-const label = computed(() =>
-  resolveLocalizedName(props.group.name, props.gameLocale),
-)
+const label = computed(() => props.group.name)
 const maskId = `card-detail-group-mask-${useId()}`
 const color = (value: string) => (value.startsWith('#') ? value : `#${value}`)
 </script>

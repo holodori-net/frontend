@@ -3,32 +3,22 @@ import { ArrowLeft, Grid2X2, Maximize, Shirt } from '@lucide/vue'
 import { NuxtLink } from '#components'
 import {
   buildLocalizedPath,
-  resolveLocalizedName,
   gameLocaleLanguages,
   type GameLocale,
   type SiteLocale,
 } from '#shared/language'
-import type { CardDetailPayload } from '#shared/game-data/cards/detail'
-import type {
-  CardListSkillData,
-  CardStatKey,
-} from '#shared/game-data/cards/list-data'
+import type { CardDetailPagePayload } from '#shared/game-data/cards/detail-page'
+import type { CardStatKey } from '#shared/game-data/cards/list-data'
 import {
   calculateCardGrowth,
   selectCardGrowthLevel,
 } from '#shared/game-data/cards/stats'
 import { useCardDetailState } from '~/composables/card/useCardDetailState'
-import {
-  composeActiveSkillDescription,
-  composeCostumeSkillDescription,
-  composePassiveSkillDescription,
-  composeSpecialSkillDescription,
-} from '#shared/game-data/live-skill-description'
 import { getCostumeThumbnailUrl } from '#shared/game-data/cards/assets'
 import { tokenizeSkillText } from '#shared/game-data/skill-text'
 
 const props = defineProps<{
-  payload: CardDetailPayload
+  payload: CardDetailPagePayload
   gameLocale: GameLocale
 }>()
 const { t, locale } = useI18n()
@@ -56,12 +46,8 @@ const displayedCard = computed(() => ({
   ...props.payload.card,
   ...growth.value,
 }))
-const cardName = computed(() =>
-  resolveLocalizedName(props.payload.card.name, props.gameLocale),
-)
-const characterName = computed(() =>
-  resolveLocalizedName(props.payload.card.characterName, props.gameLocale),
-)
+const cardName = computed(() => props.payload.card.name)
+const characterName = computed(() => props.payload.card.characterName)
 const skillLocale = computed(() => gameLocaleLanguages[props.gameLocale])
 const levels = computed(() =>
   props.payload.growth.levels
@@ -85,64 +71,17 @@ const currentLevelLimit = computed(
     )?.levelLimit ?? maximum.value.level,
 )
 const skillDescriptions = computed(() => {
-  const skills: CardListSkillData = props.payload.skills
-  const card = props.payload.card
-  const byLevels = <T extends { level: number }>(
-    rows: readonly T[] | undefined,
-    describe: (row: T) => string | null,
-    effectType: (row: T) => number | undefined,
-  ) => {
-    return [...(rows ?? [])]
-      .sort((a, b) => a.level - b.level)
-      .map((item) => {
-        const text = describe(item)
-        return {
-          level: item.level,
-          effectType: effectType(item) ?? null,
-          text: text ?? t('cardList.skillUnavailable'),
-          lang: text === null ? locale.value : skillLocale.value,
-        }
-      })
-  }
+  const describe = (rows: typeof props.payload.skills.passiveSkills) =>
+    rows.map((row) => ({
+      level: row.level,
+      effectType: row.effectType,
+      text: row.text ?? t('cardList.skillUnavailable'),
+      lang: row.text === null ? locale.value : skillLocale.value,
+    }))
   return {
-    passiveSkill: byLevels(
-      skills.passiveSkills[card.livePassiveSkillId],
-      (row) =>
-        composePassiveSkillDescription(
-          row,
-          skills,
-          props.gameLocale,
-          undefined,
-          'display',
-        ),
-      (row) => skills.effects[row.livePassiveSkillEffectGroupId]?.[0]?.type,
-    ),
-    activeSkill: byLevels(
-      skills.activeSkills[card.liveActiveSkillId],
-      (row) =>
-        composeActiveSkillDescription(
-          row,
-          skills,
-          props.gameLocale,
-          undefined,
-          'display',
-        ),
-      (row) =>
-        skills.activeEffects[row.liveActiveSkillEffectGroupId]?.[0]?.type,
-    ),
-    specialSkill: byLevels(
-      skills.specialSkills[card.liveSpecialSkillId],
-      (row) =>
-        composeSpecialSkillDescription(
-          row,
-          skills,
-          props.gameLocale,
-          undefined,
-          'display',
-        ),
-      (row) =>
-        skills.activeEffects[row.liveActiveSkillEffectGroupId]?.[0]?.type,
-    ),
+    passiveSkill: describe(props.payload.skills.passiveSkills),
+    activeSkill: describe(props.payload.skills.activeSkills),
+    specialSkill: describe(props.payload.skills.specialSkills),
   }
 })
 const costume = computed(() =>
@@ -150,19 +89,8 @@ const costume = computed(() =>
     ? props.payload.costumes[props.payload.card.costumeId]
     : undefined,
 )
-const costumeSkill = computed(() =>
-  costume.value?.leaderSkillId
-    ? props.payload.skills.leaderSkills[costume.value.leaderSkillId]
-    : undefined,
-)
-const costumeDescription = computed(() =>
-  costumeSkill.value
-    ? composeCostumeSkillDescription(
-        costumeSkill.value,
-        props.payload.skills,
-        props.gameLocale,
-      )
-    : null,
+const costumeDescription = computed(
+  () => costume.value?.leaderDescription ?? null,
 )
 const connectLevels = computed(() => {
   const id = props.payload.card.skillTreeConnectEffectId
@@ -179,8 +107,8 @@ const connectDescriptions = computed(() =>
     .sort((a, b) => a.level - b.level)
     .map((row) => ({
       level: row.level,
-      text: row.description[props.gameLocale].replace(/\[\/?highlight\]/g, ''),
-      lang: skillLocale.value,
+      text: row.description?.text ?? t('cardList.skillUnavailable'),
+      lang: row.description?.lang ?? locale.value,
     })),
 )
 type PotentialEffect = {
@@ -302,7 +230,6 @@ function changePotential(value: unknown) {
           :character-name="characterName"
           :character-asset-id="payload.card.characterAssetId"
           :character-id="payload.card.characterId"
-          :game-locale="gameLocale"
           :character-groups="payload.characterGroups"
         >
           <div
@@ -405,9 +332,9 @@ function changePotential(value: unknown) {
                 <div class="min-w-0 flex-1">
                   <p
                     class="mb-2 text-sm font-medium leading-snug wrap-anywhere"
-                    :lang="resolveLocalizedName(costume.name, gameLocale).lang"
+                    :lang="costume.name.lang"
                   >
-                    {{ resolveLocalizedName(costume.name, gameLocale).text }}
+                    {{ costume.name.text }}
                   </p>
                   <p
                     class="mb-0 whitespace-pre-line text-sm leading-relaxed wrap-anywhere"

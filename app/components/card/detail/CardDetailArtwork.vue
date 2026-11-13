@@ -3,16 +3,14 @@ import {
   getCardCharacterDecorationUrl,
   getCardDetailArtworkUrl,
 } from '#shared/game-data/cards/assets'
-import type { CardDetailPayload } from '#shared/game-data/cards/detail'
-import type { GameLocale } from '#shared/language'
+import type { CardDetailPagePayload } from '#shared/game-data/cards/detail-page'
 
 const props = defineProps<{
   cardName: { text: string; lang: string }
   characterName: { text: string; lang: string }
   characterAssetId: string | null
   characterId: string
-  characterGroups: CardDetailPayload['characterGroups']
-  gameLocale: GameLocale
+  characterGroups: CardDetailPagePayload['characterGroups']
 }>()
 
 const { themes } = useMemberTheme()
@@ -106,7 +104,6 @@ const { status, imageElement, onLoad, onError } = useImageLoading(titleBase)
               v-for="group in characterGroups"
               :key="group.id"
               :group="group"
-              :game-locale="gameLocale"
             />
           </div>
         </div>
