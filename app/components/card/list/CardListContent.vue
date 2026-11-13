@@ -21,10 +21,6 @@ import {
   composeSpecialSkillDescription,
 } from '#shared/game-data/live-skill-description'
 import {
-  getCardAttributeIconUrl,
-  getCardImageUrl,
-} from '#shared/game-data/cards/assets'
-import {
   CARD_LIST_FIELDS,
   getCardListFieldGroups,
   type CardSkillField,
@@ -65,18 +61,6 @@ const props = withDefaults(
 )
 
 const { t, locale } = useI18n()
-const imageUrl = computed(() =>
-  getCardImageUrl(props.card.assetId, props.layout, props.imageSize),
-)
-const {
-  status: imageStatus,
-  imageElement,
-  onLoad,
-  onError,
-} = useImageLoading(imageUrl)
-const hasImage = computed(
-  () => Boolean(imageUrl.value) && imageStatus.value !== 'failed',
-)
 const cardName = computed(() =>
   resolveLocalizedName(props.card.name, props.gameLocale),
 )
@@ -268,61 +252,16 @@ const contentWrapper = computed(() => (props.linked ? NuxtLink : 'div'))
       class="contents card-list-detail-link text-inherit no-underline"
       :aria-label="linked ? cardName.text : undefined"
     >
-      <div
-        class="card-list-art relative overflow-hidden bg-surface-100 dark:bg-surface-800"
-        :class="
-          layout === 'vertical' && hasInformation
-            ? 'aspect-[256/366] w-24 shrink-0'
-            : layout === 'vertical'
-              ? 'aspect-[256/366] w-full'
-              : 'aspect-video w-full'
-        "
+      <CardListArtwork
+        :asset-id="card.assetId"
+        :attribute-type="card.attributeType"
+        :rarity="card.rarity"
+        :layout="layout"
+        :image-size="imageSize"
+        :has-information="hasInformation"
       >
-        <Skeleton
-          v-if="hasImage && imageStatus === 'loading'"
-          class="card-image-skeleton inset-0"
-          style="position: absolute"
-          width="100%"
-          height="100%"
-          border-radius="0"
-        />
-        <img
-          v-if="hasImage"
-          ref="imageElement"
-          :key="imageUrl!"
-          :src="imageUrl!"
-          alt=""
-          class="relative size-full object-contain"
-          draggable="false"
-          loading="lazy"
-          decoding="async"
-          @load="onLoad"
-          @error="onError"
-        />
-        <span
-          v-else
-          class="absolute inset-0 grid place-items-center px-3 text-center text-xs text-muted-color"
-        >
-          {{ t('cardList.imageUnavailable') }}
-        </span>
-
         <slot name="image-overlay" />
-
-        <div class="absolute left-1 top-1">
-          <CardListIcon
-            :src="getCardAttributeIconUrl(card.attributeType)"
-            :label="t(`cardList.attribute${card.attributeType}`)"
-            size="large"
-          />
-        </div>
-        <div class="absolute bottom-1 left-1 top-11">
-          <CardListRarity
-            :count="card.rarity"
-            :label="t('cardList.rarityOption', { count: card.rarity })"
-            vertical
-          />
-        </div>
-      </div>
+      </CardListArtwork>
     </component>
 
     <div
@@ -528,11 +467,5 @@ const contentWrapper = computed(() => (props.linked ? NuxtLink : 'div'))
 
 .card-list-content--art-only-full.card-list-content--full-subgrid {
   contain-intrinsic-block-size: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card-image-skeleton::after {
-    animation: none;
-  }
 }
 </style>

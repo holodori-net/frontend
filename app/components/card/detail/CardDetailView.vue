@@ -305,29 +305,26 @@ function changePotential(value: unknown) {
           :game-locale="gameLocale"
           :character-groups="payload.characterGroups"
         >
-          <CardListContent
-            class="min-w-0"
-            :card="displayedCard"
-            :costumes="payload.costumes"
-            :skills="payload.skills"
-            :connect-effects="payload.connectEffects"
-            :connect-extents="payload.connectExtents"
-            :game-locale="gameLocale"
-            :stat-keys="statKeys"
-            :fields="[]"
-            :linked="false"
-            image-size="original"
+          <div
+            class="card-list-content card-list-content--art-only-full min-w-0"
           >
-            <template v-if="mediaEnabled && !fullscreenVisible" #image-overlay>
-              <CardDetailMedia
-                :key="`${payload.card.id}:${mediaVariant}`"
-                v-model:animate="animateCard"
-                v-model:show-signature="showSignature"
-                :asset-id="payload.card.assetId"
-                :variant="mediaVariant"
-              />
-            </template>
-          </CardListContent>
+            <CardListArtwork
+              :asset-id="displayedCard.assetId"
+              :attribute-type="displayedCard.attributeType"
+              :rarity="displayedCard.rarity"
+              image-size="original"
+            >
+              <template v-if="mediaEnabled && !fullscreenVisible">
+                <CardDetailMedia
+                  :key="`${payload.card.id}:${mediaVariant}`"
+                  v-model:animate="animateCard"
+                  v-model:show-signature="showSignature"
+                  :asset-id="payload.card.assetId"
+                  :variant="mediaVariant"
+                />
+              </template>
+            </CardListArtwork>
+          </div>
           <template #controls>
             <div
               class="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1"
