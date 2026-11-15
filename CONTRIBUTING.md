@@ -81,7 +81,7 @@ pnpm test
 pnpm generate
 ```
 
-Master integration tests derive collection sizes and relationships from the current `.data/master.sqlite` and shared language settings. The skill filter test checks card coverage, skill references, canonical source grouping, and description languages.
+Master integration tests derive collection sizes and relationships from the current `.data/master.sqlite` and shared language settings. The full song-list integration test has a 30-second budget because it converts the complete six-language dataset twice; other tests retain their normal timeout. The skill filter test checks card coverage, skill references, canonical source grouping, and description languages.
 
 With `.data/master.sqlite` available, `pnpm test tests/data/live-skills-master.test.ts` verifies automatic inference against every effect, trigger, target, and composed leader skill source description in all game languages. It also verifies that confirmed templates render and compose successfully, allowing their wording to differ from the source. It prints rendered counts, source match counts, template counts, and the complete pending list. Without the local database, this integration test is skipped; in-memory data tests still run.
 

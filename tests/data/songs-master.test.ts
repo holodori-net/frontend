@@ -168,6 +168,7 @@ describe.skipIf(!existsSync('.data/master.sqlite'))(
       } finally {
         source.close()
       }
-    })
+      // The full SQLite dataset is converted twice, including all six languages.
+    }, 30_000)
   },
 )
