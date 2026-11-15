@@ -72,7 +72,7 @@ The site checks for updates when a page is opened. An update ready during that c
 
 ## Run locally
 
-Use Node.js 24 or newer with pnpm and `curl`. From the repository root, download the game database, generate the static site, and preview it:
+Use Node.js 24 or newer with pnpm. From the repository root, download the game database, generate the static site, and preview it:
 
 ```sh
 pnpm install
@@ -97,4 +97,6 @@ In the GA4 web data stream's **Enhanced measurement → Page views** settings, e
 
 The output is written to `.output/public`. It includes the language entry pages and each configured language combination for all pages, including individual card details, along with the sitemap, robots file, web manifest, and service worker. All 18 site/game language combinations remain available. Canonical URLs and reciprocal `hreflang` links use three home representatives by site language and six data-page and card-detail representatives by game language; `x-default` points to Japanese. The sitemap lists these canonical public URLs and excludes settings. After deployment, the site owner can submit `/sitemap.xml` in Google Search Console and review canonical URLs with URL Inspection. Deploy the contents of `.output/public` to a static host configured to serve generated paths and `404.html` fallback behavior. The service worker and install prompt require HTTPS in production.
 
-Pushes to `main` build and deploy the site to GitHub Pages. You can also run **Deploy to GitHub Pages** manually from GitHub Actions on `main`.
+Pushes to `main` build and deploy the site to GitHub Pages. A successful `android-database` publication also triggers deployment after its SQLite release asset finishes uploading. Builds pin the database release and verify its checksum; failed checks retain the currently deployed website. Builds superseded by a newer database release or frontend commit skip deployment.
+
+You can also run **Deploy to GitHub Pages** manually from GitHub Actions on `main`. Leave `database_tag` blank to resolve the latest release, or supply its tag; `database_commit` and `database_sha256` can optionally assert the expected source. Only the latest database release can deploy. The deployed `/version.json` records the frontend and database versions and links to the workflow run.

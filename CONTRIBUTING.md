@@ -2,7 +2,7 @@
 
 ## Development
 
-Use Node.js 24 or newer with pnpm and `curl`. Run commands from the repository root. Generate and preview the static site:
+Use Node.js 24 or newer with pnpm. Run commands from the repository root. Generate and preview the static site:
 
 ```sh
 pnpm install
@@ -11,7 +11,7 @@ pnpm generate
 pnpm preview
 ```
 
-Fetching the database requires `curl`. Run `pnpm data:fetch` to download it to `.data/master.sqlite`, which is ignored by Git. Running the command again downloads and overwrites the file. If `curl` fails, the command returns a nonzero status and removes any incomplete output.
+Run `pnpm data:fetch` to download `.data/master.sqlite` and record its provenance in `.data/database-source.json`; both are ignored by Git. The Node.js downloader resolves the latest stable release once, pins its tag and commit, and checks the downloaded SHA-256 against both the release asset digest and that commit's report. A failed download or checksum check removes temporary output and preserves the previous database. `DATABASE_TAG` selects a release; optional `DATABASE_COMMIT` and `DATABASE_SHA256` must match its provenance.
 
 Google Analytics is disabled by `pnpm dev`. Run `pnpm generate` followed by `pnpm preview` to check the production tag, then confirm the `gtag/js` request and GA4 page views in the browser's Network panel. `NUXT_PUBLIC_GA_ID` optionally overrides the default Measurement ID or disables Analytics when set to an empty string. In the GA4 web data stream, enable page views based on browser history events under **Enhanced measurement** for in-app navigation.
 
@@ -63,7 +63,11 @@ When assigning parallel work, keep each domain's transform, types, tests, and da
 
 GitHub Pages uses the **GitHub Actions** source and the `holodori.net` custom domain. The `github-pages` environment is restricted to the `main` branch. Pushes to `main` run the deployment workflow; it can also be started manually from Actions on `main`.
 
-The workflow installs dependencies, downloads the latest SQLite release, runs typecheck, lint, format, tests, and static generation, then deploys `.output/public` with the built-in `GITHUB_TOKEN`. A failed check or build prevents deployment, leaving the current website in place.
+After publishing a database release and uploading its SQLite asset, `holodori-net/android-database` dispatches this workflow on `main` with `database_tag`, `database_commit`, and `database_sha256`. These inputs are optional for manual runs; an empty tag resolves the latest release once. A frontend push also resolves the latest release once.
+
+The workflow installs dependencies, downloads and verifies the pinned SQLite release, runs typecheck, lint, format, tests, and static generation, then deploys `.output/public` with the built-in `GITHUB_TOKEN`. It writes `/version.json` with the frontend commit, database tag/commit/checksum, build time, and workflow run URL. Before uploading the Pages artifact, it checks that both the database release and frontend main commit remain current. Superseded builds skip deployment. Concurrency serializes the whole workflow, including deployment; do not rely on queue order to determine the newest version. A failed check or build prevents deployment, leaving the current website in place.
+
+`scripts/deployment/` implements database acquisition, provenance, and the supersession check with native Node.js APIs. Its types are checked by `tsconfig.deployment.json`; `tests/deployment/` covers provenance mismatch, incomplete uploads, corrupt downloads, cleanup, and superseded inputs. To retry an existing database release manually, run **Deploy to GitHub Pages** on `main` with its tag; older-than-latest releases will not deploy. After deployment, compare the uncached `/version.json` response with the workflow inputs.
 
 ## Checks
 

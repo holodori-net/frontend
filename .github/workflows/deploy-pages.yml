@@ -5,6 +5,16 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      database_tag:
+        description: Database release tag (blank resolves latest once)
+        default: ''
+      database_commit:
+        description: Expected database release commit SHA
+        default: ''
+      database_sha256:
+        description: Expected master.sqlite SHA-256
+        default: ''
 
 concurrency:
   group: pages
@@ -15,6 +25,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      current: ${{ steps.current.outputs.current }}
     permissions:
       contents: read
       pages: read
@@ -31,18 +43,33 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm data:fetch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DATABASE_TAG: ${{ inputs.database_tag }}
+          DATABASE_COMMIT: ${{ inputs.database_commit }}
+          DATABASE_SHA256: ${{ inputs.database_sha256 }}
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm test
       - run: pnpm generate
+      - name: Record deployed source versions
+        run: node scripts/deployment/cli.ts version
+      - name: Skip superseded database or frontend versions
+        id: current
+        run: node scripts/deployment/cli.ts current
+        env:
+          GH_TOKEN: ${{ github.token }}
       - uses: actions/configure-pages@v6
+        if: steps.current.outputs.current == 'true'
       - uses: actions/upload-pages-artifact@v5
+        if: steps.current.outputs.current == 'true'
         with:
           path: .output/public
 
   deploy:
     needs: build
+    if: needs.build.outputs.current == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
