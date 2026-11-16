@@ -420,7 +420,7 @@ describe('song list logic', () => {
 
   it('builds jacket URLs with the original asset identifier', () => {
     expect(getSongImageUrl('0000123')).toBe(
-      'https://assets.holodori.net/cdn/img_music_jacket_0000123/Texture2D/img_music_jacket_0000123.webp',
+      'https://assets.holodori.net/cdn/img_music_jacket_0000123/Texture2D/img_music_jacket_0000123.thumb-640-v1.webp',
     )
   })
 

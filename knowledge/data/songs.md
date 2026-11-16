@@ -21,6 +21,8 @@
 
 列表投影移除 title／credit／singer ruby、歌曲 assetId 與歌曲級 MV thumbnailAssetId；MV 項目仍保留自己的 thumbnail。`searchTextBySongId` 合併六語標題與 ruby、作詞者／作曲者／編曲者、歌手、角色名、歌曲描述與解鎖說明、MV 名稱／描述、引用 Condition 說明及 MV 分類標籤／篩選名。只索引文字欄位，忽略 null 並以 `toLowerCase()` 小寫化；資源 ID、enum、數值及時間不進索引。
 
+歌曲封面 URL 集中於 `shared/game-data/songs/assets.ts` 的 `getSongImageUrl()`，保留 `jacketAssetId` 的前導零。列表載入 `https://assets.holodori.net/cdn/img_music_jacket_{jacketAssetId}/Texture2D/img_music_jacket_{jacketAssetId}.thumb-640-v1.webp` 的 640×640 WebP 縮圖；`fetch-assets` 同時保留無損原圖。圖片載入、快取確認、原生延後載入與失敗占位仍由既有共用流程處理。
+
 本機快照觀察日期為 2026-10-23，`master_meta.master_version` 為 `452bd7acfd1b9f90cc85d9978aea55b1a6bf6c2cddaff470c640462830c8c00d`，SQLite 檔案 SHA-256 為 `0d03e1d2cf2d80445df40e0a53658f00ebe2fb4ec3e5865c09e8fce214dc098e`。此快照包含 220 筆 Music、13,542 筆 LangMusic、880 組難度／譜面計數、310 筆 MusicMv、3 個 MV 分類、28 筆 LiveScoreEvaluationRank、11 筆 LiveCombo 與 2,855 筆 Condition；歌曲目前未引用 Condition 群組。觀察到 64 筆 arranger 對應列六語皆為 null，`m0352` 的 title ruby 僅日文有文字，其餘語言列保留 null。資料更新後重新檢查欄位、enum、關聯與 null 分布。
 
 ## 歌曲分數係數

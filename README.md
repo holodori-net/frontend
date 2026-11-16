@@ -44,7 +44,7 @@ Open **Songs** to browse jacket images, singers, four chart difficulties, Song L
 
 **Filters and sorting** and **Song display** start collapsed and can be expanded independently. Resetting either panel preserves both panels' open or closed state. Song display options stay in a fixed order, with one Song Level toggle for all four difficulties; singer names can be expanded to show member avatars. Display preferences are saved in this browser across languages, while filters and sorting are saved in the URL.
 
-Without JavaScript, the song list reflects what was available when the site was built. With JavaScript enabled, each page entry checks device time once and updates the list, hiding tutorial songs and songs whose availability time has not arrived. Reopen or reload after a song's availability time to see it if it is already in the site's data. Dates are displayed in JST. Jackets load from `assets.holodori.net`; unavailable images retain a placeholder and the song name.
+Without JavaScript, the song list reflects what was available when the site was built. With JavaScript enabled, each page entry checks device time once and updates the list, hiding tutorial songs and songs whose availability time has not arrived. Reopen or reload after a song's availability time to see it if it is already in the site's data. Dates are displayed in JST. Jackets load as 640×640 WebP thumbnails from `assets.holodori.net`; unavailable images retain a placeholder and the song name.
 
 ## Characters
 
