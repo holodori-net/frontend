@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { getCardAttributeIconUrl } from '#shared/game-data/cards/assets'
+import { useCardIcons } from '~/composables/card/useCardIcons'
+
+const { getCardAttributeIconUrl } = useCardIcons()
 
 const props = defineProps<{
   attribute: 'cute' | 'pure' | 'happy'
@@ -19,7 +21,7 @@ const iconStyle = computed(() => ({
 <template>
   <span
     class="skill-attribute"
-    :class="status === 'failed' && 'skill-attribute--failed'"
+    :class="(!iconUrl || status === 'failed') && 'skill-attribute--failed'"
     :style="iconStyle"
   >
     <img

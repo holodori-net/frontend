@@ -243,18 +243,18 @@ ORDER BY extent.position_y, extent.position_x;
 
 | 用途      | Sprite 名稱                   | 尺寸    | 圖案           |
 | --------- | ----------------------------- | ------- | -------------- |
-| 表現力    | `ui_999_ico_performance`      | 110×106 | P              |
-| 技巧      | `ui_999_ico_technique`        | 110×106 | T              |
-| 品味      | `ui_999_ico_sense`            | 101×98  | S              |
+| 表現力    | `ui_999_ico_performance`      | 110×105 | P              |
+| 技巧      | `ui_999_ico_technique`        | 110×105 | T              |
+| 品味      | `ui_999_ico_sense`            | 101×97  | S              |
 | 可愛（1） | `ui_999_ico_element_cute_cl`  | 128×128 | 粉紅心形       |
 | 清純（2） | `ui_999_ico_element_pure_cl`  | 128×128 | 綠色葉形       |
 | 快樂（3） | `ui_999_ico_element_happy_cl` | 128×128 | 黃橙色旋轉圖案 |
 
-素材來源：[APK 索引](https://assets.holodori.net/apk/index.json) 的 [主要圖示圖集](https://assets.holodori.net/apk/bundle/71a80fc31d22653f28db3f211e30ddde.bundle/index.json)。`files[].objectName` 對應 Sprite 名稱，`files[].path` 相對於該圖集目錄；來源 WebP 位於 `/srv/docker/holodori/public/apk/bundle/71a80fc31d22653f28db3f211e30ddde.bundle/images/`，保留 Sprite 的 object ID 檔名。另有 [陰影圖集](https://assets.holodori.net/apk/bundle/77297a5b58f9376da1f0bb5542e322c2.bundle/index.json)，名稱後綴為 `_shadow`。
+素材來源：[APK 索引](https://assets.holodori.net/apk/index.json) 的 [主要圖示圖集](https://assets.holodori.net/apk/bundle/71a80fc31d22653f28db3f211e30ddde.bundle/index.json)。`files[].objectName` 對應 Sprite 名稱，`files[].path` 相對於該圖集目錄，檔名由匯出器產生。另有 [陰影圖集](https://assets.holodori.net/apk/bundle/77297a5b58f9376da1f0bb5542e322c2.bundle/index.json)，名稱後綴為 `_shadow`。
 
 客戶端對應：`../extraction/work/decompile/05-annotate-decompiled-code/annotated-csharp/Vision.Common.Core/Vision/Common/AddressDefinition.cs` 的 `LocalSpriteAtlas`；屬性由 `Vision.Common/Vision/Common/CardAttributeTypeIcon.cs` 的 `Set` 選取。屬性 1／2／3 引用的靜態欄位 offset 分別為 8120／8168／8144，對應 `cute_cl`／`pure_cl`／`happy_cl`。觀察日期為 2026-10-14。
 
-前端 URL 對照集中於 `shared/game-data/cards/assets.ts`。卡片上的屬性與三圍使用圖示；兩種版型共用「圖示 數值 + 圖示 數值 + 圖示 數值 = 合計」算式，完整版型於圖片下方呈現，直式版型放在圖片右側的三圍欄。窄螢幕與缺圖文字按數值項目換行。篩選與三圍排序選項保留圖示及文字。`CardListIcon` 提供名稱、tooltip、尺寸選擇及載入失敗時的文字 fallback；三圍圖示使用透明背景，亮模式顯示黑色、暗模式顯示白色。
+`server/data/card-icons.ts` 依 Sprite 名稱查索引，卡片顯示元件從共用 `/data/card-icons.json` 取得 CDN 網址，不改卡片資料。卡片上的屬性與三圍使用圖示；兩種版型共用「圖示 數值 + 圖示 數值 + 圖示 數值 = 合計」算式，完整版型於圖片下方呈現，直式版型放在圖片右側的三圍欄。窄螢幕與缺圖文字按數值項目換行。篩選與三圍排序選項保留圖示及文字。`CardListIcon` 提供名稱、tooltip、尺寸選擇及載入失敗時的文字 fallback；三圍圖示使用透明背景，亮模式顯示黑色、暗模式顯示白色。
 
 ### 動態卡面與簽名影片
 

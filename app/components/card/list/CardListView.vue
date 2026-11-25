@@ -22,11 +22,13 @@ import { useCardFields } from '~/composables/card/useCardFields'
 import { useCardSkillFilterCatalog } from '~/composables/card/useCardSkillFilterCatalog'
 import { useListPanels } from '~/composables/useListPanels'
 import { useProgressiveList } from '~/composables/useProgressiveList'
+import { provideCardIcons } from '~/composables/card/useCardIcons'
 
 const props = defineProps<{
   payload: CardListPayload
   gameLocale: GameLocale
 }>()
+provideCardIcons()
 const { t } = useI18n()
 const gameLocale = computed(() => props.gameLocale)
 const payload = computed(() => props.payload)
