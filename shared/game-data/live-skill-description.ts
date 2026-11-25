@@ -409,25 +409,45 @@ function probabilityLabel(
 function activeMainSegment(
   effectText: string,
   duration: string | null,
-  probability: string,
+  chance: string,
   locale: GameLocale,
   format: 'source' | 'display',
   coolTime: string,
+  triggerText: string | null,
 ): string {
-  const chance = probability
   switch (locale) {
-    case 'jpn':
-      return `${coolTime}秒毎に${chance}で${duration ? `${duration}秒間` : ''}${format === 'display' ? '、' : ''}${effectText}`
-    case 'eng':
-      return `${duration ? `For ${duration}s, ` : ''}${format === 'display' ? joinSkillText(effectText, `Every ${coolTime}s with a ${chance} chance.`, conditionSeparator(locale)) : `${effectText} Every ${coolTime}s with a ${chance} chance.`}`
-    case 'ind':
-      return `${duration ? `Selama ${duration} dtk, ` : ''}${format === 'display' ? joinSkillText(effectText, `setiap ${coolTime} dtk dengan ${chance}`, conditionSeparator(locale)) : `${effectText} setiap ${coolTime} dtk dengan ${chance}`}`
-    case 'kor':
-      return `${coolTime}초마다 ${chance}로${duration ? '  ' : ' '}${duration ? `${duration}초 동안 ` : ''}${effectText}`
+    case 'jpn': {
+      const main = `${coolTime}秒毎に${chance}で${duration ? `${duration}秒間` : ''}${format === 'display' ? '、' : ''}${effectText}`
+      return triggerText === null
+        ? main
+        : `${triggerText}発動${format === 'display' ? '、' : '\n'}${main}`
+    }
+    case 'eng': {
+      const main = `${duration ? `For ${duration}s, ` : ''}${format === 'display' ? joinSkillText(effectText, `Every ${coolTime}s with a ${chance} chance.`, conditionSeparator(locale)) : `${effectText} Every ${coolTime}s with a ${chance} chance.`}`
+      return triggerText === null
+        ? main
+        : joinSkillText(triggerText, main, ', ')
+    }
+    case 'ind': {
+      const main = `${duration ? `Selama ${duration} dtk, ` : ''}${format === 'display' ? joinSkillText(effectText, `setiap ${coolTime} dtk dengan ${chance}`, conditionSeparator(locale)) : `${effectText} setiap ${coolTime} dtk dengan ${chance}`}`
+      return triggerText === null ? main : `${main} saat ${triggerText}`
+    }
+    case 'kor': {
+      const main = `${coolTime}초마다 ${chance}로 ${duration ? `${duration}초 동안 ` : ''}${effectText}`
+      return triggerText === null ? main : `${triggerText} ${main}`
+    }
     case 'cht':
-      return `每 ${coolTime} 秒以${chance}${duration ? `在 ${duration} 秒內` : ''}${format === 'display' ? '，' : ''}${effectText}`
-    case 'chs':
-      return `每 ${coolTime} 秒以${chance}${duration ? `在 ${duration} 秒内` : ''}${format === 'display' ? '，' : ''}${effectText}`
+    case 'chs': {
+      const timing = `每 ${coolTime} 秒以${chance}`
+      const within = duration
+        ? `在 ${duration} 秒${locale === 'cht' ? '內' : '内'}`
+        : ''
+      const separator = format === 'display' ? '，' : ''
+      if (triggerText === null)
+        return `${timing}${within}${separator}${effectText}`
+      const activation = `${triggerText}，${timing}${locale === 'cht' ? '發動' : '发动'}`
+      return `${activation}。${within}${within ? separator : ''}${effectText}`
+    }
   }
 }
 
@@ -467,9 +487,6 @@ export function composeActiveSkillDescription(
   format: 'source' | 'display' = 'source',
 ): string | null {
   const fail = (reason: string) => failCardSkill(onFailure, reason)
-  if (skill.liveSkillTriggerGroupId !== null) {
-    return fail('卡片主動技能主要條件組合尚未確認')
-  }
   if (
     (skill.additionalLiveSkillTriggerGroupId === null) !==
     (skill.additionalLiveActiveSkillEffectGroupId === null)
@@ -506,6 +523,17 @@ export function composeActiveSkillDescription(
   if (probability === null) return fail('卡片主動技能發動機率尚未確認')
   const effectText = renderCardSkillRow(effect, data, locale)
   if (effectText === null) return fail('卡片主動技能效果描述無法解析')
+  const trigger = getSingleSkillRow(
+    data.triggers,
+    skill.liveSkillTriggerGroupId,
+    false,
+  )
+  if (trigger === undefined)
+    return fail('卡片主動技能主要條件缺少資料或不是單列')
+  const triggerText =
+    trigger === null ? null : renderCardSkillRow(trigger, data, locale)
+  if (trigger !== null && triggerText === null)
+    return fail('卡片主動技能主要條件描述無法解析')
   const main = activeMainSegment(
     effectText,
     duration,
@@ -513,6 +541,7 @@ export function composeActiveSkillDescription(
     locale,
     format,
     coolTime,
+    triggerText,
   )
 
   if (skill.additionalLiveActiveSkillEffectGroupId === null) return main.trim()

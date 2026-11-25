@@ -134,6 +134,19 @@ export const confirmedDescriptionTemplates: ConfirmedDescriptionTemplates = {
         },
       },
     ],
+    '11': [
+      {
+        parameters: ['target', 'percent'],
+        text: {
+          jpn: '{target}スキル発動率が{percent}%UP',
+          eng: 'Grants Skill Activation Rate UP {percent}% to {target}.',
+          ind: 'Peluang Aktivasi Skill Naik {percent}% untuk {target}.',
+          kor: '{target} 스킬 발동률이 {percent}% UP',
+          cht: '{target}技能發動機率提升{percent}%',
+          chs: '{target}技能发动概率提升{percent}%',
+        },
+      },
+    ],
   },
   trigger: {
     '1': [

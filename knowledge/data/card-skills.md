@@ -85,7 +85,9 @@
 
 `composePassiveSkillDescription`、`composeActiveSkillDescription`、`composeSpecialSkillDescription` 位於 [live-skill-description.ts](../../shared/game-data/live-skill-description.ts)。函式接收指定等級列、唯讀描述資料、遊戲語言、可選的 `onFailure(reason)` 及第五個參數 `format: 'source' | 'display'`（預設 `source`），回傳 `string | null`。組合不修改資料，時間僅在組合時由毫秒除以 1,000 換算為秒。
 
-`source` 模式供來源還原與驗證。被動技能分別組合主要與附加條件／效果：日文與中文直接相接，英文及韓文以空格相接，印尼文使用 `Saat {trigger}, {effect}`。主要與附加段落在日文以換行相隔，其餘語言以空格相隔。主動技能保留各語言的時間、機率、效果順序；特殊技能共用持續時間與主動效果描述。屬性標記、描述內部空白、標點與日文換行保留。
+`source` 模式供來源還原與驗證。被動技能分別組合主要與附加條件／效果：日文與中文直接相接，英文及韓文以空格相接，印尼文使用 `Saat {trigger}, {effect}`。主要與附加段落在日文以換行相隔，其餘語言以空格相隔。主動技能保留各語言的時間、機率、效果順序；特殊技能共用持續時間與主動效果描述。屬性標記與原文語言各自的分隔方式保留。
+
+For a single primary active trigger, Japanese places activation on its own line; English and Korean put the condition before the timed effect, Indonesian puts it last, and Chinese separates timed activation from the effect. Korean uses one space before the duration, as in the November 25 master snapshot.
 
 `display` 模式供列表使用。條件與效果間，繁簡中文使用 `，`、日文使用 `、`，其餘語言使用逗號加空格；主要與附加段落間，繁簡中文及日文使用 `、`，其餘語言使用分號加空格。時間與機率子句依語言補上分隔，片段邊界去除重複標點，內文與屬性標記保留。服裝技能沿用相同分隔符。
 
@@ -117,7 +119,7 @@
 
 `useCardSkillFilterCatalog` 在同一個 Nuxt app 重用此建置的六語技能目錄，切回卡片頁或切換語言時不重複組合；快取不加入序列化 payload，不同伺服器請求分別建立。
 
-列表效果保留 `type` 與 `description`；其他原始效果欄位留在 server。被動效果 4／5／6／8／10 對應表現力提升、技巧提升、品味提升、全能力提升與分數加成效果提升；主動效果 1／5／6／8／9 對應分數提升、分數加成效果提升、技能發動機率提升、生命值回復與判定強化。各效果依配對的主要或附加 Trigger 判定條件，發動間隔與機率沿用技能描述。
+列表效果保留 `type` 與 `description`；其他原始效果欄位留在 server。被動效果 4／5／6／8／10／11 對應表現力提升、技巧提升、品味提升、全能力提升、分數加成效果提升與技能發動機率提升；主動效果 1／5／6／8／9 對應分數提升、分數加成效果提升、技能發動機率提升、生命值回復與判定強化。各效果依配對的主要或附加 Trigger 判定條件，發動間隔與機率沿用技能描述。
 
 摘要由結構化參數組合，各等級不同數值依來源等級順序以 `/` 串接；全部相同時只顯示一次。有差異的重複值保留完整序列，例如 `35/40/35%`。實體名稱及屬性標記保留。無法共用句型時，同一選項保存各等級完整描述。篩選不依賴卡片顯示的已選等級。群組與網址契約見[卡片資料](cards.md#技能篩選)。
 
@@ -127,4 +129,4 @@
 
 **CONFIRMED**：此快照的列表投影包含 196 張卡片、三類技能各 392 列等級；784 個來源技能識別合併為 368 個篩選選項。Nuxt 生成的 payload 使用自己的序列化格式。
 
-`tests/data/card-skills-master.test.ts` 驗證全部 330 個主動效果六語描述與 7,074 個完整技能描述。自動歸納比對只移除來源 `[highlight]` 標記及首尾空白；已確認模板另驗證完整組合，允許獨立文案。共用的 Indonesia Target 因人數為 null 保持待確認，詳見 [服裝技能](costume-live-skills.md#描述-catalog-與確認流程)。記憶體 SQLite 測試涵蓋欄位保留、排序、錯誤與轉換入口的資料表邊界；列表投影測試驗證全部被引用等級的六語組合與完整 converter 一致、移除未引用資料及缺少必要等級時的錯誤。指令見 [CONTRIBUTING.md](../../CONTRIBUTING.md)。
+`tests/data/card-skills-master.test.ts` 驗證全部 330 個主動效果六語描述與 7,074 個完整技能描述。自動歸納比對移除來源 `[highlight]` 標記及首尾空白，並將舊版韓文主動技能持續時間前的兩個空格統一為一個；已確認模板另驗證完整組合，允許獨立文案。共用的 Indonesia Target 因人數為 null 保持待確認，詳見 [服裝技能](costume-live-skills.md#描述-catalog-與確認流程)。記憶體 SQLite 測試涵蓋欄位保留、排序、錯誤與轉換入口的資料表邊界；列表投影測試驗證全部被引用等級的六語組合與完整 converter 一致、移除未引用資料及缺少必要等級時的錯誤。指令見 [CONTRIBUTING.md](../../CONTRIBUTING.md)。

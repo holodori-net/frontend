@@ -153,10 +153,18 @@ describe.skipIf(!existsSync(sourcePath))('local master card skills', () => {
               const text = skill.compose(locale)
               expect(text, key).toEqual(expect.any(String))
               expect(text, key).not.toContain('[highlight]')
-              if (mode === 'automatic')
-                expect(normalize(text!), key).toBe(
-                  normalize(sourceTexts.get(key)!),
-                )
+              if (mode === 'automatic') {
+                const source = normalize(sourceTexts.get(key)!)
+                // Older Korean active-skill text doubled the space before the duration.
+                const expected =
+                  domain.table === 'LiveActiveSkill' && locale === 'kor'
+                    ? source.replace(
+                        /확률로 {2}(?=\d+(?:\.\d+)?초 동안 )/u,
+                        '확률로 ',
+                      )
+                    : source
+                expect(normalize(text!), key).toBe(expected)
+              }
               complete++
             }
           }

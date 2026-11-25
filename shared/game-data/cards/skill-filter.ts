@@ -44,6 +44,7 @@ const passiveTypes: Record<number, CardSkillEffect> = {
   6: 'sense',
   8: 'allStats',
   10: 'scoreSupport',
+  11: 'activationRate',
 }
 const activeTypes: Record<number, CardSkillEffect> = {
   1: 'scoreUp',

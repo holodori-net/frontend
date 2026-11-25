@@ -1,8 +1,9 @@
 import { DatabaseSync } from 'node:sqlite'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { gameLocales } from '../../shared/language.ts'
+import { gameLocales, type GameLocale } from '../../shared/language.ts'
 import { createGameDatabase } from '../../server/data/database.ts'
 import { transformLiveSkillData } from '../../server/data/converters/live-skills.ts'
+import { confirmedDescriptionTemplates } from '../../server/data/live-skill-description-templates.ts'
 import { renderSkillDescription } from '../../shared/game-data/live-skill-description.ts'
 import type { ConfirmedDescriptionTemplates } from '../../shared/game-data/live-skills.ts'
 
@@ -11,7 +12,7 @@ let database: DatabaseSync
 function insertLanguages(
   table: string,
   id: string,
-  text: (locale: string) => string,
+  text: (locale: GameLocale) => string,
 ) {
   const insert = database.prepare(
     `INSERT INTO ${table} (language, id, text) VALUES (?, ?, ?)`,
@@ -171,6 +172,77 @@ describe('live skill data transform', () => {
       'LivePassiveSkillEffect.live_skill_effect_target_id in row effect-main:1',
     )
   })
+
+  it.each([
+    ['automatic', {}],
+    ['confirmed', confirmedDescriptionTemplates],
+  ] as const)(
+    'renders passive type 11 in all six languages with %s templates',
+    (_, templates) => {
+      database.exec(`
+      INSERT INTO LiveSkillEffectTarget VALUES ('target-cute', 5, 2, NULL, NULL, 1, 'target-cute-text');
+      INSERT INTO LivePassiveSkillEffect VALUES
+        ('activation-rate', 1, 11, '140', 'target-cute', NULL, NULL, 'activation-rate-14'),
+        ('activation-rate', 2, 11, '190', 'target-cute', NULL, NULL, 'activation-rate-19');
+    `)
+      const target = {
+        jpn: '[attribute=cute]キュートタイプ[/attribute]2人の',
+        eng: '2 [attribute=cute]Cute Type[/attribute] Members',
+        ind: '2 Member [attribute=cute]Cute Type[/attribute]',
+        kor: '[attribute=cute]큐트 타입[/attribute] 2명의',
+        cht: '2名[attribute=cute]可愛類型[/attribute]的',
+        chs: '2名[attribute=cute]可爱类型[/attribute]角色',
+      }
+      const expectedSource = (percent: number) => ({
+        jpn: `${target.jpn}スキル発動率が${percent}%UP`,
+        eng: `Grants Skill Activation Rate UP ${percent}% to ${target.eng}.`,
+        ind: `Peluang Aktivasi Skill Naik ${percent}% untuk ${target.ind}.`,
+        kor: `${target.kor} 스킬 발동률이 ${percent}% UP`,
+        cht: `${target.cht}技能發動機率提升${percent}%`,
+        chs: `${target.chs}技能发动概率提升${percent}%`,
+      })
+      insertLanguages(
+        'LangGeneratedLiveSkillEffectTarget',
+        'target-cute-text',
+        (locale) => target[locale],
+      )
+      const percentages = [14, 19]
+      for (const percent of percentages) {
+        const wording = expectedSource(percent)
+        insertLanguages(
+          'LangGeneratedLivePassiveSkillEffect',
+          `activation-rate-${percent}`,
+          (locale) => wording[locale],
+        )
+      }
+
+      const data = transformLiveSkillData(
+        createGameDatabase(database),
+        templates,
+      )
+      const effects = data.effects['activation-rate']!
+      expect(effects).toHaveLength(percentages.length)
+      for (const [index, percent] of percentages.entries()) {
+        const { description, value } = effects[index]!
+        expect(value).toBe(String(percent * 10))
+        expect(description?.params).toEqual({
+          target: { kind: 'target', id: 'target-cute' },
+          percent,
+        })
+        const wording = expectedSource(percent)
+        for (const locale of gameLocales) {
+          expect(renderSkillDescription(description, data, locale)).toBe(
+            wording[locale],
+          )
+        }
+      }
+      expect(
+        data.pendingDescriptions.filter(({ key }) =>
+          key.startsWith('activation-rate:'),
+        ),
+      ).toEqual([])
+    },
+  )
 
   it('keeps structured data after inference fails and uses a confirmed template on retry', () => {
     database.exec(

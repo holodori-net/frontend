@@ -327,6 +327,21 @@ describe('buildCardSkillFilterCatalog', () => {
     })
   })
 
+  it('groups passive type 11 under skill activation rate', () => {
+    const data = payload()
+    for (const groupId of ['e4', 'e4alias']) {
+      data.skills.effects[groupId]![0]!.type = 11
+    }
+    const { options } = buildCardSkillFilterCatalog(data)
+    expect(options.find(({ key }) => key === 'passive:p1')).toMatchObject({
+      effects: ['activationRate'],
+      pureEffects: ['activationRate'],
+    })
+    expect(options.find(({ key }) => key === 'passive:p2')).toMatchObject({
+      conditionalEffects: ['activationRate'],
+    })
+  })
+
   it('keeps missing groups distinct and merges values by description position', () => {
     const result = buildCardSkillFilterCatalog(payload())
     expect(result.canonicalKeys['passive:pmiss1']).not.toBe(
