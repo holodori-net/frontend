@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import type { CardListLayout } from '#shared/game-data/cards/display'
-import {
-  getCardAttributeIconUrl,
-  getCardImageUrl,
-} from '#shared/game-data/cards/assets'
+import { getCardAttributeIconUrl } from '~/utils/card-icons'
+import { getCardImageUrl } from '#shared/game-data/cards/assets'
 
 const props = withDefaults(
   defineProps<{

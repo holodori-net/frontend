@@ -13,10 +13,7 @@ import type {
 import type { CardSkillFilterCatalog } from '#shared/game-data/cards/skill-filter'
 import type { CardConnectFilterCatalog } from '#shared/game-data/cards/connect-filter'
 import type { CardSkillQueryError } from '~/composables/card/useCardListConditions'
-import {
-  getCardAttributeIconUrl,
-  getCardStatIconUrl,
-} from '#shared/game-data/cards/assets'
+import { getCardAttributeIconUrl, getCardStatIconUrl } from '~/utils/card-icons'
 import { getCharacterIconUrl } from '#shared/game-data/character-list'
 
 const props = defineProps<{

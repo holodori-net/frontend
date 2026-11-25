@@ -22,6 +22,10 @@ import { fileURLToPath } from 'node:url'
 import { generateSiteSeo } from './scripts/site-seo'
 import { renderMemberThemeBootstrap } from './scripts/member-theme-bootstrap'
 import { buildLanguageEntryBootstrap } from './scripts/build-language-entry-bootstrap'
+import {
+  defaultCardIconUrls,
+  resolveCardIconUrls,
+} from './scripts/deployment/card-icons'
 import { addTemplate, defineNuxtModule } from 'nuxt/kit'
 import { getPrerenderWorkerCount } from './scripts/prerender/worker-count'
 import {
@@ -82,6 +86,20 @@ const memberDataModule = defineNuxtModule({
           `export const memberThemes: readonly MemberTheme[] = ${JSON.stringify(memberThemes)}`,
           `export const memberGroups: readonly MemberGroup[] = ${JSON.stringify(memberGroups)}`,
         ].join('\n'),
+    })
+  },
+})
+
+const cardIconModule = defineNuxtModule({
+  meta: { name: 'card-icons' },
+  async setup(_options, nuxt) {
+    const urls = nuxt.options.nitro.static
+      ? await resolveCardIconUrls()
+      : defaultCardIconUrls
+    addTemplate({
+      filename: 'card-icons.ts',
+      write: true,
+      getContents: () => `export default ${JSON.stringify(urls)}`,
     })
   },
 })
@@ -181,6 +199,7 @@ export default defineNuxtConfig({
   modules: [
     languageEntryBootstrapModule,
     memberDataModule,
+    cardIconModule,
     '@nuxtjs/i18n',
     '@nuxt/eslint',
     '@vite-pwa/nuxt',
@@ -269,11 +288,7 @@ export default defineNuxtConfig({
       'icons/icon-maskable-512.png',
     ],
     injectManifest: {
-      globPatterns: [
-        '**/*.{js,css,ico,png,svg,woff2}',
-        '**/_i18n/**/*.json',
-        'card-icons/*.webp',
-      ],
+      globPatterns: ['**/*.{js,css,ico,png,svg,woff2}', '**/_i18n/**/*.json'],
       globIgnores: [
         '**/*_payload.json',
         '**/*.html',

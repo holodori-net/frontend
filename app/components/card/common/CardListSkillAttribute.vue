@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getCardAttributeIconUrl } from '#shared/game-data/cards/assets'
+import { getCardAttributeIconUrl } from '~/utils/card-icons'
 
 const props = defineProps<{
   attribute: 'cute' | 'pure' | 'happy'
