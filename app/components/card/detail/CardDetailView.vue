@@ -22,7 +22,7 @@ const props = defineProps<{
   payload: CardDetailPagePayload
   gameLocale: GameLocale
 }>()
-provideCardIcons(computed(() => props.payload.iconUrls))
+provideCardIcons()
 const { t, locale } = useI18n()
 const fullscreenPlayer = ref<{ open: () => void } | null>(null)
 const {

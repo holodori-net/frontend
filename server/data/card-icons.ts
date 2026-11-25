@@ -1,5 +1,3 @@
-import process from 'node:process'
-import { getEnvironmentData, setEnvironmentData } from 'node:worker_threads'
 import type { CardIconUrls } from '#shared/game-data/cards/icon-urls'
 
 const atlas =
@@ -61,25 +59,12 @@ export async function resolveCardIconUrls(
   })
 }
 
-const prerenderIconsKey = 'holodori-card-icon-urls'
-// Nitro routes and Vite SSR can load separate copies of this module in dev.
-const cacheKey = Symbol.for('holodori.cardIconUrls')
-const runtime = process as typeof process & {
-  [cacheKey]?: Promise<CardIconUrls> | undefined
-}
+let iconUrls: Promise<CardIconUrls> | undefined
 
 export function readCardIconUrls(): Promise<CardIconUrls> {
-  const snapshot = getEnvironmentData(prerenderIconsKey) as
-    CardIconUrls | undefined
-  if (snapshot) return Promise.resolve(snapshot)
-
-  runtime[cacheKey] ??= resolveCardIconUrls().catch((error: unknown) => {
-    runtime[cacheKey] = undefined
+  iconUrls ??= resolveCardIconUrls().catch((error: unknown) => {
+    iconUrls = undefined
     throw error
   })
-  return runtime[cacheKey]
-}
-
-export async function shareCardIconUrlsWithWorkers() {
-  setEnvironmentData(prerenderIconsKey, await readCardIconUrls())
+  return iconUrls
 }

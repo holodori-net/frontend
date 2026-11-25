@@ -8,6 +8,8 @@ import {
 import { primeVueComponents } from './shared/primevue'
 import { cardDetailDataPath, pageDataPaths } from './shared/page-data'
 import { readCardDetailIndex } from './server/data/card-detail'
+import { cardIconDataPath } from './shared/game-data/cards/icon-urls'
+import { readCardIconUrls } from './server/data/card-icons'
 import {
   defaultThemeId,
   memberThemeFaviconKey,
@@ -45,6 +47,7 @@ const contentPages = sitePages.map((page) =>
 
 const prerenderRoutes = [
   ...Object.values(pageDataPaths),
+  cardIconDataPath,
   ...cardIds.flatMap((id) => [
     cardDetailDataPath(id),
     `/cards/${encodeURIComponent(id)}`,
@@ -114,13 +117,18 @@ export default defineNuxtConfig({
         }
       })
 
-      if (prerenderWorkerCount > 1) {
-        nitro.hooks.hook('prerender:config', (config) => {
+      nitro.hooks.hook('prerender:config', async (config) => {
+        // All prerender workers use the same atlas snapshot.
+        config.runtimeConfig = {
+          ...config.runtimeConfig,
+          cardIconUrls: await readCardIconUrls(),
+        }
+        if (prerenderWorkerCount > 1) {
           config.entry = fileURLToPath(
             new URL('./scripts/prerender/entry.ts', import.meta.url),
           )
-        })
-      }
+        }
+      })
     },
     'nitro:config': async () => {
       await generateSiteSeo(
@@ -269,7 +277,11 @@ export default defineNuxtConfig({
       'icons/icon-maskable-512.png',
     ],
     injectManifest: {
-      globPatterns: ['**/*.{js,css,ico,png,svg,woff2}', '**/_i18n/**/*.json'],
+      globPatterns: [
+        '**/*.{js,css,ico,png,svg,woff2}',
+        '**/_i18n/**/*.json',
+        cardIconDataPath.slice(1),
+      ],
       globIgnores: [
         '**/*_payload.json',
         '**/*.html',

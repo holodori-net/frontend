@@ -1,6 +1,4 @@
-import { existsSync } from 'node:fs'
-import process from 'node:process'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   readCardIconUrls,
   resolveCardIconUrls,
@@ -70,14 +68,8 @@ describe('resolveCardIconUrls', () => {
   })
 })
 
-const sourcePath = new URL('../../.data/master.sqlite', import.meta.url)
-
 describe('readCardIconUrls', () => {
-  afterEach(() => {
-    Reflect.deleteProperty(process, Symbol.for('holodori.cardIconUrls'))
-  })
-
-  it('retries a failed lookup and shares a successful lookup across module copies', async () => {
+  it('retries a failed lookup and shares a successful lookup across callers', async () => {
     const fetcher = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(new Response(null, { status: 503 }))
@@ -88,42 +80,11 @@ describe('readCardIconUrls', () => {
         'Card icon index: HTTP 503',
       )
       const request = readCardIconUrls()
-      vi.resetModules()
-      const fresh = await import('../../server/data/card-icons.ts')
-      expect(fresh.readCardIconUrls()).toBe(request)
-      const urls = await request
-      expect(await readCardIconUrls()).toBe(urls)
+      expect(readCardIconUrls()).toBe(request)
+      expect(await readCardIconUrls()).toBe(await request)
       expect(fetcher).toHaveBeenCalledTimes(2)
     } finally {
       vi.unstubAllGlobals()
     }
   })
-
-  it.skipIf(!existsSync(sourcePath))(
-    'includes the same URLs once in the list and detail payloads',
-    async () => {
-      const fetcher = vi.fn<typeof fetch>(async () =>
-        Response.json({ files: fixtures() }),
-      )
-      vi.stubGlobal('fetch', fetcher)
-      try {
-        const { readCardListPayload } =
-          await import('../../server/data/card-list.ts')
-        const { readCardDetailPayload, readCardDetailIndex } =
-          await import('../../server/data/card-detail.ts')
-        const id = readCardDetailIndex().cardIds[0]!
-        const [list, detail] = await Promise.all([
-          readCardListPayload(),
-          readCardDetailPayload(id),
-        ])
-        expect(detail?.iconUrls).toBe(list.iconUrls)
-        expect(Object.keys(list.iconUrls.attributes)).toHaveLength(3)
-        expect(list.cards[0]).not.toHaveProperty('iconUrls')
-        expect(detail?.card).not.toHaveProperty('iconUrls')
-        expect(fetcher).toHaveBeenCalledOnce()
-      } finally {
-        vi.unstubAllGlobals()
-      }
-    },
-  )
 })

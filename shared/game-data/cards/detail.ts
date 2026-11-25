@@ -1,9 +1,8 @@
 import type {
-  CardListData,
+  CardListPayload,
   CardListItemData,
   CardListCostumeData,
 } from './list-data.ts'
-import type { CardIconUrls } from './icon-urls.ts'
 import type { CardData } from '../cards.ts'
 import type { CharacterGroupData } from '../character-groups.ts'
 
@@ -18,8 +17,8 @@ export interface CardDetailGrowthData {
   potentials: { upgradeCount: number; effectType: number; value: number }[]
 }
 
-export interface CardDetailData extends Omit<
-  CardListData,
+export interface CardDetailPayload extends Omit<
+  CardListPayload,
   'cards' | 'searchTextByCardId' | 'costumes'
 > {
   voiceAssetId: string | null
@@ -29,10 +28,6 @@ export interface CardDetailData extends Omit<
   >
   costumes: Record<string, CardDetailCostumeData>
   growth: CardDetailGrowthData
-}
-
-export interface CardDetailPayload extends CardDetailData {
-  iconUrls: CardIconUrls
 }
 
 export interface CardDetailIndex {

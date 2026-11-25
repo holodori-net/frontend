@@ -1,4 +1,4 @@
-import type { CardListData } from './list-data.ts'
+import type { CardListPayload } from './list-data.ts'
 import { gameLocales } from '../../language.ts'
 import {
   composeActiveSkillDescription,
@@ -19,7 +19,7 @@ function searchableText(value: string) {
 /** Build locale-independent search text from every searchable card field. */
 export function buildCardSearchTextById(
   payload: Pick<
-    CardListData,
+    CardListPayload,
     'cards' | 'costumes' | 'skills' | 'connectEffects'
   >,
 ): Record<string, string> {

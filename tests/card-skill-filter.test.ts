@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { existsSync } from 'node:fs'
 import { readCardList } from '../server/data/card-list.ts'
-import type { CardListData } from '../shared/game-data/cards/list-data.ts'
+import type { CardListPayload } from '../shared/game-data/cards/list-data.ts'
 import { gameLocales } from '../shared/language.ts'
 import {
   buildCardSkillFilterCatalog,
@@ -18,7 +18,7 @@ const text = {
   chs: '效果',
 }
 
-function payload(): CardListData {
+function payload(): CardListPayload {
   return {
     cards: [
       {
@@ -283,7 +283,7 @@ function payload(): CardListData {
     connectEffects: {},
     connectExtents: {},
     searchTextByCardId: {},
-  } satisfies CardListData
+  } satisfies CardListPayload
 }
 
 describe('buildCardSkillFilterCatalog', () => {

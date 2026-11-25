@@ -20,7 +20,6 @@ export interface CardDetailPageSkillLevel {
 }
 
 export interface CardDetailPagePayload {
-  iconUrls: CardDetailPayload['iconUrls']
   voiceAssetId: CardDetailPayload['voiceAssetId']
   card: Omit<CardDetailPayload['card'], 'name' | 'characterName'> & {
     name: CardDetailLocalizedText
@@ -135,7 +134,6 @@ export function localizeCardDetailPayload(
   }
 
   return {
-    iconUrls: payload.iconUrls,
     voiceAssetId: payload.voiceAssetId,
     card: {
       ...card,

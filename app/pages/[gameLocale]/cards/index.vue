@@ -22,8 +22,8 @@ const {
   async (_nuxtApp, { signal }) => {
     try {
       if (import.meta.server) {
-        const { readCardListPayload } = await import('~~/server/data/card-list')
-        return await readCardListPayload()
+        const { readCardList } = await import('~~/server/data/card-list')
+        return readCardList()
       }
       return await $fetch<CardListPayload>(pageDataPaths.cards, {
         signal,

@@ -4,13 +4,11 @@ import type {
   CardDetailGrowthData,
   CardDetailIndex,
   CardDetailPayload,
-  CardDetailData,
 } from '#shared/game-data/cards/detail'
 import type { CardGrowthData } from '#shared/game-data/cards/growth'
 import type { CharacterGroupData } from '#shared/game-data/character-groups'
 import { card } from './schema/cards.ts'
 import { characterVoice } from './schema/character-voices.ts'
-import { readCardIconUrls } from './card-icons.ts'
 import { withGameDatabase } from './database.ts'
 import { transformCards } from './converters/cards.ts'
 import { transformCharacters } from './converters/characters.ts'
@@ -96,14 +94,7 @@ function getSources() {
   return sourcesCache
 }
 
-export async function readCardDetailPayload(
-  id: string,
-): Promise<CardDetailPayload | null> {
-  const data = readCardDetail(id)
-  return data ? { ...data, iconUrls: await readCardIconUrls() } : null
-}
-
-export function readCardDetail(id: string): CardDetailData | null {
+export function readCardDetail(id: string): CardDetailPayload | null {
   if (!readCardDetailIndex().cardIds.includes(id)) return null
   const sources = getSources()
   const card = sources.cards.find((item) => item.id === id)
@@ -162,14 +153,14 @@ export function readCardDetail(id: string): CardDetailData | null {
     [card],
     new Set(costumeIds.values()),
   )
-  const costumes: CardDetailData['costumes'] = {}
+  const costumes: CardDetailPayload['costumes'] = {}
   for (const source of sources.liveSkills.costumes) {
     const projectedCostume = projected.costumes[source.id]
     if (projectedCostume)
       costumes[source.id] = { ...projectedCostume, assetId: source.assetId }
   }
-  const connectEffects: CardDetailData['connectEffects'] = {}
-  const connectExtents: CardDetailData['connectExtents'] = {}
+  const connectEffects: CardDetailPayload['connectEffects'] = {}
+  const connectExtents: CardDetailPayload['connectExtents'] = {}
   if (card.skillTreeConnectEffectId) {
     const effectRows = sources.connect.effects[card.skillTreeConnectEffectId]
     if (!effectRows?.length)

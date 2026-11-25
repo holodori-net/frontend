@@ -28,7 +28,7 @@ const props = defineProps<{
   payload: CardListPayload
   gameLocale: GameLocale
 }>()
-provideCardIcons(computed(() => props.payload.iconUrls))
+provideCardIcons()
 const { t } = useI18n()
 const gameLocale = computed(() => props.gameLocale)
 const payload = computed(() => props.payload)

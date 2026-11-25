@@ -21,7 +21,7 @@ const iconStyle = computed(() => ({
 <template>
   <span
     class="skill-attribute"
-    :class="status === 'failed' && 'skill-attribute--failed'"
+    :class="(!iconUrl || status === 'failed') && 'skill-attribute--failed'"
     :style="iconStyle"
   >
     <img

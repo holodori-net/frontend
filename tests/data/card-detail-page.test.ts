@@ -1,9 +1,9 @@
 import { existsSync } from 'node:fs'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { gameLocales, resolveLocalizedName } from '../../shared/language.ts'
 import { localizeCardDetailPayload } from '../../shared/game-data/cards/detail-page.ts'
 import {
-  readCardDetailPayload,
+  readCardDetail,
   readCardDetailIndex,
 } from '../../server/data/card-detail.ts'
 import {
@@ -13,28 +13,14 @@ import {
   composeSpecialSkillDescription,
 } from '../../shared/game-data/live-skill-description.ts'
 
-const { iconUrls } = vi.hoisted(() => ({
-  iconUrls: {
-    stats: {
-      performance: 'https://example.test/performance.webp',
-      technique: 'https://example.test/technique.webp',
-      sense: 'https://example.test/sense.webp',
-    },
-    attributes: { 1: 'https://example.test/cute.webp' },
-  },
-}))
-vi.mock('../../server/data/card-icons.ts', () => ({
-  readCardIconUrls: async () => iconUrls,
-}))
-
 const sourcePath = new URL('../../.data/master.sqlite', import.meta.url)
 
 describe.skipIf(!existsSync(sourcePath))(
   'localized card detail page payload',
   () => {
-    it('matches every source skill description for every card, locale, and level', async () => {
+    it('matches every source skill description for every card, locale, and level', () => {
       for (const id of readCardDetailIndex().cardIds) {
-        const source = await readCardDetailPayload(id)
+        const source = readCardDetail(id)
         expect(source, id).not.toBeNull()
         if (!source) continue
 
@@ -139,9 +125,9 @@ describe.skipIf(!existsSync(sourcePath))(
       }
     }, 30_000)
 
-    it('keeps the Japanese fallback language on resolved names and omits source locale maps', async () => {
+    it('keeps the Japanese fallback language on resolved names and omits source locale maps', () => {
       const id = readCardDetailIndex().cardIds[0]
-      const source = id ? await readCardDetailPayload(id) : null
+      const source = id ? readCardDetail(id) : null
       expect(source).not.toBeNull()
       if (!source) return
       source.card.name = {
@@ -154,7 +140,6 @@ describe.skipIf(!existsSync(sourcePath))(
       }
 
       const localized = localizeCardDetailPayload(source, 'eng')
-      expect(localized.iconUrls).toEqual(iconUrls)
       expect(localized.card.name).toEqual({
         text: '日本語 fallback',
         lang: 'ja',
