@@ -9,14 +9,24 @@ const cardIconUrlsKey: InjectionKey<Ref<CardIconUrls | undefined>> =
   Symbol('card-icon-urls')
 
 export function provideCardIcons() {
-  const { data } = useLazyAsyncData('card-icon-urls', (_app, { signal }) =>
-    $fetch<CardIconUrls>(cardIconDataPath, { signal, retry: 0 }),
+  const { data } = useLazyAsyncData(
+    'card-icon-urls',
+    (_app, { signal }) =>
+      $fetch<CardIconUrls>(cardIconDataPath, { signal, retry: 0 }),
+    {
+      // The URLs only change with a new build, so client navigation reuses
+      // the first successful result instead of refetching it on every page.
+      getCachedData: (key, nuxtApp) =>
+        nuxtApp.payload.data[key] ?? nuxtApp.static.data[key],
+    },
   )
   provide(cardIconUrlsKey, data)
 }
 
 export function useCardIcons() {
-  const urls = inject(cardIconUrlsKey, undefined)
+  // No default: a component rendered outside a provider triggers Vue's
+  // missing-injection warning in development.
+  const urls = inject(cardIconUrlsKey)
 
   return {
     getCardStatIconUrl: (stat: CardStatKey) => urls?.value?.stats[stat] ?? null,
