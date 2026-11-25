@@ -29,10 +29,18 @@ describe('resolveCardIconUrls', () => {
     expect(indexUrl.searchParams.has('frontend-build')).toBe(true)
     expect(fetcher).toHaveBeenCalledTimes(1)
     const base = new URL('./images/', indexUrl).href
-    expect(urls.stats.performance).toBe(`${base}new-export-0.webp`)
-    expect(urls.attributes[1]).toBe(`${base}new-export-3.webp`)
-    expect(urls.attributes[2]).toBe(`${base}new-export-4.webp`)
-    expect(urls.attributes[3]).toBe(`${base}new-export-5.webp`)
+    expect(urls).toEqual({
+      stats: {
+        performance: `${base}new-export-0.webp`,
+        technique: `${base}new-export-1.webp`,
+        sense: `${base}new-export-2.webp`,
+      },
+      attributes: {
+        1: `${base}new-export-3.webp`,
+        2: `${base}new-export-4.webp`,
+        3: `${base}new-export-5.webp`,
+      },
+    })
   })
 
   it.each(['missing', 'duplicate', 'unsafe'])(

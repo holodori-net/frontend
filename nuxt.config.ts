@@ -22,10 +22,7 @@ import { fileURLToPath } from 'node:url'
 import { generateSiteSeo } from './scripts/site-seo'
 import { renderMemberThemeBootstrap } from './scripts/member-theme-bootstrap'
 import { buildLanguageEntryBootstrap } from './scripts/build-language-entry-bootstrap'
-import {
-  defaultCardIconUrls,
-  resolveCardIconUrls,
-} from './scripts/deployment/card-icons'
+import { resolveCardIconUrls } from './scripts/deployment/card-icons'
 import { addTemplate, defineNuxtModule } from 'nuxt/kit'
 import { getPrerenderWorkerCount } from './scripts/prerender/worker-count'
 import {
@@ -93,9 +90,21 @@ const memberDataModule = defineNuxtModule({
 const cardIconModule = defineNuxtModule({
   meta: { name: 'card-icons' },
   async setup(_options, nuxt) {
-    const urls = nuxt.options.nitro.static
-      ? await resolveCardIconUrls()
-      : defaultCardIconUrls
+    if (nuxt.options._prepare) {
+      addTemplate({
+        filename: 'card-icons.d.ts',
+        write: true,
+        getContents: () =>
+          [
+            "import type { CardIconUrls } from '~~/scripts/deployment/card-icons'",
+            'declare const urls: CardIconUrls',
+            'export default urls',
+          ].join('\n'),
+      })
+      return
+    }
+
+    const urls = await resolveCardIconUrls()
     addTemplate({
       filename: 'card-icons.ts',
       write: true,
