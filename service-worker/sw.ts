@@ -15,7 +15,6 @@ import {
 } from '../shared/language'
 import { fetchWithProgress, mapConcurrent } from './transfer'
 import { cardDetailDataPath, pageDataPaths } from '../shared/page-data'
-import { cardIconDirectory } from '../shared/game-data/cards/icon-sprites'
 import type {
   OfflineProgress,
   OfflineSelection,
@@ -42,14 +41,8 @@ const precacheEntries = self.__WB_MANIFEST.map((entry) =>
 const PRECACHED_URLS = new Set(
   precacheEntries.map((entry) => new URL(entry.url, self.location.origin).href),
 )
-function isApplicationAsset(pathname: string) {
-  return (
-    /^\/(?:_nuxt|_i18n)\//.test(pathname) ||
-    pathname.startsWith(`/${cardIconDirectory}/`)
-  )
-}
 const PRECACHE_ASSET_URLS = [...PRECACHED_URLS].filter((url) =>
-  isApplicationAsset(new URL(url).pathname),
+  /^\/(?:_nuxt|_i18n)\//.test(new URL(url).pathname),
 )
 let selectionQueue: Promise<unknown> = Promise.resolve()
 
@@ -279,7 +272,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url)
   const snapshotAsset =
     url.origin === self.location.origin &&
-    isApplicationAsset(url.pathname) &&
+    /^\/(?:_nuxt|_i18n)\//.test(url.pathname) &&
     !PRECACHED_URLS.has(url.href)
   const cardDetailData = /^\/data\/cards\/[^/]+\.json$/.test(url.pathname)
   if (

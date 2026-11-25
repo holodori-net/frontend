@@ -1,11 +1,6 @@
 import type { CardListLayout } from './display.ts'
 
 import type { CardStatKey } from './list-data.ts'
-import {
-  cardAttributeSprites,
-  cardIconDirectory,
-  cardStatSprites,
-} from './icon-sprites.ts'
 import { getMemberThemeAssets } from '../../theme.ts'
 
 export function getCardImageUrl(
@@ -171,6 +166,25 @@ export function getCardVoiceUrl(assetId: string | null): string | null {
 
 export const cardRarityAnimationUrl =
   'https://assets.holodori.net/apk/generated/animations/ef_ui_999_rare_anim_001--da09250dd35035f2.webp'
+
+export const cardIconDirectory = 'card-icons'
+
+const cardStatSprites: Record<CardStatKey, string> = {
+  performance: 'ui_999_ico_performance',
+  technique: 'ui_999_ico_technique',
+  sense: 'ui_999_ico_sense',
+}
+
+const cardAttributeSprites: Readonly<Record<number, string | undefined>> = {
+  1: 'ui_999_ico_element_cute_cl',
+  2: 'ui_999_ico_element_pure_cl',
+  3: 'ui_999_ico_element_happy_cl',
+}
+
+export const cardIconSpriteNames = [
+  ...Object.values(cardStatSprites),
+  ...Object.values(cardAttributeSprites).filter((name) => name !== undefined),
+]
 
 function cardIconUrl(sprite: string): string {
   return `/${cardIconDirectory}/${sprite}.webp`

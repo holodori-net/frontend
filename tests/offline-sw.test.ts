@@ -468,35 +468,29 @@ describe('offline service worker selection', () => {
     expect(selection.assetUrls).toEqual(['https://example.test/_nuxt/app.js'])
   })
 
-  it.each(['/_nuxt/app.js', '/card-icons/ui_999_ico_element_cute_cl.webp'])(
-    'serves pinned assets referenced by a saved page after an app update: %s',
-    async (assetPath) => {
-      await loadWorker(assetPath)
-      vi.stubGlobal(
-        'fetch',
-        vi.fn(async () => new Response('page')),
-      )
-      await message({
-        type: 'SYNC_OFFLINE_PAGES',
-        siteLocale: 'ja',
-        gameLocale: 'jpn',
-        pages: ['home'],
-      })
-      await loadWorker('/_nuxt/new.js')
-      vi.stubGlobal(
-        'fetch',
-        vi.fn(async () => Promise.reject(new Error('offline'))),
-      )
-      let response: Promise<Response> | undefined
-      listeners.get('fetch')!({
-        request: new Request(`https://example.test${assetPath}`),
-        respondWith: (value) => (response = value),
-      })
-      expect(await (await response)?.text()).toBe(
-        assetPath === '/_nuxt/app.js' ? 'app' : 'new app',
-      )
-    },
-  )
+  it('serves pinned assets referenced by a saved page after an app update', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('page')),
+    )
+    await message({
+      type: 'SYNC_OFFLINE_PAGES',
+      siteLocale: 'ja',
+      gameLocale: 'jpn',
+      pages: ['home'],
+    })
+    await loadWorker('/_nuxt/new.js')
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Promise.reject(new Error('offline'))),
+    )
+    let response: Promise<Response> | undefined
+    listeners.get('fetch')!({
+      request: new Request('https://example.test/_nuxt/app.js'),
+      respondWith: (value) => (response = value),
+    })
+    expect(await (await response)?.text()).toBe('app')
+  })
 
   it('returns a localized HTML fallback for missing pages and JSON for payloads', async () => {
     vi.stubGlobal(

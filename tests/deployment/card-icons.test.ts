@@ -2,7 +2,7 @@ import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { prepareCardIcons } from '../../scripts/assets/card-icons.ts'
+import { prepareCardIcons } from '../../scripts/deployment/card-icons.ts'
 import {
   getCardAttributeIconUrl,
   getCardStatIconUrl,
