@@ -4,6 +4,7 @@
 app/assets/css/generated.css
 public/sitemap.xml
 public/robots.txt
+/public/card-icons/
 node_modules
 coverage
 dist

@@ -9,5 +9,10 @@
     "types": ["node"],
     "lib": ["ES2024"]
   },
-  "include": ["scripts/deployment/**/*.ts", "tests/deployment/**/*.ts"]
+  "include": [
+    "scripts/assets/**/*.ts",
+    "scripts/deployment/**/*.ts",
+    "tests/assets/**/*.ts",
+    "tests/deployment/**/*.ts"
+  ]
 }

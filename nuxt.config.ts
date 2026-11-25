@@ -6,6 +6,7 @@ import {
   buildCardDetailPath,
 } from './shared/language'
 import { primeVueComponents } from './shared/primevue'
+import { cardIconDirectory } from './shared/game-data/cards/icon-sprites'
 import { cardDetailDataPath, pageDataPaths } from './shared/page-data'
 import { readCardDetailIndex } from './server/data/card-detail'
 import {
@@ -269,7 +270,11 @@ export default defineNuxtConfig({
       'icons/icon-maskable-512.png',
     ],
     injectManifest: {
-      globPatterns: ['**/*.{js,css,ico,png,svg,woff2}', '**/_i18n/**/*.json'],
+      globPatterns: [
+        '**/*.{js,css,ico,png,svg,woff2}',
+        '**/_i18n/**/*.json',
+        `${cardIconDirectory}/*.webp`,
+      ],
       globIgnores: [
         '**/*_payload.json',
         '**/*.html',
