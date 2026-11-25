@@ -1,5 +1,5 @@
 import { gameLocales, type GameLocale } from '../../language.ts'
-import type { CardListPayload } from './list-data.ts'
+import type { CardListData } from './list-data.ts'
 import type { SkillDescription } from '../live-skills.ts'
 import type { SkillDescriptionData } from '../live-skill-description.ts'
 import {
@@ -72,7 +72,7 @@ const sortUnique = <T extends string>(values: T[]) =>
   [...new Set(values)].sort() as T[]
 
 export function buildCardSkillFilterCatalog(
-  payload: CardListPayload,
+  payload: CardListData,
 ): CardSkillFilterCatalog {
   const sources: Source[] = []
   const groupSignature = (
@@ -165,7 +165,7 @@ export function buildCardSkillFilterCatalog(
     render: (
       level: T,
       locale: GameLocale,
-      data: CardListPayload['skills'] &
+      data: CardListData['skills'] &
         Pick<SkillDescriptionData, 'formatSummaryValue'>,
     ) => string | null,
   ) => {
@@ -355,7 +355,7 @@ export function buildCardSkillFilterCatalog(
 
 function normalizeDescription(
   description: SkillDescription | null,
-  payload: CardListPayload,
+  payload: CardListData,
   stack = new Set<string>(),
 ): unknown | null {
   if (!description) return null

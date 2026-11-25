@@ -13,8 +13,10 @@ import type {
 import type { CardSkillFilterCatalog } from '#shared/game-data/cards/skill-filter'
 import type { CardConnectFilterCatalog } from '#shared/game-data/cards/connect-filter'
 import type { CardSkillQueryError } from '~/composables/card/useCardListConditions'
-import { getCardAttributeIconUrl, getCardStatIconUrl } from '~/utils/card-icons'
+import { useCardIcons } from '~/composables/card/useCardIcons'
 import { getCharacterIconUrl } from '#shared/game-data/character-list'
+
+const { getCardAttributeIconUrl, getCardStatIconUrl } = useCardIcons()
 
 const props = defineProps<{
   cards: readonly CardListItemData[]

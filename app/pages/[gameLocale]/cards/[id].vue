@@ -24,8 +24,9 @@ const { data, error, status, refresh } =
       const requestedGameLocale = gameLocale.value
       try {
         if (import.meta.server) {
-          const { readCardDetail } = await import('~~/server/data/card-detail')
-          const payload = await readCardDetail(requestedCardId)
+          const { readCardDetailPayload } =
+            await import('~~/server/data/card-detail')
+          const payload = await readCardDetailPayload(requestedCardId)
           return payload
             ? localizeCardDetailPayload(payload, requestedGameLocale)
             : null

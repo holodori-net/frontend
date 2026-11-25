@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { CardStatKey } from '#shared/game-data/cards/list-data'
-import { getCardStatIconUrl } from '~/utils/card-icons'
+import { useCardIcons } from '~/composables/card/useCardIcons'
+
+const { getCardStatIconUrl } = useCardIcons()
 
 defineProps<{
   stats: Record<CardStatKey, number>

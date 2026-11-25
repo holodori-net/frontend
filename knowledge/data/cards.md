@@ -254,7 +254,7 @@ ORDER BY extent.position_y, extent.position_x;
 
 客戶端對應：`../extraction/work/decompile/05-annotate-decompiled-code/annotated-csharp/Vision.Common.Core/Vision/Common/AddressDefinition.cs` 的 `LocalSpriteAtlas`；屬性由 `Vision.Common/Vision/Common/CardAttributeTypeIcon.cs` 的 `Set` 選取。屬性 1／2／3 引用的靜態欄位 offset 分別為 8120／8168／8144，對應 `cute_cl`／`pure_cl`／`happy_cl`。觀察日期為 2026-10-14。
 
-開發伺服器啟動及建置時依 `scripts/deployment/card-icons.ts` 中的 Sprite 名稱查索引，前端直接使用索引的 CDN 網址。卡片上的屬性與三圍使用圖示；兩種版型共用「圖示 數值 + 圖示 數值 + 圖示 數值 = 合計」算式，完整版型於圖片下方呈現，直式版型放在圖片右側的三圍欄。窄螢幕與缺圖文字按數值項目換行。篩選與三圍排序選項保留圖示及文字。`CardListIcon` 提供名稱、tooltip、尺寸選擇及載入失敗時的文字 fallback；三圍圖示使用透明背景，亮模式顯示黑色、暗模式顯示白色。
+`server/data/card-icons.ts` 依 Sprite 名稱查索引，卡片列表與單卡的既有 payload 提供相同的 CDN 網址。卡片上的屬性與三圍使用圖示；兩種版型共用「圖示 數值 + 圖示 數值 + 圖示 數值 = 合計」算式，完整版型於圖片下方呈現，直式版型放在圖片右側的三圍欄。窄螢幕與缺圖文字按數值項目換行。篩選與三圍排序選項保留圖示及文字。`CardListIcon` 提供名稱、tooltip、尺寸選擇及載入失敗時的文字 fallback；三圍圖示使用透明背景，亮模式顯示黑色、暗模式顯示白色。
 
 ### 動態卡面與簽名影片
 

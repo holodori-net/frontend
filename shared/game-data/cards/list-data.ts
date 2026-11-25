@@ -1,3 +1,4 @@
+import type { CardIconUrls } from './icon-urls.ts'
 import type { LocalizedNames, LocalizedText } from '../localized-text.ts'
 import type { CardSkillDescriptionData } from '../live-skill-description.ts'
 import type { LiveLeaderSkillData, SkillDescription } from '../live-skills.ts'
@@ -71,11 +72,15 @@ export interface CardListSkillData extends Omit<
   >
 }
 
-export interface CardListPayload {
+export interface CardListData {
   cards: CardListItemData[]
   costumes: Record<string, CardListCostumeData>
   skills: CardListSkillData
   connectEffects: Record<string, CardListConnectEffectLevelData[]>
   connectExtents: Record<string, ConnectPosition[]>
   searchTextByCardId: Record<string, string>
+}
+
+export interface CardListPayload extends CardListData {
+  iconUrls: CardIconUrls
 }

@@ -16,11 +16,13 @@ import {
 import { useCardDetailState } from '~/composables/card/useCardDetailState'
 import { getCostumeThumbnailUrl } from '#shared/game-data/cards/assets'
 import { tokenizeSkillText } from '#shared/game-data/skill-text'
+import { provideCardIcons } from '~/composables/card/useCardIcons'
 
 const props = defineProps<{
   payload: CardDetailPagePayload
   gameLocale: GameLocale
 }>()
+provideCardIcons(computed(() => props.payload.iconUrls))
 const { t, locale } = useI18n()
 const fullscreenPlayer = ref<{ open: () => void } | null>(null)
 const {

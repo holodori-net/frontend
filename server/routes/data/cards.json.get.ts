@@ -1,3 +1,3 @@
-import { readCardList } from '../../data/card-list'
+import { readCardListPayload } from '../../data/card-list'
 
-export default defineEventHandler(() => readCardList())
+export default defineEventHandler(() => readCardListPayload())

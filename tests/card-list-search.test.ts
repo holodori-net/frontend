@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { gameLocales } from '../shared/language.ts'
-import type { CardListPayload } from '../shared/game-data/cards/list-data.ts'
+import type { CardListData } from '../shared/game-data/cards/list-data.ts'
 import { buildCardSearchTextById } from '../shared/game-data/cards/list-search.ts'
 
 const localized = (value: string) =>
@@ -13,7 +13,7 @@ function description(templateId: string) {
   return { templateId, params: {} }
 }
 
-function payload(): CardListPayload {
+function payload(): CardListData {
   const templates = Object.fromEntries(
     [
       'passive',
@@ -166,7 +166,7 @@ function payload(): CardListPayload {
         probability: { '370': localized('often') },
       },
     },
-  } as CardListPayload['skills']
+  } as CardListData['skills']
 
   return {
     cards: [

@@ -1,6 +1,7 @@
 import type {
   CardListItemData,
   CardListPayload,
+  CardListData,
   CardListSkillData,
 } from '#shared/game-data/cards/list-data'
 import { gameLocales } from '#shared/language'
@@ -9,6 +10,7 @@ import { buildCardSearchTextById } from '#shared/game-data/cards/list-search'
 import { transformCardGrowth } from './converters/card-growth.ts'
 import { transformCards } from './converters/cards.ts'
 import { transformCharacters } from './converters/characters.ts'
+import { readCardIconUrls } from './card-icons.ts'
 import { withGameDatabase } from './database.ts'
 import { calculateCardListStats } from './card-list-stats.ts'
 import { transformLiveSkillData } from './converters/live-skills.ts'
@@ -19,7 +21,12 @@ import {
   projectCardListSkills,
 } from './card-list-skills.ts'
 
-export function readCardList(): CardListPayload {
+export async function readCardListPayload(): Promise<CardListPayload> {
+  const data = readCardList()
+  return { ...data, iconUrls: await readCardIconUrls() }
+}
+
+export function readCardList(): CardListData {
   return withGameDatabase((gameDatabase) => {
     const cards = transformCards(gameDatabase)
     if (cards.length === 0) {
@@ -39,8 +46,8 @@ export function readCardList(): CardListPayload {
     const liveSkills = transformLiveSkillData(gameDatabase)
     const cardSkills = transformCardSkillData(gameDatabase)
     const connectData = transformSkillTreeConnectEffects(gameDatabase)
-    const connectEffects: CardListPayload['connectEffects'] = {}
-    const connectExtents: CardListPayload['connectExtents'] = {}
+    const connectEffects: CardListData['connectEffects'] = {}
+    const connectExtents: CardListData['connectExtents'] = {}
     for (const card of cards) {
       const id = card.skillTreeConnectEffectId
       if (id === null || connectEffects[id]) continue

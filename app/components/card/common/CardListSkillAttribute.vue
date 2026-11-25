@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { getCardAttributeIconUrl } from '~/utils/card-icons'
+import { useCardIcons } from '~/composables/card/useCardIcons'
+
+const { getCardAttributeIconUrl } = useCardIcons()
 
 const props = defineProps<{
   attribute: 'cute' | 'pure' | 'happy'

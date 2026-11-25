@@ -22,7 +22,6 @@ import { fileURLToPath } from 'node:url'
 import { generateSiteSeo } from './scripts/site-seo'
 import { renderMemberThemeBootstrap } from './scripts/member-theme-bootstrap'
 import { buildLanguageEntryBootstrap } from './scripts/build-language-entry-bootstrap'
-import { resolveCardIconUrls } from './scripts/deployment/card-icons'
 import { addTemplate, defineNuxtModule } from 'nuxt/kit'
 import { getPrerenderWorkerCount } from './scripts/prerender/worker-count'
 import {
@@ -83,32 +82,6 @@ const memberDataModule = defineNuxtModule({
           `export const memberThemes: readonly MemberTheme[] = ${JSON.stringify(memberThemes)}`,
           `export const memberGroups: readonly MemberGroup[] = ${JSON.stringify(memberGroups)}`,
         ].join('\n'),
-    })
-  },
-})
-
-const cardIconModule = defineNuxtModule({
-  meta: { name: 'card-icons' },
-  async setup(_options, nuxt) {
-    if (nuxt.options._prepare) {
-      addTemplate({
-        filename: 'card-icons.d.ts',
-        write: true,
-        getContents: () =>
-          [
-            "import type { CardIconUrls } from '~~/scripts/deployment/card-icons'",
-            'declare const urls: CardIconUrls',
-            'export default urls',
-          ].join('\n'),
-      })
-      return
-    }
-
-    const urls = await resolveCardIconUrls()
-    addTemplate({
-      filename: 'card-icons.ts',
-      write: true,
-      getContents: () => `export default ${JSON.stringify(urls)}`,
     })
   },
 })
@@ -208,7 +181,6 @@ export default defineNuxtConfig({
   modules: [
     languageEntryBootstrapModule,
     memberDataModule,
-    cardIconModule,
     '@nuxtjs/i18n',
     '@nuxt/eslint',
     '@vite-pwa/nuxt',
