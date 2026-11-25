@@ -43,7 +43,9 @@
 
 ## LivePassiveSkillEffect
 
-主鍵依序為 `(group_id, number)`。原始 `value` 為字串；目前使用類型 4、5、6、8、10 的模板參數 `percent` 為 `Number(value) / 10`。
+主鍵依序為 `(group_id, number)`。原始 `value` 為字串；類型 4、5、6、8、10、11 的模板參數 `percent` 為 `Number(value) / 10`。
+
+Effect type 11 (`LIVE_ACTIVE_SKILL_ACTIVATION_PROBABILITY_UP_PERMIL_UP`) uses `target` and `percent`. In the [2026-11-25 master snapshot](https://github.com/holodori-net/android-database/releases/tag/master-c85ba53533bd8ef6166a5baf2e358e294393b689cf38cc020ea4f4fb51aa32b6), `LangGeneratedLivePassiveSkillEffect` renders source values `140` and `190` as 14% and 19% for two Cute-type members. The confirmed template preserves each language's wording and the formatted target from `LangGeneratedLiveSkillEffectTarget`.
 
 | 轉換 | 來源欄位                      | 型別               | 回傳對應／關聯                                                 |
 | ---- | ----------------------------- | ------------------ | -------------------------------------------------------------- |

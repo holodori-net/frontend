@@ -215,7 +215,7 @@ describe('card skill description composition', () => {
     ],
     [
       'kor',
-      '17초마다 낮은 확률로  6초 동안 SCORE; COND, ADD',
+      '17초마다 낮은 확률로 6초 동안 SCORE; COND, ADD',
       '8초 동안 SPECIAL; COND, ADD',
     ],
     [
@@ -310,7 +310,7 @@ describe('card skill description composition', () => {
     ['jpn', '17秒毎に低確率で6秒間SCORE'],
     ['eng', 'For 6s, SCORE Every 17s with a Low Probability chance.'],
     ['ind', 'Selama 6 dtk, SCORE setiap 17 dtk dengan Peluang Rendah'],
-    ['kor', '17초마다 낮은 확률로  6초 동안 SCORE'],
+    ['kor', '17초마다 낮은 확률로 6초 동안 SCORE'],
     ['cht', '每 17 秒以低機率在 6 秒內SCORE'],
     ['chs', '每 17 秒以低概率在 6 秒内SCORE'],
   ] as const)(
@@ -321,6 +321,73 @@ describe('card skill description composition', () => {
       ).toBe(expected)
     },
   )
+
+  it.each([
+    [
+      'jpn',
+      '条件で',
+      '条件で発動\n17秒毎に低確率で6秒間SCORE',
+      '条件で発動、17秒毎に低確率で6秒間、SCORE',
+    ],
+    [
+      'eng',
+      'With two members,',
+      'With two members, For 6s, SCORE Every 17s with a Low Probability chance.',
+      'With two members, For 6s, SCORE, Every 17s with a Low Probability chance.',
+    ],
+    [
+      'ind',
+      'Minimal 2 member',
+      'Selama 6 dtk, SCORE setiap 17 dtk dengan Peluang Rendah saat Minimal 2 member',
+      'Selama 6 dtk, SCORE, setiap 17 dtk dengan Peluang Rendah saat Minimal 2 member',
+    ],
+    [
+      'kor',
+      '조건이면',
+      '조건이면 17초마다 낮은 확률로 6초 동안 SCORE',
+      '조건이면 17초마다 낮은 확률로 6초 동안 SCORE',
+    ],
+    [
+      'cht',
+      '若符合條件',
+      '若符合條件，每 17 秒以低機率發動。在 6 秒內SCORE',
+      '若符合條件，每 17 秒以低機率發動。在 6 秒內，SCORE',
+    ],
+    [
+      'chs',
+      '满足条件时',
+      '满足条件时，每 17 秒以低概率发动。在 6 秒内SCORE',
+      '满足条件时，每 17 秒以低概率发动。在 6 秒内，SCORE',
+    ],
+  ] as const)(
+    'composes the primary active trigger in %s',
+    (locale, trigger, source, display) => {
+      const data = createData()
+      data.catalog.templates['passive-trigger']!.text[locale] = trigger
+      const skill = { ...activeSkill, liveSkillTriggerGroupId: 'passive' }
+      expect(composeActiveSkillDescription(skill, data, locale)).toBe(source)
+      expect(
+        composeActiveSkillDescription(
+          skill,
+          data,
+          locale,
+          undefined,
+          'display',
+        ),
+      ).toBe(display)
+    },
+  )
+
+  it('reports a missing primary active trigger', () => {
+    const onFailure = vi.fn()
+    const skill = { ...activeSkill, liveSkillTriggerGroupId: 'missing' }
+    expect(
+      composeActiveSkillDescription(skill, createData(), 'jpn', onFailure),
+    ).toBeNull()
+    expect(onFailure).toHaveBeenCalledWith(
+      '卡片主動技能主要條件缺少資料或不是單列',
+    )
+  })
 
   it('supports active effects without duration and fractional seconds', () => {
     const data = createData()

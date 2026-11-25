@@ -268,6 +268,7 @@ export function transformLiveSkillDescriptions(
     effectRows.map((row): LivePassiveSkillEffectData => {
       const key = `${row.groupId}:${row.number}`
       const text = effectSources.get(key)!
+      const isPercentageEffect = [4, 5, 6, 8, 10, 11].includes(row.type)
       const candidates: DescriptionCandidate[] = []
       if (row.liveSkillEffectTargetId !== null) {
         const targetText = targetSource.get(row.liveSkillEffectTargetId)
@@ -281,7 +282,7 @@ export function transformLiveSkillDescriptions(
           text: targetText,
         })
       }
-      if (row.value !== null && [4, 5, 6, 8, 10].includes(row.type)) {
+      if (row.value !== null && isPercentageEffect) {
         candidates.push({
           name: 'percent',
           value: Number(row.value) / 10,
@@ -293,7 +294,7 @@ export function transformLiveSkillDescriptions(
           ) as LocalizedText,
         })
       }
-      const description = [4, 5, 6, 8, 10].includes(row.type)
+      const description = isPercentageEffect
         ? inferSkillDescription(
             {
               domain: 'effect',
@@ -308,7 +309,7 @@ export function transformLiveSkillDescriptions(
             confirmedTemplates,
           )
         : null
-      if (![4, 5, 6, 8, 10].includes(row.type))
+      if (!isPercentageEffect)
         reportPendingDescription(pendingDescriptions, {
           table: 'LivePassiveSkillEffect',
           key,
